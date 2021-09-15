@@ -523,24 +523,20 @@ static int libd_getSpritePatch(lua_State *L)
 	if (angle >= ((sprframe->rotate & SRF_3DGE) ? 16 : 8)) // out of range?
 		return 0;
 
-#ifdef ROTSPRITE
 	if (lua_isnumber(L, 4))
 	{
-		// rotsprite?????
 		angle_t rollangle = luaL_checkangle(L, 4);
-		INT32 rot = R_GetRollAngle(rollangle);
+		patch_t *rotsprite = Patch_GetRotatedSprite(sprframe, frame, angle, sprframe->flip & (1<<angle), true, &spriteinfo[i], rollangle);
 
-		if (rot) {
-			patch_t *rotsprite = Patch_GetRotatedSprite(sprframe, frame, angle, sprframe->flip & (1<<angle), true, &spriteinfo[i], rot);
+		if (rotsprite) {
 			LUA_PushUserdata(L, rotsprite, META_PATCH);
 			lua_pushboolean(L, false);
 			lua_pushboolean(L, true);
 			return 3;
 		}
 	}
-#endif
 
-	// push both the patch and it's "flip" value
+	// push both the patch and its "flip" value
 	LUA_PushUserdata(L, W_CachePatchNum(sprframe->lumppat[angle], PU_SPRITE), META_PATCH);
 	lua_pushboolean(L, (sprframe->flip & (1<<angle)) != 0);
 	return 2;
@@ -635,24 +631,20 @@ static int libd_getSprite2Patch(lua_State *L)
 	if (angle >= ((sprframe->rotate & SRF_3DGE) ? 16 : 8)) // out of range?
 		return 0;
 
-#ifdef ROTSPRITE
 	if (lua_isnumber(L, 4))
 	{
-		// rotsprite?????
 		angle_t rollangle = luaL_checkangle(L, 4);
-		INT32 rot = R_GetRollAngle(rollangle);
+		patch_t *rotsprite = Patch_GetRotatedSprite(sprframe, frame, angle, sprframe->flip & (1<<angle), true, &skins[i].sprinfo[j], rollangle);
 
-		if (rot) {
-			patch_t *rotsprite = Patch_GetRotatedSprite(sprframe, frame, angle, sprframe->flip & (1<<angle), true, &skins[i].sprinfo[j], rot);
+		if (rotsprite) {
 			LUA_PushUserdata(L, rotsprite, META_PATCH);
 			lua_pushboolean(L, false);
 			lua_pushboolean(L, true);
 			return 3;
 		}
 	}
-#endif
 
-	// push both the patch and it's "flip" value
+	// push both the patch and its "flip" value
 	LUA_PushUserdata(L, W_CachePatchNum(sprframe->lumppat[angle], PU_SPRITE), META_PATCH);
 	lua_pushboolean(L, (sprframe->flip & (1<<angle)) != 0);
 	return 2;

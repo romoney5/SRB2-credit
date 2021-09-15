@@ -533,6 +533,94 @@ void R_DrawTranslatedColumn_8(void)
 }
 
 // ==========================================================================
+// COLUMNS (ROTATED)
+// ==========================================================================
+
+/**	\brief The R_DrawRotatedColumn000_8 function
+	Draws a rotated column.
+*/
+#define DC_ROTATION_FUNC R_DrawRotatedColumn000_8
+#define DC_ROTATION_PIXELFUNC dc_colormap[src_pixel & 0xFF]
+#include "r_draw8_rotated.inl"
+
+#undef DC_ROTATION_FUNC
+#undef DC_ROTATION_PIXELFUNC
+
+/**	\brief The R_DrawRotatedColumn001_8 function
+	Draws a translated rotated column.
+*/
+#define DC_ROTATION_FUNC R_DrawRotatedColumn001_8
+#define DC_ROTATION_PIXELFUNC dc_colormap[dc_translation[src_pixel & 0xFF]]
+#include "r_draw8_rotated.inl"
+
+#undef DC_ROTATION_FUNC
+#undef DC_ROTATION_PIXELFUNC
+
+/**	\brief The R_DrawRotatedColumn010_8 function
+	Draws a translucent rotated column.
+*/
+#define DC_ROTATION_FUNC R_DrawRotatedColumn010_8
+#define DC_ROTATION_PIXELFUNC *(dc_transmap + (dc_colormap[src_pixel & 0xFF]<<8) + (*dest))
+#include "r_draw8_rotated.inl"
+
+#undef DC_ROTATION_FUNC
+#undef DC_ROTATION_PIXELFUNC
+
+/**	\brief The R_DrawRotatedColumn011_8 function
+	Draws a translucent translated rotated column.
+*/
+#define DC_ROTATION_FUNC R_DrawRotatedColumn011_8
+#define DC_ROTATION_PIXELFUNC *(dc_transmap + (dc_colormap[dc_translation[src_pixel & 0xFF]]<<8) + (*dest))
+#include "r_draw8_rotated.inl"
+
+#undef DC_ROTATION_FUNC
+#undef DC_ROTATION_PIXELFUNC
+
+#define DC_ROTATION_INTEGER
+
+/**	\brief The R_DrawRotatedColumn100_8 function
+	Draws a rotated column. (Integer rotation)
+*/
+#define DC_ROTATION_FUNC R_DrawRotatedColumn100_8
+#define DC_ROTATION_PIXELFUNC dc_colormap[src_pixel & 0xFF]
+#include "r_draw8_rotated.inl"
+
+#undef DC_ROTATION_FUNC
+#undef DC_ROTATION_PIXELFUNC
+
+/**	\brief The R_DrawRotatedColumn101_8 function
+	Draws a translated rotated column. (Integer rotation)
+*/
+#define DC_ROTATION_FUNC R_DrawRotatedColumn101_8
+#define DC_ROTATION_PIXELFUNC dc_colormap[dc_translation[src_pixel & 0xFF]]
+#include "r_draw8_rotated.inl"
+
+#undef DC_ROTATION_FUNC
+#undef DC_ROTATION_PIXELFUNC
+
+/**	\brief The R_DrawRotatedColumn110_8 function
+	Draws a translucent rotated column. (Integer rotation)
+*/
+#define DC_ROTATION_FUNC R_DrawRotatedColumn110_8
+#define DC_ROTATION_PIXELFUNC *(dc_transmap + (dc_colormap[src_pixel & 0xFF]<<8) + (*dest))
+#include "r_draw8_rotated.inl"
+
+#undef DC_ROTATION_FUNC
+#undef DC_ROTATION_PIXELFUNC
+
+/**	\brief The R_DrawRotatedColumn111_8 function
+	Draws a translucent translated rotated column. (Integer rotation)
+*/
+#define DC_ROTATION_FUNC R_DrawRotatedColumn111_8
+#define DC_ROTATION_PIXELFUNC *(dc_transmap + (dc_colormap[dc_translation[src_pixel & 0xFF]]<<8) + (*dest))
+#include "r_draw8_rotated.inl"
+
+#undef DC_ROTATION_FUNC
+#undef DC_ROTATION_PIXELFUNC
+
+#undef DC_ROTATION_INTEGER
+
+// ==========================================================================
 // SPANS
 // ==========================================================================
 

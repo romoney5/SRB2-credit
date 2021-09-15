@@ -49,6 +49,7 @@
 // --------------------------------------------
 void (*colfunc)(void);
 void (*colfuncs[COLDRAWFUNC_MAX])(void);
+void (*colfuncs_rotated[2][COLDRAWFUNC_MAX])(void);
 
 void (*spanfunc)(void);
 void (*spanfuncs[SPANDRAWFUNC_MAX])(void);
@@ -125,6 +126,16 @@ void SCR_SetDrawFuncs(void)
 		colfuncs[COLDRAWFUNC_TWOSMULTIPATCH] = R_Draw2sMultiPatchColumn_8;
 		colfuncs[COLDRAWFUNC_TWOSMULTIPATCHTRANS] = R_Draw2sMultiPatchTranslucentColumn_8;
 		colfuncs[COLDRAWFUNC_FOG] = R_DrawFogColumn_8;
+
+		colfuncs_rotated[0][BASEDRAWFUNC] = R_DrawRotatedColumn000_8;
+		colfuncs_rotated[0][COLDRAWFUNC_TRANS] = R_DrawRotatedColumn001_8;
+		colfuncs_rotated[0][COLDRAWFUNC_FUZZY] = R_DrawRotatedColumn010_8;
+		colfuncs_rotated[0][COLDRAWFUNC_TRANSTRANS] = R_DrawRotatedColumn011_8;
+
+		colfuncs_rotated[1][BASEDRAWFUNC] = R_DrawRotatedColumn100_8;
+		colfuncs_rotated[1][COLDRAWFUNC_TRANS] = R_DrawRotatedColumn101_8;
+		colfuncs_rotated[1][COLDRAWFUNC_FUZZY] = R_DrawRotatedColumn110_8;
+		colfuncs_rotated[1][COLDRAWFUNC_TRANSTRANS] = R_DrawRotatedColumn111_8;
 
 		spanfuncs[SPANDRAWFUNC_TRANS] = R_DrawTranslucentSpan_8;
 		spanfuncs[SPANDRAWFUNC_TILTED] = R_DrawTiltedSpan_8;

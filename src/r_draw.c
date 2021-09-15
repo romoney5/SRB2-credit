@@ -70,6 +70,8 @@ UINT8 dc_hires; // under MSVC boolean is a byte, while on other systems, it a bi
                // soo lets make it a byte on all system for the ASM code
 UINT8 *dc_source;
 
+dc_rotation_t dc_rotation;
+
 // -----------------------
 // translucency stuff here
 // -----------------------

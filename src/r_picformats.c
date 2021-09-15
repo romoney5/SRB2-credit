@@ -448,13 +448,29 @@ void *Picture_FlatConvert(
 		for (x = 0; x < inwidth; x++)
 		{
 			void *input;
-			size_t offs = ((y * inwidth) + x);
+			INT32 in_y = y;
+			size_t offs = ((y * inwidth) + x), in_offs;
+
+			if (flags & (PICFLAGS_XFLIP | PICFLAGS_YFLIP))
+			{
+				if (flags & PICFLAGS_YFLIP)
+					in_y = (inheight - in_y) - 1;
+
+				in_offs = in_y * inwidth;
+
+				if (flags & PICFLAGS_XFLIP)
+					in_offs += (inwidth - x) - 1;
+				else
+					in_offs += x;
+			}
+			else
+				in_offs = offs;
 
 			// Read pixel
 			if (Picture_IsPatchFormat(informat))
-				input = Picture_GetPatchPixel(inpatch, informat, x, y, flags);
+				input = Picture_GetPatchPixel(inpatch, informat, x, in_y, flags);
 			else if (Picture_IsFlatFormat(informat))
-				input = (UINT8 *)picture + (offs * (inbpp / 8));
+				input = (UINT8 *)picture + (in_offs * (inbpp / 8));
 			else
 				I_Error("Picture_FlatConvert: unsupported input format!");
 

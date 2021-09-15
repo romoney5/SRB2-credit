@@ -1191,7 +1191,7 @@ void P_GivePlayerRings(player_t *player, INT32 num_rings)
 {
 	if (!player)
 		return;
-	
+
 	if ((player->bot == BOT_2PAI || player->bot == BOT_2PHUMAN) && player->botleader)
 		player = player->botleader;
 
@@ -7244,7 +7244,7 @@ static void P_NiGHTSMovement(player_t *player)
 		else
 			player->mo->momz = 0;
 
-#if 0//def ROTSPRITE
+#if 0
 		if (!(player->charflags & SF_NONIGHTSROTATION) && player->mo->momz)
 		{
 			if (player->mo->state != &states[S_PLAY_NIGHTS_DRILL])
@@ -11651,7 +11651,7 @@ void P_PlayerThink(player_t *player)
 			INT32 i, total = 0, exiting = 0;
 
 			for (i = 0; i < MAXPLAYERS; i++)
-			{ 
+			{
 				if (!playeringame[i] || players[i].spectator || players[i].bot == BOT_2PAI || players[i].bot == BOT_2PHUMAN)
 					continue;
 				if (players[i].quittime > 30 * TICRATE)
@@ -12592,7 +12592,7 @@ void P_PlayerAfterThink(player_t *player)
 					player->mo->momy = tails->momy;
 					player->mo->momz = tails->momz;
 				}
-				
+
 				if (G_CoopGametype() && tails->player && tails->player->bot != BOT_2PAI)
 				{
 					player->mo->angle = tails->angle;

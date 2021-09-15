@@ -124,12 +124,13 @@ typedef enum
 	SC_LINKDRAW   = 1<<3,
 	SC_FULLBRIGHT = 1<<4,
 	SC_FULLDARK   = 1<<5,
-	SC_VFLIP      = 1<<6,
-	SC_ISSCALED   = 1<<7,
-	SC_ISROTATED  = 1<<8,
-	SC_SHADOW     = 1<<9,
-	SC_SHEAR      = 1<<10,
-	SC_SPLAT      = 1<<11,
+	SC_HFLIP      = 1<<6,
+	SC_VFLIP      = 1<<7,
+	SC_ISSCALED   = 1<<8,
+	SC_ISROTATED  = 1<<9,
+	SC_SHADOW     = 1<<10,
+	SC_SHEAR      = 1<<11,
+	SC_SPLAT      = 1<<12,
 	// masks
 	SC_CUTMASK    = SC_TOP|SC_BOTTOM,
 	SC_FLAGMASK   = ~SC_CUTMASK
@@ -149,6 +150,7 @@ typedef struct vissprite_s
 	mobj_t *mobj; // for easy access
 
 	INT32 x1, x2;
+	fixed_t width, height;
 
 	fixed_t gx, gy; // for line side calculation
 	fixed_t gz, gzt; // global bottom/top for silhouette clipping
@@ -185,6 +187,7 @@ typedef struct vissprite_s
 	UINT8 *transmap; // for MF2_SHADOW sprites, which translucency table to use
 
 	INT32 mobjflags;
+	angle_t rollangle;
 
 	INT32 heightsec; // height sector for underwater/fake ceiling support
 

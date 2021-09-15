@@ -407,14 +407,14 @@ static void R_RasterizeFloorSplat(floorsplat_t *pSplat, vector2_t *verts, visspr
 
 		if (pSplat->angle)
 		{
-			memset(cachedheight, 0, sizeof(cachedheight));
-
 			// Add the view offset, rotated by the plane angle.
 			fixed_t a = -pSplat->verts[0].x + vis->viewpoint.x;
 			fixed_t b = -pSplat->verts[0].y + vis->viewpoint.y;
 			angle_t angle = (pSplat->angle >> ANGLETOFINESHIFT);
 			offsetx = FixedMul(a, FINECOSINE(angle)) - FixedMul(b, FINESINE(angle));
 			offsety = -FixedMul(a, FINESINE(angle)) - FixedMul(b, FINECOSINE(angle));
+
+			memset(cachedheight, 0, sizeof(cachedheight));
 		}
 		else
 		{
