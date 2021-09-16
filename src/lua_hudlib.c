@@ -725,6 +725,35 @@ static int libd_drawStretched(lua_State *L)
 	return 0;
 }
 
+static int libd_drawRotated(lua_State *L)
+{
+	fixed_t x, y, hscale, vscale;
+	angle_t angle;
+	INT32 flags;
+	patch_t *patch;
+	const UINT8 *colormap = NULL;
+
+	HUDONLY
+	x = luaL_checkinteger(L, 1);
+	y = luaL_checkinteger(L, 2);
+	hscale = luaL_checkinteger(L, 3);
+	if (hscale < 0)
+		return luaL_error(L, "negative horizontal scale");
+	vscale = luaL_checkinteger(L, 4);
+	if (vscale < 0)
+		return luaL_error(L, "negative vertical scale");
+	angle = luaL_checkangle(L, 5);
+	patch = *((patch_t **)luaL_checkudata(L, 6, META_PATCH));
+	flags = luaL_optinteger(L, 7, 0);
+	if (!lua_isnoneornil(L, 8))
+		colormap = *((UINT8 **)luaL_checkudata(L, 8, META_COLORMAP));
+
+	flags &= ~V_PARAMMASK; // Don't let crashes happen.
+
+	V_DrawRotatedPatch(x, y, hscale, vscale, angle, flags, patch, colormap, 0, 0, patch->width<<FRACBITS, patch->height<<FRACBITS);
+	return 0;
+}
+
 static int libd_drawCropped(lua_State *L)
 {
 	fixed_t x, y, hscale, vscale, sx, sy, w, h;
@@ -1226,6 +1255,7 @@ static luaL_Reg lib_draw[] = {
 	{"draw", libd_draw},
 	{"drawScaled", libd_drawScaled},
 	{"drawStretched", libd_drawStretched},
+	{"drawRotated", libd_drawRotated},
 	{"drawCropped", libd_drawCropped},
 	{"drawNum", libd_drawNum},
 	{"drawPaddedNum", libd_drawPaddedNum},

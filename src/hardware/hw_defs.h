@@ -72,7 +72,7 @@ typedef struct FColorARGB FColorARGB;
 typedef struct
 {
 	FLOAT x,y;
-} F2DCoord, v2d_t;
+} F2DCoord;
 
 // Simple 3D vector
 typedef struct FVector
@@ -80,11 +80,11 @@ typedef struct FVector
 	FLOAT x,y,z;
 } FVector;
 
-// ======================
-//      wallVert3D
-// ----------------------
-// :crab: IS GONE! :crab:
-// ======================
+// Simple 2D line
+typedef struct
+{
+	F2DCoord v1, v2;
+} F2DLine;
 
 // -----------
 // structures

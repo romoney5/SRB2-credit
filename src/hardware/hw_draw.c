@@ -20,6 +20,7 @@
 #include "hw_main.h"
 #include "hw_glob.h"
 #include "hw_drv.h"
+#include "hw_splitpoly.h"
 
 #include "../m_misc.h" //FIL_WriteFile()
 #include "../r_draw.h" //viewborderlump
@@ -380,6 +381,344 @@ void HWR_DrawStretchyFixedPatch(patch_t *gpatch, fixed_t x, fixed_t y, fixed_t p
 	}
 	else
 		HWD.pfnDrawPolygon(NULL, v, 4, flags);
+}
+
+#if 0
+static FOutVector *Intersect2DRectangle(FOutVector *v, F2DLine *line, INT32 *numpts, boolean useTop)
+{
+	FOutVector *frontpoly, *backpoly;
+	INT32 frontpts = 0, backpts = 0, i;
+
+	FOutVector *toppoly = NULL;
+	INT32 toppts = 0;
+
+	if (!HWR_SplitPolygon(line, v, *numpts, &frontpoly, &frontpts, &backpoly, &backpts))
+		return v;
+
+	for (i = 0; i < frontpts; i++)
+	{
+		if ((useTop && frontpoly[i].y < (INT32)line->v1.y)
+		|| (!useTop && frontpoly[i].y >= (INT32)line->v1.y))
+		{
+			toppoly = frontpoly;
+			toppts = frontpts;
+		}
+		else
+		{
+			toppoly = backpoly;
+			toppts = backpts;
+			break;
+		}
+	}
+
+	*numpts = toppts;
+	return toppoly;
+}
+#endif
+
+void HWR_DrawRotatedPatch(patch_t *gpatch, fixed_t x, fixed_t y, fixed_t pscale, fixed_t vscale, angle_t angle, INT32 option, const UINT8 *colormap, fixed_t sx, fixed_t sy, fixed_t w, fixed_t h)
+{
+	FOutVector v[4];
+	FOutVector *vPtr = v;
+	INT32 numpts = 4;
+	FBITFIELD flags;
+	float cx = FIXED_TO_FLOAT(x);
+	float cy = FIXED_TO_FLOAT(y);
+	float ang = ANG2RAD(angle);
+	float offsetx, offsety;
+	float stex[2];
+	UINT8 alphalevel = ((option & V_ALPHAMASK) >> V_ALPHASHIFT);
+	GLPatch_t *hwrPatch;
+	INT32 i;
+
+//  3--2
+//  | /|
+//  |/ |
+//  0--1
+	float dupx, dupy, fscalew, fscaleh, fwidth, fheight;
+
+	UINT8 perplayershuffle = 0;
+
+	if (alphalevel >= 10 && alphalevel < 13)
+		return;
+
+	// make patch ready in hardware cache
+	if (!colormap)
+		HWR_GetPatch(gpatch);
+	else
+		HWR_GetMappedPatch(gpatch, colormap);
+
+	hwrPatch = ((GLPatch_t *)gpatch->hardware);
+
+	dupx = (float)vid.dupx;
+	dupy = (float)vid.dupy;
+
+	switch (option & V_SCALEPATCHMASK)
+	{
+	case V_NOSCALEPATCH:
+		dupx = dupy = 1.0f;
+		break;
+	case V_SMALLSCALEPATCH:
+		dupx = (float)vid.smalldupx;
+		dupy = (float)vid.smalldupy;
+		break;
+	case V_MEDSCALEPATCH:
+		dupx = (float)vid.meddupx;
+		dupy = (float)vid.meddupy;
+		break;
+	}
+
+	dupx = dupy = (dupx < dupy ? dupx : dupy);
+	fscalew = fscaleh = FIXED_TO_FLOAT(pscale);
+	if (vscale != pscale)
+		fscaleh = FIXED_TO_FLOAT(vscale);
+
+	// left offset
+	if (option & V_FLIP)
+		offsetx = (float)(gpatch->width - gpatch->leftoffset) * fscalew;
+	else
+		offsetx = (float)(gpatch->leftoffset) * fscalew;
+
+	// top offset
+	offsety = (float)(gpatch->topoffset) * fscaleh;
+
+	cx -= offsetx;
+	cy -= offsety;
+
+	offsetx *= dupx;
+	offsety *= dupy;
+
+	if (splitscreen && (option & V_PERPLAYER))
+	{
+		float adjusty = ((option & V_NOSCALESTART) ? vid.height : BASEVIDHEIGHT)/2.0f;
+		//fscaleh /= 2;
+		cy /= 2;
+#ifdef QUADS
+		if (splitscreen > 1) // 3 or 4 players
+		{
+			float adjustx = ((option & V_NOSCALESTART) ? vid.width : BASEVIDWIDTH)/2.0f;
+			//fscalew /= 2;
+			cx /= 2;
+			if (stplyr == &players[displayplayer])
+			{
+				if (!(option & (V_SNAPTOTOP|V_SNAPTOBOTTOM)))
+					perplayershuffle |= 1;
+				if (!(option & (V_SNAPTOLEFT|V_SNAPTORIGHT)))
+					perplayershuffle |= 4;
+				option &= ~V_SNAPTOBOTTOM|V_SNAPTORIGHT;
+			}
+			else if (stplyr == &players[secondarydisplayplayer])
+			{
+				if (!(option & (V_SNAPTOTOP|V_SNAPTOBOTTOM)))
+					perplayershuffle |= 1;
+				if (!(option & (V_SNAPTOLEFT|V_SNAPTORIGHT)))
+					perplayershuffle |= 8;
+				cx += adjustx;
+				option &= ~V_SNAPTOBOTTOM|V_SNAPTOLEFT;
+			}
+			else if (stplyr == &players[thirddisplayplayer])
+			{
+				if (!(option & (V_SNAPTOTOP|V_SNAPTOBOTTOM)))
+					perplayershuffle |= 2;
+				if (!(option & (V_SNAPTOLEFT|V_SNAPTORIGHT)))
+					perplayershuffle |= 4;
+				cy += adjusty;
+				option &= ~V_SNAPTOTOP|V_SNAPTORIGHT;
+			}
+			else if (stplyr == &players[fourthdisplayplayer])
+			{
+				if (!(option & (V_SNAPTOTOP|V_SNAPTOBOTTOM)))
+					perplayershuffle |= 2;
+				if (!(option & (V_SNAPTOLEFT|V_SNAPTORIGHT)))
+					perplayershuffle |= 8;
+				cx += adjustx;
+				cy += adjusty;
+				option &= ~V_SNAPTOTOP|V_SNAPTOLEFT;
+			}
+		}
+		else
+#endif
+		// 2 players
+		{
+			if (stplyr == &players[displayplayer])
+			{
+				if (!(option & (V_SNAPTOTOP|V_SNAPTOBOTTOM)))
+					perplayershuffle = 1;
+				option &= ~V_SNAPTOBOTTOM;
+			}
+			else //if (stplyr == &players[secondarydisplayplayer])
+			{
+				if (!(option & (V_SNAPTOTOP|V_SNAPTOBOTTOM)))
+					perplayershuffle = 2;
+				cy += adjusty;
+				option &= ~V_SNAPTOTOP;
+			}
+		}
+	}
+
+	if (!(option & V_NOSCALESTART))
+	{
+		cx = cx * dupx;
+		cy = cy * dupy;
+
+		if (!(option & V_SCALEPATCHMASK))
+		{
+			// if it's meant to cover the whole screen, black out the rest
+			// no the patch is cropped do not do this ever
+
+			// centre screen
+			if (fabsf((float)vid.width - (float)BASEVIDWIDTH * dupx) > 1.0E-36f)
+			{
+				if (option & V_SNAPTORIGHT)
+					cx += ((float)vid.width - ((float)BASEVIDWIDTH * dupx));
+				else if (!(option & V_SNAPTOLEFT))
+					cx += ((float)vid.width - ((float)BASEVIDWIDTH * dupx))/2;
+				if (perplayershuffle & 4)
+					cx -= ((float)vid.width - ((float)BASEVIDWIDTH * dupx))/4;
+				else if (perplayershuffle & 8)
+					cx += ((float)vid.width - ((float)BASEVIDWIDTH * dupx))/4;
+			}
+			if (fabsf((float)vid.height - (float)BASEVIDHEIGHT * dupy) > 1.0E-36f)
+			{
+				if (option & V_SNAPTOBOTTOM)
+					cy += ((float)vid.height - ((float)BASEVIDHEIGHT * dupy));
+				else if (!(option & V_SNAPTOTOP))
+					cy += ((float)vid.height - ((float)BASEVIDHEIGHT * dupy))/2;
+				if (perplayershuffle & 1)
+					cy -= ((float)vid.height - ((float)BASEVIDHEIGHT * dupy))/4;
+				else if (perplayershuffle & 2)
+					cy += ((float)vid.height - ((float)BASEVIDHEIGHT * dupy))/4;
+			}
+		}
+	}
+
+	fwidth = FIXED_TO_FLOAT(w);
+	fheight = FIXED_TO_FLOAT(h);
+
+	if (sx + w > gpatch->width<<FRACBITS)
+		fwidth = FIXED_TO_FLOAT((gpatch->width<<FRACBITS) - sx);
+
+	if (sy + h > gpatch->height<<FRACBITS)
+		fheight = FIXED_TO_FLOAT((gpatch->height<<FRACBITS) - sy);
+
+	if (pscale != FRACUNIT || vscale != FRACUNIT || (splitscreen && option & V_PERPLAYER))
+	{
+		fwidth *= fscalew * dupx;
+		fheight *= fscaleh * dupy;
+	}
+	else
+	{
+		fwidth *= dupx;
+		fheight *= dupy;
+	}
+
+	// set the polygon vertices to the right positions
+	v[0].x = v[3].x = 0.0f;
+	v[2].x = v[1].x = fwidth;
+
+	v[0].y = v[1].y = 0.0f;
+	v[2].y = v[3].y = fheight;
+
+	for (i = 0; i < 4; i++)
+	{
+		float temp_x = v[i].x - offsetx;
+		float temp_y = v[i].y - offsety;
+
+		float rotated_x = (temp_x * cos(ang)) - (temp_y * sin(ang));
+		float rotated_y = (temp_x * sin(ang)) + (temp_y * cos(ang));
+
+		v[i].x = rotated_x + offsetx + cx;
+		v[i].y = rotated_y + offsety;
+
+		if (splitscreen && (option & V_PERPLAYER))
+			v[i].y /= 2;
+
+		v[i].y += cy;
+	}
+
+	stex[0] = (FIXED_TO_FLOAT(sx)/(float)(gpatch->width))*hwrPatch->max_s;
+	if (sx + w > gpatch->width<<FRACBITS)
+		stex[1] = hwrPatch->max_s;
+	else
+		stex[1] = (FIXED_TO_FLOAT(sx+w)/(float)(gpatch->width))*hwrPatch->max_s;
+
+	if (option & V_FLIP)
+	{
+		v[2].s = v[1].s = stex[0];
+		v[0].s = v[3].s = stex[1];
+	}
+	else
+	{
+		v[0].s = v[3].s = stex[0];
+		v[2].s = v[1].s = stex[1];
+	}
+
+	v[0].t = v[1].t = (FIXED_TO_FLOAT(sy)/(float)(gpatch->height))*hwrPatch->max_t;
+	if (sy + h > gpatch->height<<FRACBITS)
+		v[2].t = v[3].t = hwrPatch->max_t;
+	else
+		v[2].t = v[3].t = (FIXED_TO_FLOAT(sy+h)/(float)(gpatch->height))*hwrPatch->max_t;
+
+#if 0
+	// Auto-crop at splitscreen borders!
+	if (splitscreen && (option & V_PERPLAYER))
+	{
+		boolean p1 = (stplyr == &players[displayplayer]);
+		boolean visible = false;
+
+		F2DLine line;
+
+		line.v1.x = 0.0;
+		line.v2.x = vid.width;
+
+		line.v1.y = line.v2.y = vid.height / 2;
+
+		vPtr = Intersect2DRectangle(v, &line, &numpts, p1);
+		if (!numpts)
+			return;
+
+		for (i = 0; i < numpts; i++)
+		{
+			if ((p1 && vPtr[i].y < vid.height / 2) || (!p1 && vPtr[i].y >= vid.height / 2))
+			{
+				visible = true;
+				break;
+			}
+		}
+
+		if (!visible)
+			return;
+	}
+#endif
+
+	for (i = 0; i < numpts; i++)
+	{
+		vPtr[i].x = -1 + (vPtr[i].x / (vid.width/2));
+		vPtr[i].y = 1 - (vPtr[i].y / (vid.height/2));
+		vPtr[i].z = 1.0f;
+	}
+
+	flags = PF_Translucent|PF_NoDepthTest;
+
+	if (option & V_WRAPX)
+		flags |= PF_ForceWrapX;
+	if (option & V_WRAPY)
+		flags |= PF_ForceWrapY;
+
+	// clip it since it is used for bunny scroll in doom I
+	if (alphalevel)
+	{
+		FSurfaceInfo Surf;
+		Surf.PolyColor.s.red = Surf.PolyColor.s.green = Surf.PolyColor.s.blue = 0xff;
+		if (alphalevel == 13) Surf.PolyColor.s.alpha = softwaretranstogl_lo[st_translucency];
+		else if (alphalevel == 14) Surf.PolyColor.s.alpha = softwaretranstogl[st_translucency];
+		else if (alphalevel == 15) Surf.PolyColor.s.alpha = softwaretranstogl_hi[st_translucency];
+		else Surf.PolyColor.s.alpha = softwaretranstogl[10-alphalevel];
+		flags |= PF_Modulated;
+		HWD.pfnDrawPolygon(&Surf, vPtr, numpts, flags);
+	}
+	else
+		HWD.pfnDrawPolygon(NULL, vPtr, numpts, flags);
 }
 
 void HWR_DrawCroppedPatch(patch_t *gpatch, fixed_t x, fixed_t y, fixed_t pscale, fixed_t vscale, INT32 option, const UINT8 *colormap, fixed_t sx, fixed_t sy, fixed_t w, fixed_t h)

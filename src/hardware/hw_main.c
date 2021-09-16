@@ -1042,7 +1042,7 @@ static void HWR_DrawSkyWall(FOutVector *wallVerts, FSurfaceInfo *Surf)
 static void HWR_ProcessSeg(void) // Sort of like GLWall::Process in GZDoom
 {
 	FOutVector wallVerts[4];
-	v2d_t vs, ve; // start, end vertices of 2d line (view from above)
+	F2DCoord vs, ve; // start, end vertices of 2d line (view from above)
 
 	fixed_t worldtop, worldbottom;
 	fixed_t worldhigh = 0, worldlow = 0;
