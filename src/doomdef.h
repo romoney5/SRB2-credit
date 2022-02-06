@@ -626,7 +626,6 @@ extern const char *compdate, *comptime, *comprevision, *compbranch;
 #define SECTORSPECIALSAFTERTHINK
 
 /// Sprite rotation
-#define ROTSPRITE
 #define ROTANGLES 72 // Needs to be a divisor of 360 (45, 60, 90, 120...)
 #define ROTANGDIFF (360 / ROTANGLES)
 

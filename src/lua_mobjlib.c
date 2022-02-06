@@ -42,6 +42,8 @@ enum mobj_e {
 	mobj_spriteyscale,
 	mobj_spritexoffset,
 	mobj_spriteyoffset,
+	mobj_spritexpivot,
+	mobj_spriteypivot,
 	mobj_floorspriteslope,
 	mobj_touching_sectorlist,
 	mobj_subsector,
@@ -118,6 +120,8 @@ static const char *const mobj_opt[] = {
 	"spriteyscale",
 	"spritexoffset",
 	"spriteyoffset",
+	"spritexpivot",
+	"spriteypivot",
 	"floorspriteslope",
 	"touching_sectorlist",
 	"subsector",
@@ -251,6 +255,12 @@ static int mobj_get(lua_State *L)
 		break;
 	case mobj_spriteyoffset:
 		lua_pushfixed(L, mo->spriteyoffset);
+		break;
+	case mobj_spritexpivot:
+		lua_pushfixed(L, mo->spritexpivot);
+		break;
+	case mobj_spriteypivot:
+		lua_pushfixed(L, mo->spriteypivot);
 		break;
 	case mobj_floorspriteslope:
 		LUA_PushUserdata(L, mo->floorspriteslope, META_SLOPE);
@@ -537,6 +547,12 @@ static int mobj_set(lua_State *L)
 		break;
 	case mobj_spriteyoffset:
 		mo->spriteyoffset = luaL_checkfixed(L, 3);
+		break;
+	case mobj_spritexpivot:
+		mo->spritexpivot = luaL_checkfixed(L, 3);
+		break;
+	case mobj_spriteypivot:
+		mo->spriteypivot = luaL_checkfixed(L, 3);
 		break;
 	case mobj_floorspriteslope:
 		return NOSET;

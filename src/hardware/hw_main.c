@@ -1042,7 +1042,7 @@ static void HWR_DrawSkyWall(FOutVector *wallVerts, FSurfaceInfo *Surf)
 static void HWR_ProcessSeg(void) // Sort of like GLWall::Process in GZDoom
 {
 	FOutVector wallVerts[4];
-	v2d_t vs, ve; // start, end vertices of 2d line (view from above)
+	F2DCoord vs, ve; // start, end vertices of 2d line (view from above)
 
 	fixed_t worldtop, worldbottom;
 	fixed_t worldhigh = 0, worldlow = 0;
@@ -5007,9 +5007,7 @@ static void HWR_ProjectSprite(mobj_t *thing)
 	float gz, gzt;
 	spritedef_t *sprdef;
 	spriteframe_t *sprframe;
-#ifdef ROTSPRITE
 	spriteinfo_t *sprinfo;
-#endif
 	md2_t *md2;
 	size_t lumpoff;
 	unsigned rot;
@@ -5028,9 +5026,9 @@ static void HWR_ProjectSprite(mobj_t *thing)
 
 	fixed_t spr_width, spr_height;
 	fixed_t spr_offset, spr_topoffset;
-#ifdef ROTSPRITE
+
+#if 0
 	patch_t *rotsprite = NULL;
-	INT32 rollangle = 0;
 #endif
 
 	if (!thing)
@@ -5098,16 +5096,12 @@ static void HWR_ProjectSprite(mobj_t *thing)
 	if (thing->skin && thing->sprite == SPR_PLAY)
 	{
 		sprdef = &((skin_t *)thing->skin)->sprites[thing->sprite2];
-#ifdef ROTSPRITE
 		sprinfo = &((skin_t *)thing->skin)->sprinfo[thing->sprite2];
-#endif
 	}
 	else
 	{
 		sprdef = &sprites[thing->sprite];
-#ifdef ROTSPRITE
 		sprinfo = &spriteinfo[thing->sprite];
-#endif
 	}
 
 	if (rot >= sprdef->numframes)
@@ -5117,9 +5111,7 @@ static void HWR_ProjectSprite(mobj_t *thing)
 		thing->sprite = states[S_UNKNOWN].sprite;
 		thing->frame = states[S_UNKNOWN].frame;
 		sprdef = &sprites[thing->sprite];
-#ifdef ROTSPRITE
 		sprinfo = &spriteinfo[thing->sprite];
-#endif
 		rot = thing->frame&FF_FRAMEMASK;
 		thing->state->sprite = thing->sprite;
 		thing->state->frame = thing->frame;
@@ -5177,12 +5169,10 @@ static void HWR_ProjectSprite(mobj_t *thing)
 	spr_offset = spritecachedinfo[lumpoff].offset;
 	spr_topoffset = spritecachedinfo[lumpoff].topoffset;
 
-#ifdef ROTSPRITE
-	if (thing->rollangle
-	&& !(splat && !(thing->renderflags & RF_NOSPLATROLLANGLE)))
+#if 0
+	if (thing->rollangle && !(splat && !(thing->renderflags & RF_NOSPLATROLLANGLE)))
 	{
-		rollangle = R_GetRollAngle(thing->rollangle);
-		rotsprite = Patch_GetRotatedSprite(sprframe, (thing->frame & FF_FRAMEMASK), rot, flip, false, sprinfo, rollangle);
+		rotsprite = Patch_GetRotatedSprite(sprframe, (thing->frame & FF_FRAMEMASK), rot, flip, false, sprinfo, thing->rollangle);
 
 		if (rotsprite != NULL)
 		{
@@ -5196,6 +5186,8 @@ static void HWR_ProjectSprite(mobj_t *thing)
 			flip = 0;
 		}
 	}
+#else
+	(void)sprinfo;
 #endif
 
 	if (thing->renderflags & RF_ABSOLUTEOFFSETS)
@@ -5363,7 +5355,7 @@ static void HWR_ProjectSprite(mobj_t *thing)
 
 	vis->rotated = false;
 
-#ifdef ROTSPRITE
+#if 0
 	if (rotsprite)
 	{
 		vis->gpatch = (patch_t *)rotsprite;

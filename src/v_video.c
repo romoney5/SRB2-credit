@@ -490,22 +490,54 @@ static UINT8 hudminusalpha[11] = { 10,  9,  9,  8,  8,  7,  7,  6,  6,  5,  5};
 static const UINT8 *v_colormap = NULL;
 static const UINT8 *v_translevel = NULL;
 
+#define STANDARDPDRAW(px) px
+#define MAPPEDPDRAW(px) *(v_colormap + px)
+#define TRANSLUCENTPDRAW(px) *(v_translevel + ((px<<8)&0xff00) + (*dest&0xff))
+#define TRANSMAPPEDPDRAW(px) *(v_translevel + (((*(v_colormap + px))<<8)&0xff00) + (*dest&0xff))
+
 static inline UINT8 standardpdraw(const UINT8 *dest, const UINT8 *source, fixed_t ofs)
 {
-	(void)dest; return source[ofs>>FRACBITS];
+	(void)dest; return STANDARDPDRAW(source[ofs>>FRACBITS]);
 }
 static inline UINT8 mappedpdraw(const UINT8 *dest, const UINT8 *source, fixed_t ofs)
 {
-	(void)dest; return *(v_colormap + source[ofs>>FRACBITS]);
+	(void)dest; return MAPPEDPDRAW(source[ofs>>FRACBITS]);
 }
 static inline UINT8 translucentpdraw(const UINT8 *dest, const UINT8 *source, fixed_t ofs)
 {
-	return *(v_translevel + ((source[ofs>>FRACBITS]<<8)&0xff00) + (*dest&0xff));
+	return TRANSLUCENTPDRAW(source[ofs>>FRACBITS]);
 }
 static inline UINT8 transmappedpdraw(const UINT8 *dest, const UINT8 *source, fixed_t ofs)
 {
-	return *(v_translevel + (((*(v_colormap + source[ofs>>FRACBITS]))<<8)&0xff00) + (*dest&0xff));
+	return TRANSMAPPEDPDRAW(source[ofs>>FRACBITS]);
 }
+
+// Used in V_DrawRotatedPatch.
+static inline UINT8 standardpdrawspan(const UINT8 *dest, const UINT16 *source, fixed_t ofs)
+{
+	UINT8 px = (source[ofs>>FRACBITS] & 0xFF);
+	(void)dest; return STANDARDPDRAW(px);
+}
+static inline UINT8 mappedpdrawspan(const UINT8 *dest, const UINT16 *source, fixed_t ofs)
+{
+	UINT8 px = (source[ofs>>FRACBITS] & 0xFF);
+	(void)dest; return MAPPEDPDRAW(px);
+}
+static inline UINT8 translucentpdrawspan(const UINT8 *dest, const UINT16 *source, fixed_t ofs)
+{
+	UINT8 px = (source[ofs>>FRACBITS] & 0xFF);
+	return TRANSLUCENTPDRAW(px);
+}
+static inline UINT8 transmappedpdrawspan(const UINT8 *dest, const UINT16 *source, fixed_t ofs)
+{
+	UINT8 px = (source[ofs>>FRACBITS] & 0xFF);
+	return TRANSMAPPEDPDRAW(px);
+}
+
+#undef STANDARDPDRAW
+#undef MAPPEDPDRAW
+#undef TRANSLUCENTPDRAW
+#undef TRANSMAPPEDPDRAW
 
 // Draws a patch scaled to arbitrary size.
 void V_DrawStretchyFixedPatch(fixed_t x, fixed_t y, fixed_t pscale, fixed_t vscale, INT32 scrn, patch_t *patch, const UINT8 *colormap)
@@ -528,7 +560,6 @@ void V_DrawStretchyFixedPatch(fixed_t x, fixed_t y, fixed_t pscale, fixed_t vsca
 		return;
 
 #ifdef HWRENDER
-	//if (rendermode != render_soft && !con_startup)		// Why?
 	if (rendermode == render_opengl)
 	{
 		HWR_DrawStretchyFixedPatch(patch, x, y, pscale, vscale, scrn, colormap);
@@ -622,7 +653,7 @@ void V_DrawStretchyFixedPatch(fixed_t x, fixed_t y, fixed_t pscale, fixed_t vsca
 #ifdef QUADS
 		if (splitscreen > 1) // 3 or 4 players
 		{
-			fixed_t adjustx = ((scrn & V_NOSCALESTART) ? vid.height : BASEVIDHEIGHT)<<(FRACBITS-1));
+			fixed_t adjustx = ((scrn & V_NOSCALESTART) ? vid.height : BASEVIDHEIGHT)<<(FRACBITS-1);
 			fdup >>= 1;
 			colfrac <<= 1;
 			x >>= 1;
@@ -802,6 +833,468 @@ void V_DrawStretchyFixedPatch(fixed_t x, fixed_t y, fixed_t pscale, fixed_t vsca
 	}
 }
 
+struct rotationraster {
+	fixed_t startcol, stopcol;
+	vector2_t *pstart, *pstop;
+	fixed_t srcregion[4];
+	fixed_t invrow, invcol;
+	fixed_t invcos, invsin;
+	fixed_t colfrac, rowfrac;
+	UINT8 *desttop;
+	patch_t *patch;
+	UINT8 (*patchdrawfunc)(const UINT8*, const UINT16*, fixed_t);
+};
+
+static struct rotationraster v_rotationraster;
+
+static void RasterizeRotatedSpan(fixed_t row)
+{
+	struct rotationraster *r = &v_rotationraster;
+	UINT16 *source = r->patch->flats[0];
+
+	// Precalculate sine and cosine for this row
+	fixed_t rowcos = FixedMul(r->invrow, r->invcos);
+	fixed_t rowsin = FixedMul(r->invrow, r->invsin);
+
+	UINT8 *deststart = r->desttop + (row * vid.width); // Pointer to row
+	UINT8 *dest = deststart + r->startcol; // Pointer to starting column
+	UINT8 *destend = deststart + r->stopcol; // Pointer to ending column
+
+	for (; dest <= destend; dest++, r->startcol++, r->invcol += FRACUNIT)
+	{
+		vector2_t srcpos;
+		UINT16 *srcline;
+		UINT16 srcpx;
+
+		if (r->startcol < 0)
+			continue;
+
+		// Wherever it is
+		srcpos.x = FixedMul(r->invcol, r->invcos) - rowsin;
+		srcpos.y = FixedMul(r->invcol, r->invsin) + rowcos;
+
+		if (srcpos.x < r->pstart->x || srcpos.x >= r->pstop->x
+		|| srcpos.y < r->pstart->y || srcpos.y >= r->pstop->y)
+			continue;
+
+		// Scale it and offset by cropping position
+		srcpos.x = r->srcregion[0] + FixedMul(srcpos.x - r->pstart->x, r->colfrac);
+		srcpos.y = r->srcregion[1] + FixedMul(srcpos.y - r->pstart->y, r->rowfrac);
+
+		srcline = &(source[(srcpos.y >> FRACBITS) * r->patch->width]);
+		srcpx = srcline[srcpos.x >> FRACBITS];
+
+		if (srcpx & 0xFF00)
+			*dest = r->patchdrawfunc(dest, srcline, srcpos.x);
+	}
+}
+
+static void RasterizeRotatedSpanFlipX(fixed_t row)
+{
+	struct rotationraster *r = &v_rotationraster;
+	UINT16 *source = r->patch->flats[0];
+
+	// Precalculate sine and cosine for this row
+	fixed_t rowcos = FixedMul(r->invrow, r->invcos);
+	fixed_t rowsin = FixedMul(r->invrow, r->invsin);
+
+	UINT8 *deststart = r->desttop + (row * vid.width); // Pointer to row
+	UINT8 *dest = deststart + r->startcol; // Pointer to starting column
+	UINT8 *destend = deststart + r->stopcol; // Pointer to ending column
+
+	for (; dest <= destend; dest++, r->startcol++, r->invcol += FRACUNIT)
+	{
+		vector2_t srcpos;
+		UINT16 *srcline;
+		UINT16 srcpx;
+
+		if (r->startcol < 0)
+			continue;
+
+		// Wherever it is
+		srcpos.x = FixedMul(r->invcol, r->invcos) - rowsin;
+		srcpos.y = FixedMul(r->invcol, r->invsin) + rowcos;
+
+		if (srcpos.x < r->pstart->x || srcpos.x >= r->pstop->x
+		|| srcpos.y < r->pstart->y || srcpos.y >=r-> pstop->y)
+			continue;
+
+		// Scale it and offset by cropping position
+		srcpos.x = r->srcregion[2] - FixedMul(srcpos.x - r->pstart->x, r->colfrac);
+		srcpos.y = r->srcregion[1] + FixedMul(srcpos.y - r->pstart->y, r->rowfrac);
+
+		srcline = &(source[(srcpos.y >> FRACBITS) * r->patch->width]);
+		srcpx = srcline[srcpos.x >> FRACBITS];
+
+		if (srcpx & 0xFF00)
+			*dest = r->patchdrawfunc(dest, srcline, srcpos.x);
+	}
+}
+
+// Draws a scaled, cropped, and rotated patch.
+void V_DrawRotatedPatch(fixed_t x, fixed_t y, fixed_t pscale, fixed_t vscale, angle_t angle, INT32 scrn, patch_t *patch, const UINT8 *colormap, fixed_t sx, fixed_t sy, fixed_t w, fixed_t h)
+{
+	struct rotationraster *r = &v_rotationraster;
+
+	UINT32 alphalevel = 0;
+	fixed_t offsetx = 0, offsety = 0;
+
+	INT32 dupx, dupy;
+	INT32 startrow = 0;
+	INT32 stoprow = vid.height;
+	fixed_t pwidth, pheight; // patch width and height
+
+	boolean perplayer = (splitscreen && (scrn & V_PERPLAYER));
+	UINT8 perplayershuffle = 0;
+	fixed_t invfrac = FRACUNIT;
+
+	if (rendermode == render_none)
+		return;
+	else if (!angle)
+	{
+		V_DrawCroppedPatch(x, y, pscale, vscale, scrn, patch, colormap, sx, sy, w, h);
+		return;
+	}
+
+#ifdef HWRENDER
+	if (rendermode == render_opengl)
+	{
+		HWR_DrawRotatedPatch(patch, x, y, pscale, vscale, angle, scrn, colormap, sx, sy, w, h);
+		return;
+	}
+#endif
+
+	r->patchdrawfunc = standardpdrawspan;
+
+	v_translevel = NULL;
+	if ((alphalevel = ((scrn & V_ALPHAMASK) >> V_ALPHASHIFT)))
+	{
+		if (alphalevel == 13)
+			alphalevel = hudminusalpha[st_translucency];
+		else if (alphalevel == 14)
+			alphalevel = 10 - st_translucency;
+		else if (alphalevel == 15)
+			alphalevel = hudplusalpha[st_translucency];
+
+		if (alphalevel >= 10)
+			return; // invis
+
+		if (alphalevel)
+		{
+			v_translevel = R_GetTranslucencyTable(alphalevel);
+			r->patchdrawfunc = translucentpdrawspan;
+		}
+	}
+
+	v_colormap = NULL;
+	if (colormap)
+	{
+		v_colormap = colormap;
+		r->patchdrawfunc = v_translevel ? transmappedpdrawspan : mappedpdrawspan;
+	}
+
+	dupx = vid.dupx;
+	dupy = vid.dupy;
+	if (scrn & V_SCALEPATCHMASK) switch ((scrn & V_SCALEPATCHMASK) >> V_SCALEPATCHSHIFT)
+	{
+		case 1: // V_NOSCALEPATCH
+			dupx = dupy = 1;
+			break;
+		case 2: // V_SMALLSCALEPATCH
+			dupx = vid.smalldupx;
+			dupy = vid.smalldupy;
+			break;
+		case 3: // V_MEDSCALEPATCH
+			dupx = vid.meddupx;
+			dupy = vid.meddupy;
+			break;
+		default:
+			break;
+	}
+
+	// only use one dup, to avoid stretching (har har)
+	dupx = dupy = (dupx < dupy ? dupx : dupy);
+
+	// left offset
+	if (scrn & V_FLIP)
+		offsetx = FixedMul((patch->width - patch->leftoffset)<<FRACBITS, pscale) + 1;
+	else
+		offsetx = FixedMul(patch->leftoffset<<FRACBITS, pscale);
+
+	// top offset
+	offsety = FixedMul(patch->topoffset<<FRACBITS, vscale);
+
+	if (perplayer)
+	{
+		fixed_t adjusty = ((scrn & V_NOSCALESTART) ? vid.height : BASEVIDHEIGHT)<<(FRACBITS-1);
+		y >>= 1;
+#ifdef QUADS
+		if (splitscreen > 1) // 3 or 4 players
+		{
+			fixed_t adjustx = ((scrn & V_NOSCALESTART) ? vid.height : BASEVIDHEIGHT)<<(FRACBITS-1);
+			x >>= 1;
+			if (stplyr == &players[displayplayer])
+			{
+				if (!(scrn & (V_SNAPTOTOP|V_SNAPTOBOTTOM)))
+					perplayershuffle |= 1;
+				if (!(scrn & (V_SNAPTOLEFT|V_SNAPTORIGHT)))
+					perplayershuffle |= 4;
+				scrn &= ~V_SNAPTOBOTTOM|V_SNAPTORIGHT;
+			}
+			else if (stplyr == &players[secondarydisplayplayer])
+			{
+				if (!(scrn & (V_SNAPTOTOP|V_SNAPTOBOTTOM)))
+					perplayershuffle |= 1;
+				if (!(scrn & (V_SNAPTOLEFT|V_SNAPTORIGHT)))
+					perplayershuffle |= 8;
+				x += adjustx;
+				scrn &= ~V_SNAPTOBOTTOM|V_SNAPTOLEFT;
+			}
+			else if (stplyr == &players[thirddisplayplayer])
+			{
+				if (!(scrn & (V_SNAPTOTOP|V_SNAPTOBOTTOM)))
+					perplayershuffle |= 2;
+				if (!(scrn & (V_SNAPTOLEFT|V_SNAPTORIGHT)))
+					perplayershuffle |= 4;
+				y += adjusty;
+				scrn &= ~V_SNAPTOTOP|V_SNAPTORIGHT;
+			}
+			else //if (stplyr == &players[fourthdisplayplayer])
+			{
+				if (!(scrn & (V_SNAPTOTOP|V_SNAPTOBOTTOM)))
+					perplayershuffle |= 2;
+				if (!(scrn & (V_SNAPTOLEFT|V_SNAPTORIGHT)))
+					perplayershuffle |= 8;
+				x += adjustx;
+				y += adjusty;
+				scrn &= ~V_SNAPTOTOP|V_SNAPTOLEFT;
+			}
+		}
+		else
+#endif
+		// 2 players
+		{
+			if (stplyr == &players[displayplayer])
+			{
+				if (!(scrn & (V_SNAPTOTOP|V_SNAPTOBOTTOM)))
+					perplayershuffle = 1;
+				scrn &= ~V_SNAPTOBOTTOM;
+			}
+			else //if (stplyr == &players[secondarydisplayplayer])
+			{
+				if (!(scrn & (V_SNAPTOTOP|V_SNAPTOBOTTOM)))
+					perplayershuffle = 2;
+				y += adjusty;
+				scrn &= ~V_SNAPTOTOP;
+			}
+		}
+	}
+
+	r->desttop = screens[scrn&V_PARAMMASK];
+	if (!r->desttop)
+		return;
+
+	if (!(scrn & V_NOSCALESTART))
+	{
+		x = FixedMul(x,dupx<<FRACBITS);
+		y = FixedMul(y,dupy<<FRACBITS);
+
+		// Center it if necessary
+		if (!(scrn & V_SCALEPATCHMASK))
+		{
+			if (vid.width != BASEVIDWIDTH * dupx)
+			{
+				// dupx adjustments pretend that screen width is BASEVIDWIDTH * dupx,
+				// so center this imaginary screen
+				if (scrn & V_SNAPTORIGHT)
+					x += (vid.width - (BASEVIDWIDTH * dupx)) * FRACUNIT;
+				else if (!(scrn & V_SNAPTOLEFT))
+					x += ((vid.width - (BASEVIDWIDTH * dupx)) / 2) * FRACUNIT;
+				if (perplayershuffle & 4)
+					x -= ((vid.width - (BASEVIDWIDTH * dupx)) / 4) * FRACUNIT;
+				else if (perplayershuffle & 8)
+					x += ((vid.width - (BASEVIDWIDTH * dupx)) / 4) * FRACUNIT;
+			}
+			if (vid.height != BASEVIDHEIGHT * dupy)
+			{
+				// same thing here
+				if (scrn & V_SNAPTOBOTTOM)
+					y += (vid.height - (BASEVIDHEIGHT * dupy)) * FRACUNIT;
+				else if (!(scrn & V_SNAPTOTOP))
+					y += ((vid.height - (BASEVIDHEIGHT * dupy)) / 2) * FRACUNIT;
+				if (perplayershuffle & 1)
+					y -= ((vid.height - (BASEVIDHEIGHT * dupy)) / 4) * FRACUNIT;
+				else if (perplayershuffle & 2)
+					y += ((vid.height - (BASEVIDHEIGHT * dupy)) / 4) * FRACUNIT;
+			}
+		}
+	}
+
+#if 0
+	// Auto-crop at splitscreen borders!
+	if (perplayer)
+	{
+#ifdef QUADS
+		if (splitscreen > 1) // 3 or 4 players
+		{
+			#error Auto-cropping doesnt take quadscreen into account! Fix it!
+			// Hint: For player 1/2, copy player 1's code below. For player 3/4, copy player 2's code below
+			// For player 1/3 and 2/4, hijack the X wrap prevention lines? That's probably easiest
+		}
+		else
+#endif
+		// 2 players
+		{
+			if (stplyr == &players[displayplayer]) // Player 1's screen, crop at the bottom
+			{
+				// Just put a big old stop sign halfway through the screen
+				stoprow = vid.height>>1;
+			}
+			else //if (stplyr == &players[secondarydisplayplayer]) // Player 2's screen, crop at the top
+			{
+				// Start drawing at the border
+				startrow = vid.height>>1;
+			}
+		}
+	}
+#endif
+
+	dupx <<= FRACBITS;
+	dupy <<= FRACBITS;
+
+	if (pscale != FRACUNIT) // scale width properly
+	{
+		pwidth = patch->width<<FRACBITS;
+		pwidth = FixedMul(pwidth, pscale);
+		pwidth = FixedMul(pwidth, dupx);
+	}
+	else
+		pwidth = patch->width * dupx;
+
+	if (vscale != FRACUNIT) // scale height properly
+	{
+		pheight = patch->height<<FRACBITS;
+		pheight = FixedMul(pheight, vscale);
+		pheight = FixedMul(pheight, dupy);
+	}
+	else
+		pheight = patch->height * dupy;
+
+	if (perplayer)
+	{
+		y += pheight / 2;
+		invfrac <<= 1;
+	}
+
+	// X/Y scaling values
+	r->colfrac = FixedDiv(w, pwidth);
+	r->rowfrac = FixedDiv(h, pheight);
+
+	// Determine patch region
+	vector2_t patchstart = {
+		-FixedMul(offsetx, dupx),
+		-FixedMul(offsety, dupy)
+	}, patchstop;
+
+	patchstop.x = patchstart.x + pwidth;
+	patchstop.y = patchstart.y + pheight;
+
+	// Determine region to rasterize into
+	vector2_t rasterstart = { patchstart.x, patchstart.y };
+	vector2_t rasterstop = { patchstop.x, patchstop.y };
+
+#define CALC_SIDE(sx, sy) { \
+	fixed_t angcos = FINECOSINE(angle>>ANGLETOFINESHIFT); \
+	fixed_t angsin = FINESINE(angle>>ANGLETOFINESHIFT); \
+	fixed_t xcalc = FixedMul(sx, angcos) - FixedMul(sy, angsin); \
+	fixed_t ycalc = FixedMul(sx, angsin) + FixedMul(sy, angcos); \
+	if (rasterstart.x > xcalc) \
+		rasterstart.x = xcalc; \
+	if (rasterstop.x < xcalc) \
+		rasterstop.x = xcalc; \
+	if (rasterstart.y > ycalc) \
+		rasterstart.y = ycalc; \
+	if (rasterstop.y < ycalc) \
+		rasterstop.y = ycalc; \
+}
+
+	CALC_SIDE(patchstart.x, patchstart.y);
+	CALC_SIDE(patchstop.x, patchstart.y);
+	CALC_SIDE(patchstart.x, patchstop.y);
+	CALC_SIDE(patchstop.x, patchstop.y);
+
+#undef CALC_SIDE
+
+	// Offset bounding box by the patch position
+	rasterstart.x += x;
+	rasterstart.y += y;
+	rasterstop.x += x;
+	rasterstop.y += y;
+
+	if (rasterstart.x < 0 && rasterstop.x < 0)
+		return;
+	else if (rasterstart.y < startrow && rasterstop.y < startrow)
+		return;
+	else if (rasterstart.x>>FRACBITS >= vid.width && rasterstop.x>>FRACBITS >= vid.width)
+		return;
+	else if (rasterstart.y>>FRACBITS >= stoprow && rasterstop.y>>FRACBITS >= stoprow)
+		return;
+	else if (rasterstop.x < rasterstart.x || rasterstop.y < rasterstart.y)
+		return;
+
+	rasterstop.x /= FRACUNIT;
+	rasterstop.y /= FRACUNIT;
+
+	if (rasterstop.y >= stoprow)
+		rasterstop.y = stoprow - 1;
+
+	fixed_t destrow = rasterstart.y >> FRACBITS;
+	fixed_t invrow = rasterstart.y - y;
+
+	// Precalculated sine and cosine
+	angle = InvAngle(angle);
+	r->invcos = FINECOSINE(angle>>ANGLETOFINESHIFT);
+	r->invsin = FINESINE(angle>>ANGLETOFINESHIFT);
+
+	Patch_GenerateFlat((r->patch = patch), 0);
+
+	r->srcregion[0] = sx;
+	r->srcregion[1] = sy;
+	r->srcregion[2] = sx + w;
+	r->srcregion[3] = sy + h;
+
+	r->pstart = &patchstart;
+	r->pstop = &patchstop;
+
+	void (*spanraster)(fixed_t) = RasterizeRotatedSpan;
+
+	if (scrn & V_FLIP)
+		spanraster = RasterizeRotatedSpanFlipX;
+
+	for (; destrow <= rasterstop.y; destrow++, invrow += invfrac)
+	{
+		if (destrow < startrow)
+			continue;
+
+		fixed_t destcol = rasterstart.x / FRACUNIT;
+		fixed_t invcol = rasterstart.x - x;
+		fixed_t stopcol = destcol + rasterstop.x;
+
+		// Expand the ending column if the starting one is out of bounds
+		if (destcol < 0)
+			stopcol += -destcol;
+		if (stopcol >= vid.width - 1)
+			stopcol = vid.width - 1;
+
+		r->startcol = destcol;
+		r->stopcol = stopcol;
+		r->invrow = invrow;
+		r->invcol = invcol;
+
+		spanraster(destrow);
+	}
+}
+
 // Draws a patch cropped and scaled to arbitrary size.
 void V_DrawCroppedPatch(fixed_t x, fixed_t y, fixed_t pscale, fixed_t vscale, INT32 scrn, patch_t *patch, const UINT8 *colormap, fixed_t sx, fixed_t sy, fixed_t w, fixed_t h)
 {
@@ -822,7 +1315,6 @@ void V_DrawCroppedPatch(fixed_t x, fixed_t y, fixed_t pscale, fixed_t vscale, IN
 		return;
 
 #ifdef HWRENDER
-	//if (rendermode != render_soft && !con_startup)		// Not this again
 	if (rendermode == render_opengl)
 	{
 		HWR_DrawCroppedPatch(patch,x,y,pscale,vscale,scrn,colormap,sx,sy,w,h);
@@ -902,7 +1394,7 @@ void V_DrawCroppedPatch(fixed_t x, fixed_t y, fixed_t pscale, fixed_t vscale, IN
 #ifdef QUADS
 		if (splitscreen > 1) // 3 or 4 players
 		{
-			fixed_t adjustx = ((scrn & V_NOSCALESTART) ? vid.height : BASEVIDHEIGHT)<<(FRACBITS-1));
+			fixed_t adjustx = ((scrn & V_NOSCALESTART) ? vid.height : BASEVIDHEIGHT)<<(FRACBITS-1);
 			fdup >>= 1;
 			colfrac <<= 1;
 			x >>= 1;
@@ -1202,7 +1694,6 @@ void V_DrawFill(INT32 x, INT32 y, INT32 w, INT32 h, INT32 c)
 		return;
 
 #ifdef HWRENDER
-	//if (rendermode != render_soft && !con_startup)		// Not this again
 	if (rendermode == render_opengl)
 	{
 		HWR_DrawFill(x, y, w, h, c);

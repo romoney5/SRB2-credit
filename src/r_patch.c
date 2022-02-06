@@ -1,6 +1,6 @@
 // SONIC ROBO BLAST 2
 //-----------------------------------------------------------------------------
-// Copyright (C) 2020-2021 by Jaime "Lactozilla" Passos.
+// Copyright (C) 2020-2022 by Jaime Ita Passos.
 //
 // This program is free software distributed under the
 // terms of the GNU General Public License, version 2.
@@ -80,7 +80,6 @@ static void Patch_FreeData(patch_t *patch)
 			Z_Free(patch->flats[i]);
 	}
 
-#ifdef ROTSPRITE
 	if (patch->rotated)
 	{
 		rotsprite_t *rotsprite = patch->rotated;
@@ -94,7 +93,6 @@ static void Patch_FreeData(patch_t *patch)
 		Z_Free(rotsprite->patches);
 		Z_Free(rotsprite);
 	}
-#endif
 
 	if (patch->columnofs)
 		Z_Free(patch->columnofs);

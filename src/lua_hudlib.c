@@ -506,24 +506,20 @@ static int libd_getSpritePatch(lua_State *L)
 	if (angle >= ((sprframe->rotate & SRF_3DGE) ? 16 : 8)) // out of range?
 		return 0;
 
-#ifdef ROTSPRITE
 	if (lua_isnumber(L, 4))
 	{
-		// rotsprite?????
 		angle_t rollangle = luaL_checkangle(L, 4);
-		INT32 rot = R_GetRollAngle(rollangle);
+		patch_t *rotsprite = Patch_GetRotatedSprite(sprframe, frame, angle, sprframe->flip & (1<<angle), true, &spriteinfo[i], rollangle);
 
-		if (rot) {
-			patch_t *rotsprite = Patch_GetRotatedSprite(sprframe, frame, angle, sprframe->flip & (1<<angle), true, &spriteinfo[i], rot);
+		if (rotsprite) {
 			LUA_PushUserdata(L, rotsprite, META_PATCH);
 			lua_pushboolean(L, false);
 			lua_pushboolean(L, true);
 			return 3;
 		}
 	}
-#endif
 
-	// push both the patch and it's "flip" value
+	// push both the patch and its "flip" value
 	LUA_PushUserdata(L, W_CachePatchNum(sprframe->lumppat[angle], PU_SPRITE), META_PATCH);
 	lua_pushboolean(L, (sprframe->flip & (1<<angle)) != 0);
 	return 2;
@@ -618,24 +614,20 @@ static int libd_getSprite2Patch(lua_State *L)
 	if (angle >= ((sprframe->rotate & SRF_3DGE) ? 16 : 8)) // out of range?
 		return 0;
 
-#ifdef ROTSPRITE
 	if (lua_isnumber(L, 4))
 	{
-		// rotsprite?????
 		angle_t rollangle = luaL_checkangle(L, 4);
-		INT32 rot = R_GetRollAngle(rollangle);
+		patch_t *rotsprite = Patch_GetRotatedSprite(sprframe, frame, angle, sprframe->flip & (1<<angle), true, &skins[i].sprinfo[j], rollangle);
 
-		if (rot) {
-			patch_t *rotsprite = Patch_GetRotatedSprite(sprframe, frame, angle, sprframe->flip & (1<<angle), true, &skins[i].sprinfo[j], rot);
+		if (rotsprite) {
 			LUA_PushUserdata(L, rotsprite, META_PATCH);
 			lua_pushboolean(L, false);
 			lua_pushboolean(L, true);
 			return 3;
 		}
 	}
-#endif
 
-	// push both the patch and it's "flip" value
+	// push both the patch and its "flip" value
 	LUA_PushUserdata(L, W_CachePatchNum(sprframe->lumppat[angle], PU_SPRITE), META_PATCH);
 	lua_pushboolean(L, (sprframe->flip & (1<<angle)) != 0);
 	return 2;
@@ -713,6 +705,35 @@ static int libd_drawStretched(lua_State *L)
 	flags &= ~V_PARAMMASK; // Don't let crashes happen.
 
 	V_DrawStretchyFixedPatch(x, y, hscale, vscale, flags, patch, colormap);
+	return 0;
+}
+
+static int libd_drawRotated(lua_State *L)
+{
+	fixed_t x, y, hscale, vscale;
+	angle_t angle;
+	INT32 flags;
+	patch_t *patch;
+	const UINT8 *colormap = NULL;
+
+	HUDONLY
+	x = luaL_checkinteger(L, 1);
+	y = luaL_checkinteger(L, 2);
+	hscale = luaL_checkinteger(L, 3);
+	if (hscale < 0)
+		return luaL_error(L, "negative horizontal scale");
+	vscale = luaL_checkinteger(L, 4);
+	if (vscale < 0)
+		return luaL_error(L, "negative vertical scale");
+	angle = luaL_checkangle(L, 5);
+	patch = *((patch_t **)luaL_checkudata(L, 6, META_PATCH));
+	flags = luaL_optinteger(L, 7, 0);
+	if (!lua_isnoneornil(L, 8))
+		colormap = *((UINT8 **)luaL_checkudata(L, 8, META_COLORMAP));
+
+	flags &= ~V_PARAMMASK; // Don't let crashes happen.
+
+	V_DrawRotatedPatch(x, y, hscale, vscale, angle, flags, patch, colormap, 0, 0, patch->width<<FRACBITS, patch->height<<FRACBITS);
 	return 0;
 }
 
@@ -1213,6 +1234,7 @@ static luaL_Reg lib_draw[] = {
 	{"draw", libd_draw},
 	{"drawScaled", libd_drawScaled},
 	{"drawStretched", libd_drawStretched},
+	{"drawRotated", libd_drawRotated},
 	{"drawCropped", libd_drawCropped},
 	{"drawNum", libd_drawNum},
 	{"drawPaddedNum", libd_drawPaddedNum},

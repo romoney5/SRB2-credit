@@ -1,6 +1,6 @@
 // SONIC ROBO BLAST 2
 //-----------------------------------------------------------------------------
-// Copyright (C) 2020-2021 by Jaime "Lactozilla" Passos.
+// Copyright (C) 2020-2022 by Jaime Ita Passos.
 //
 // This program is free software distributed under the
 // terms of the GNU General Public License, version 2.
@@ -14,7 +14,6 @@
 #include "z_zone.h"
 #include "w_wad.h"
 
-#ifdef ROTSPRITE
 fixed_t rollcosang[ROTANGLES];
 fixed_t rollsinang[ROTANGLES];
 
@@ -45,11 +44,11 @@ patch_t *Patch_GetRotatedSprite(
 	spriteframe_t *sprite,
 	size_t frame, size_t spriteangle,
 	boolean flip, boolean adjustfeet,
-	void *info, INT32 rotationangle)
+	void *info, angle_t angle)
 {
 	rotsprite_t *rotsprite;
 	spriteinfo_t *sprinfo = (spriteinfo_t *)info;
-	INT32 idx = rotationangle;
+	INT32 rotationangle = R_GetRollAngle(angle), idx;
 	UINT8 type = (adjustfeet ? 1 : 0);
 
 	if (rotationangle < 1 || rotationangle >= ROTANGLES)
@@ -63,6 +62,7 @@ patch_t *Patch_GetRotatedSprite(
 		sprite->rotated[type][spriteangle] = rotsprite;
 	}
 
+	idx = rotationangle;
 	if (flip)
 		idx += rotsprite->angles;
 
@@ -88,7 +88,7 @@ patch_t *Patch_GetRotatedSprite(
 			ypivot = patch->height / 2;
 		}
 
-		RotatedPatch_DoRotation(rotsprite, patch, rotationangle, xpivot, ypivot, flip);
+		RotatedPatch_DoRotation(rotsprite, patch, angle, xpivot, ypivot, flip);
 
 		//BP: we cannot use special tric in hardware mode because feet in ground caused by z-buffer
 		if (adjustfeet)
@@ -98,7 +98,7 @@ patch_t *Patch_GetRotatedSprite(
 	return rotsprite->patches[idx];
 }
 
-void Patch_Rotate(patch_t *patch, INT32 angle, INT32 xpivot, INT32 ypivot, boolean flip)
+void Patch_Rotate(patch_t *patch, angle_t angle, INT32 xpivot, INT32 ypivot, boolean flip)
 {
 	if (patch->rotated == NULL)
 		patch->rotated = RotatedPatch_Create(ROTANGLES);
@@ -113,11 +113,13 @@ rotsprite_t *RotatedPatch_Create(INT32 numangles)
 	return rotsprite;
 }
 
-static void RotatedPatch_CalculateDimensions(
-	INT32 width, INT32 height,
-	fixed_t ca, fixed_t sa,
+void RotatedPatch_CalculateDimensions(
+	INT32 width, INT32 height, angle_t angle,
 	INT32 *newwidth, INT32 *newheight)
 {
+	fixed_t ca = FINECOSINE(angle>>ANGLETOFINESHIFT);
+	fixed_t sa = FINESINE(angle>>ANGLETOFINESHIFT);
+
 	fixed_t fixedwidth = (width * FRACUNIT);
 	fixed_t fixedheight = (height * FRACUNIT);
 
@@ -126,16 +128,18 @@ static void RotatedPatch_CalculateDimensions(
 	fixed_t h1 = abs(FixedMul(fixedwidth, sa) + FixedMul(fixedheight, ca));
 	fixed_t h2 = abs(FixedMul(-fixedwidth, sa) + FixedMul(fixedheight, ca));
 
-	w1 = FixedInt(FixedCeil(w1 + (FRACUNIT/2)));
-	w2 = FixedInt(FixedCeil(w2 + (FRACUNIT/2)));
-	h1 = FixedInt(FixedCeil(h1 + (FRACUNIT/2)));
-	h2 = FixedInt(FixedCeil(h2 + (FRACUNIT/2)));
+	fixedwidth = max(width, max(w1, w2));
+	fixedheight = max(height, max(h1, h2));
 
-	*newwidth = max(width, max(w1, w2));
-	*newheight = max(height, max(h1, h2));
+	w1 = FRACUNIT + (1<<(FRACBITS-1)); // only a spoonful
+	fixedwidth = FixedMul(fixedwidth, w1);
+	fixedheight = FixedMul(fixedheight, w1);
+
+	*newwidth = fixedwidth>>FRACBITS;
+	*newheight = fixedheight>>FRACBITS;
 }
 
-void RotatedPatch_DoRotation(rotsprite_t *rotsprite, patch_t *patch, INT32 angle, INT32 xpivot, INT32 ypivot, boolean flip)
+void RotatedPatch_DoRotation(rotsprite_t *rotsprite, patch_t *patch, angle_t angle, INT32 xpivot, INT32 ypivot, boolean flip)
 {
 	patch_t *rotated;
 	UINT16 *rawdst, *rawconv;
@@ -147,10 +151,11 @@ void RotatedPatch_DoRotation(rotsprite_t *rotsprite, patch_t *patch, INT32 angle
 	INT32 leftoffset = patch->leftoffset;
 	INT32 newwidth, newheight;
 
-	fixed_t ca = rollcosang[angle];
-	fixed_t sa = rollsinang[angle];
+	INT32 rotang = R_GetRollAngle(angle);
+	fixed_t ca = rollcosang[rotang];
+	fixed_t sa = rollsinang[rotang];
 	fixed_t xcenter, ycenter;
-	INT32 idx = angle;
+	INT32 idx = rotang;
 	INT32 x, y;
 	INT32 sx, sy;
 	INT32 dx, dy;
@@ -158,7 +163,7 @@ void RotatedPatch_DoRotation(rotsprite_t *rotsprite, patch_t *patch, INT32 angle
 	INT32 minx, miny, maxx, maxy;
 
 	// Don't cache angle = 0
-	if (angle < 1 || angle >= ROTANGLES)
+	if (!rotang)
 		return;
 
 	if (flip)
@@ -172,7 +177,7 @@ void RotatedPatch_DoRotation(rotsprite_t *rotsprite, patch_t *patch, INT32 angle
 		return;
 
 	// Find the dimensions of the rotated patch.
-	RotatedPatch_CalculateDimensions(width, height, ca, sa, &newwidth, &newheight);
+	RotatedPatch_CalculateDimensions(width, height, angle, &newwidth, &newheight);
 
 	xcenter = (xpivot * FRACUNIT);
 	ycenter = (ypivot * FRACUNIT);
@@ -270,4 +275,3 @@ void RotatedPatch_DoRotation(rotsprite_t *rotsprite, patch_t *patch, INT32 angle
 	rotated->leftoffset = ox;
 	rotated->topoffset = oy;
 }
-#endif
