@@ -157,8 +157,8 @@ void R_DrawFloorSplat(vissprite_t *spr)
 	fixed_t leftoffset, topoffset;
 	INT32 i;
 
-	boolean hflip = (spr->xiscale < 0);
-	boolean vflip = (spr->cut & SC_VFLIP);
+	boolean hflip = spr->cut & SC_HFLIP;
+	boolean vflip = spr->cut & SC_VFLIP;
 	UINT8 flipflags = 0;
 
 	renderflags_t renderflags = spr->renderflags;
@@ -189,8 +189,7 @@ void R_DrawFloorSplat(vissprite_t *spr)
 	else
 		splatangle = spr->viewpoint.angle;
 
-	if (!(spr->cut & SC_ISROTATED))
-		splatangle += mobj->rollangle;
+	splatangle += mobj->rollangle;
 
 	splat.angle = -splatangle;
 	splat.angle += ANGLE_90;
@@ -221,31 +220,33 @@ void R_DrawFloorSplat(vissprite_t *spr)
 
 	// Set positions
 
-	// 3--2
+	// 2--3
 	// |  |
-	// 0--1
+	// 1--0
 
-	splat.verts[0].x = w - xoffset;
-	splat.verts[0].y = yoffset;
+	vector2_t verts[4];
 
-	splat.verts[1].x = -xoffset;
-	splat.verts[1].y = yoffset;
+	verts[0].x = w - xoffset;
+	verts[0].y = yoffset;
 
-	splat.verts[2].x = -xoffset;
-	splat.verts[2].y = -h + yoffset;
+	verts[1].x = -xoffset;
+	verts[1].y = yoffset;
 
-	splat.verts[3].x = w - xoffset;
-	splat.verts[3].y = -h + yoffset;
+	verts[2].x = -xoffset;
+	verts[2].y = -h + yoffset;
 
-	angle = -splat.angle>>ANGLETOFINESHIFT;
+	verts[3].x = w - xoffset;
+	verts[3].y = -h + yoffset;
+
+	angle = -splat.angle >> ANGLETOFINESHIFT;
 	ca = FINECOSINE(angle);
 	sa = FINESINE(angle);
 
 	// Rotate
 	for (i = 0; i < 4; i++)
 	{
-		rotated[i].x = FixedMul(splat.verts[i].x, ca) - FixedMul(splat.verts[i].y, sa);
-		rotated[i].y = FixedMul(splat.verts[i].x, sa) + FixedMul(splat.verts[i].y, ca);
+		rotated[i].x = FixedMul(verts[i].x, ca) - FixedMul(verts[i].y, sa);
+		rotated[i].y = FixedMul(verts[i].x, sa) + FixedMul(verts[i].y, ca);
 	}
 
 	if (renderflags & (RF_SLOPESPLAT | RF_OBJECTSLOPESPLAT))
