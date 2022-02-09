@@ -1559,9 +1559,6 @@ static void R_ProjectSprite(mobj_t *thing)
 	INT32 lindex;
 	INT32 trans;
 
-	vissprite_t *vis;
-	patch_t *patch;
-
 	spritecut_e cut = SC_NONE;
 
 	angle_t ang = 0; // compiler complaints
@@ -1586,11 +1583,6 @@ static void R_ProjectSprite(mobj_t *thing)
 	INT32 heightsec, phs;
 	INT32 light = 0;
 	fixed_t this_scale = thing->scale;
-	fixed_t spritexscale, spriteyscale;
-	angle_t rollangle;
-
-	fixed_t spr_width, spr_height;
-	fixed_t spr_offset, spr_topoffset;
 
 	// transform the origin point
 	tr_x = thing->x - viewx;
@@ -1699,91 +1691,25 @@ static void R_ProjectSprite(mobj_t *thing)
 		flip = sprframe->flip & (1<<rot);
 	}
 
+	flip = !flip != !hflip;
+	if (flip)
+		cut |= SC_HFLIP;
+
 	I_Assert(lump < max_spritelumps);
 
 	if (thing->skin && ((skin_t *)thing->skin)->flags & SF_HIRES)
 		this_scale = FixedMul(this_scale, ((skin_t *)thing->skin)->highresscale);
 
-	spr_width = spritecachedinfo[lump].width;
-	spr_height = spritecachedinfo[lump].height;
-	spr_offset = spritecachedinfo[lump].offset;
-	spr_topoffset = spritecachedinfo[lump].topoffset;
+	fixed_t spritexscale = thing->spritexscale;
+	fixed_t spriteyscale = thing->spriteyscale;
 
-	//Fab: lumppat is the lump number of the patch to use, this is different
-	//     than lumpid for sprites-in-pwad : the graphics are patched
-	patch = W_CachePatchNum(sprframe->lumppat[rot], PU_SPRITE);
-
-	flip = !flip != !hflip;
-	if (flip)
-		cut |= SC_HFLIP;
-
-	rollangle = thing->rollangle;
-
-	if (rollangle && !(splat && !(thing->renderflags & RF_NOSPLATROLLANGLE)))
-	{
-		INT32 newwidth, newheight;
-		fixed_t midpoint_x = spr_width >> 1;
-		fixed_t midpoint_y = spr_height >> 1;
-		fixed_t xpivot, ypivot;
-		fixed_t temp_x, temp_y;
-		fixed_t rotated_x, rotated_y;
-		fixed_t ca, sa;
-
-		rollangle = InvAngle(rollangle);
-		if (papersprite && ang >= ANGLE_180)
-			rollangle = InvAngle(rollangle);
-
-		ca = FINECOSINE(rollangle>>ANGLETOFINESHIFT);
-		sa = FINESINE(rollangle>>ANGLETOFINESHIFT);
-
-		if (thing->renderflags & RF_PIVOTROTATION)
-		{
-			xpivot = FixedMul(thing->spritexpivot, spr_width);
-			ypivot = FixedMul(thing->spriteypivot, spr_height);
-		}
-		else if (sprinfo->available)
-		{
-			xpivot = sprinfo->pivot[frame].x << FRACBITS;
-			ypivot = sprinfo->pivot[frame].y << FRACBITS;
-		}
-		else
-		{
-			xpivot = midpoint_x;
-			ypivot = midpoint_y;
-		}
-
-		RotatedPatch_CalculateDimensions(spr_width >> FRACBITS,
-		                                spr_height >> FRACBITS,
-		                                rollangle,
-		                                &newwidth, &newheight);
-
-		spr_width = newwidth << FRACBITS;
-		spr_height = newheight << FRACBITS;
-
-		spr_offset = spr_width>>1;
-		spr_topoffset = (spr_height>>1) + (spr_topoffset>>1);
-
-		xpivot = midpoint_x - xpivot;
-		ypivot = midpoint_y - ypivot;
-
-		temp_x = -xpivot;
-		temp_y = -ypivot;
-
-		rotated_x = FixedMul(temp_x, ca) - FixedMul(temp_y, sa);
-		rotated_y = FixedMul(temp_x, sa) + FixedMul(temp_y, ca);
-
-		spr_offset += (rotated_x + xpivot);
-		spr_topoffset += (rotated_y + ypivot);
-
-		cut |= SC_ISROTATED;
-		flip = 0;
-	}
-
-	// calculate edges of the shape
-	spritexscale = thing->spritexscale;
-	spriteyscale = thing->spriteyscale;
-	if (spritexscale < 1 || spriteyscale < 1)
+	if (FixedMul(spritexscale, this_scale) < 1 || FixedMul(spriteyscale, this_scale) < 1)
 		return;
+
+	fixed_t spr_width = spritecachedinfo[lump].width;
+	fixed_t spr_height = spritecachedinfo[lump].height;
+	fixed_t spr_offset = spritecachedinfo[lump].offset;
+	fixed_t spr_topoffset = spritecachedinfo[lump].topoffset;
 
 	if (thing->renderflags & RF_ABSOLUTEOFFSETS)
 	{
@@ -1801,10 +1727,81 @@ static void R_ProjectSprite(mobj_t *thing)
 		spr_topoffset += thing->spriteyoffset * flipoffset;
 	}
 
+	vector2_t sprite_offset = { spr_offset, spr_topoffset };
+
+	// calculate the rotated shape
+	angle_t rollangle = thing->rollangle;
+
+	if (rollangle && !splat)
+	{
+		vector2_t midpoint = { spr_width >> 1, spr_height >> 1 };
+		vector2_t pivot;
+
+		if (thing->renderflags & RF_PIVOTROTATION)
+		{
+			pivot.x = FixedMul(thing->spritexpivot, spr_width);
+			pivot.y = FixedMul(thing->spriteypivot, spr_height);
+		}
+		else if (thing->renderflags & RF_PIVOTATOFFSETS)
+		{
+			pivot.x = spr_offset;
+			pivot.y = spr_topoffset;
+		}
+		else if (sprinfo->available)
+		{
+			pivot.x = sprinfo->pivot[frame].x << FRACBITS;
+			pivot.y = sprinfo->pivot[frame].y << FRACBITS;
+		}
+		else
+		{
+			pivot.x = midpoint.x;
+			pivot.y = midpoint.y;
+		}
+
+		rollangle = InvAngle(rollangle);
+		if (papersprite && ang >= ANGLE_180)
+			rollangle = InvAngle(rollangle);
+
+		if (flip)
+			offset = spr_width - spr_offset;
+		else
+			offset = spr_offset;
+
+		RotatedPatch_CalculateDimensions(spr_width, spr_height, rollangle, &spr_width, &spr_height);
+
+		sprite_offset.x = spr_width >> 1;
+		sprite_offset.y = (spr_height >> 1) + (spr_topoffset >> 1);
+
+		// relative to (0, 0)
+		pivot.x = midpoint.x - pivot.x;
+		pivot.y = midpoint.y - pivot.y;
+
+		fixed_t ca = FINECOSINE(rollangle>>ANGLETOFINESHIFT);
+		fixed_t sa = FINESINE(rollangle>>ANGLETOFINESHIFT);
+
+		vector2_t temp = {
+			FixedMul(-pivot.x, ca) - FixedMul(-pivot.y, sa),
+			FixedMul(-pivot.x, sa) + FixedMul(-pivot.y, ca)
+		};
+
+		sprite_offset.x += temp.x + pivot.x;
+		sprite_offset.y += temp.y + pivot.y;
+
+		sprite_offset.x -= midpoint.x;
+		sprite_offset.y -= midpoint.y;
+
+		sprite_offset.x += offset;
+		sprite_offset.y += spr_topoffset >> 1;
+
+		cut |= SC_ISROTATED;
+		flip = 0;
+	}
+
+	// calculate edges of the shape
 	if (flip)
-		offset = spr_offset - spr_width;
+		offset = sprite_offset.x - spr_width;
 	else
-		offset = -spr_offset;
+		offset = -sprite_offset.x;
 
 	offset = FixedMul(offset, FixedMul(spritexscale, this_scale));
 	offset2 = FixedMul(spr_width, FixedMul(spritexscale, this_scale));
@@ -1913,6 +1910,10 @@ static void R_ProjectSprite(mobj_t *thing)
 		if (x2 < 0)
 			return;
 	}
+
+	//Fab: lumppat is the lump number of the patch to use, this is different
+	//     than lumpid for sprites-in-pwad : the graphics are patched
+	patch_t *patch = W_CachePatchNum(sprframe->lumppat[rot], PU_SPRITE);
 
 	// Adjust the sort scale if needed
 	if (splat)
@@ -2058,12 +2059,12 @@ static void R_ProjectSprite(mobj_t *thing)
 			// When vertical flipped, draw sprites from the top down, at least as far as offsets are concerned.
 			// sprite height - sprite topoffset is the proper inverse of the vertical offset, of course.
 			// remember gz and gzt should be seperated by sprite height, not thing height - thing height can be shorter than the sprite itself sometimes!
-			gz = oldthing->z + oldthing->height - FixedMul(spr_topoffset, FixedMul(spriteyscale, this_scale));
+			gz = oldthing->z + oldthing->height - FixedMul(sprite_offset.y, FixedMul(spriteyscale, this_scale));
 			gzt = gz + FixedMul(spr_height, FixedMul(spriteyscale, this_scale));
 		}
 		else
 		{
-			gzt = oldthing->z + FixedMul(spr_topoffset, FixedMul(spriteyscale, this_scale));
+			gzt = oldthing->z + FixedMul(sprite_offset.y, FixedMul(spriteyscale, this_scale));
 			gz = gzt - FixedMul(spr_height, FixedMul(spriteyscale, this_scale));
 		}
 	}
@@ -2118,7 +2119,7 @@ static void R_ProjectSprite(mobj_t *thing)
 	}
 
 	// store information in a vissprite
-	vis = R_NewVisSprite();
+	vissprite_t *vis = R_NewVisSprite();
 	vis->renderflags = thing->renderflags;
 	vis->rotateflags = sprframe->rotate;
 	vis->heightsec = heightsec; //SoM: 3/17/2000
@@ -2241,7 +2242,7 @@ static void R_ProjectSprite(mobj_t *thing)
 	if (vflip)
 		vis->cut |= SC_VFLIP;
 	if (splat)
-		vis->cut |= SC_SPLAT; // I like ya cut g
+		vis->cut |= SC_SPLAT;
 
 	vis->patch = patch;
 

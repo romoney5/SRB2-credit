@@ -15,8 +15,8 @@
 rotsprite_t *RotatedPatch_Create(INT32 numangles);
 void RotatedPatch_DoRotation(rotsprite_t *rotsprite, patch_t *patch, angle_t angle, INT32 xpivot, INT32 ypivot, boolean flip);
 void RotatedPatch_CalculateDimensions(
-	INT32 width, INT32 height, angle_t angle,
-	INT32 *newwidth, INT32 *newheight);
+	fixed_t width, fixed_t height, angle_t angle,
+	fixed_t *newwidth, fixed_t *newheight);
 
 extern fixed_t rollcosang[ROTANGLES];
 extern fixed_t rollsinang[ROTANGLES];

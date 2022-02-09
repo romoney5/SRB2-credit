@@ -114,29 +114,29 @@ rotsprite_t *RotatedPatch_Create(INT32 numangles)
 }
 
 void RotatedPatch_CalculateDimensions(
-	INT32 width, INT32 height, angle_t angle,
-	INT32 *newwidth, INT32 *newheight)
+	fixed_t width, fixed_t height, angle_t angle,
+	fixed_t *newwidth, fixed_t *newheight)
 {
 	fixed_t ca = FINECOSINE(angle>>ANGLETOFINESHIFT);
 	fixed_t sa = FINESINE(angle>>ANGLETOFINESHIFT);
 
-	fixed_t fixedwidth = (width * FRACUNIT);
-	fixed_t fixedheight = (height * FRACUNIT);
+	fixed_t oldwidth = width;
+	fixed_t oldheight = height;
 
-	fixed_t w1 = abs(FixedMul(fixedwidth, ca) - FixedMul(fixedheight, sa));
-	fixed_t w2 = abs(FixedMul(-fixedwidth, ca) - FixedMul(fixedheight, sa));
-	fixed_t h1 = abs(FixedMul(fixedwidth, sa) + FixedMul(fixedheight, ca));
-	fixed_t h2 = abs(FixedMul(-fixedwidth, sa) + FixedMul(fixedheight, ca));
+	fixed_t w1 = abs(FixedMul(width, ca) - FixedMul(height, sa));
+	fixed_t w2 = abs(FixedMul(-width, ca) - FixedMul(height, sa));
+	fixed_t h1 = abs(FixedMul(width, sa) + FixedMul(height, ca));
+	fixed_t h2 = abs(FixedMul(-width, sa) + FixedMul(height, ca));
 
-	fixedwidth = max(width, max(w1, w2));
-	fixedheight = max(height, max(h1, h2));
+	width = max(oldwidth, max(w1, w2));
+	height = max(oldheight, max(h1, h2));
 
 	w1 = FRACUNIT + (1<<(FRACBITS-1)); // only a spoonful
-	fixedwidth = FixedMul(fixedwidth, w1);
-	fixedheight = FixedMul(fixedheight, w1);
+	width = FixedMul(width, w1);
+	height = FixedMul(height, w1);
 
-	*newwidth = fixedwidth>>FRACBITS;
-	*newheight = fixedheight>>FRACBITS;
+	*newwidth = width;
+	*newheight = height;
 }
 
 void RotatedPatch_DoRotation(rotsprite_t *rotsprite, patch_t *patch, angle_t angle, INT32 xpivot, INT32 ypivot, boolean flip)
@@ -149,12 +149,13 @@ void RotatedPatch_DoRotation(rotsprite_t *rotsprite, patch_t *patch, angle_t ang
 	INT32 width = patch->width;
 	INT32 height = patch->height;
 	INT32 leftoffset = patch->leftoffset;
-	INT32 newwidth, newheight;
 
 	INT32 rotang = R_GetRollAngle(angle);
 	fixed_t ca = rollcosang[rotang];
 	fixed_t sa = rollsinang[rotang];
 	fixed_t xcenter, ycenter;
+	fixed_t newwidth, newheight;
+
 	INT32 idx = rotang;
 	INT32 x, y;
 	INT32 sx, sy;
@@ -177,7 +178,10 @@ void RotatedPatch_DoRotation(rotsprite_t *rotsprite, patch_t *patch, angle_t ang
 		return;
 
 	// Find the dimensions of the rotated patch.
-	RotatedPatch_CalculateDimensions(width, height, angle, &newwidth, &newheight);
+	RotatedPatch_CalculateDimensions(width << FRACBITS, height << FRACBITS, angle, &newwidth, &newheight);
+
+	newwidth >>= FRACBITS;
+	newheight >>= FRACBITS;
 
 	xcenter = (xpivot * FRACUNIT);
 	ycenter = (ypivot * FRACUNIT);

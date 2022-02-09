@@ -743,7 +743,8 @@ typedef enum
 	RF_DROPSHADOW       = (RF_SHADOWDRAW | RF_SHADOWEFFECTS | RF_FULLDARK),
 
 	RF_PIVOTROTATION    = 0x100000, // Sprite uses the object's rotation pivot
-	RF_OLDROTATION      = 0x200000, // Uses old sprite rotation (Software)
+	RF_PIVOTATOFFSETS   = 0x200000, // Sprite uses its offsets as the rotation pivot
+	RF_OLDROTATION      = 0x400000, // Uses old sprite rotation (Software)
 } renderflags_t;
 
 typedef enum
