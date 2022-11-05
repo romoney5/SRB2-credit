@@ -8,7 +8,7 @@
 // See the 'LICENSE' file for more details.
 //-----------------------------------------------------------------------------
 /// \file hw_light.c
-/// \brief Corona/Dynamic/Static lighting add on by Hurdler
+/// \brief Corona/Dynamic/Static lighting add on by Hurdler. Revived by Ashi.
 ///	!!! Under construction !!!
 
 #include "../doomdef.h"
@@ -16,6 +16,7 @@
 #ifdef HWRENDER
 #include "hw_light.h"
 #include "hw_drv.h"
+#include "hw_batching.h"
 #include "../i_video.h"
 #include "../z_zone.h"
 #include "../m_random.h"
@@ -34,7 +35,7 @@
 #define LIGHT_POS(i) dynlights->position[(i)]
 
 #define DL_HIGH_QUALITY
-//#define STATICLIGHT  //Hurdler: TODO!
+#define STATICLIGHT  //Hurdler: TODO!
 #define LIGHTMAPFLAGS (PF_Modulated|PF_Additive)
 
 #ifdef ALAM_LIGHTING
@@ -236,7 +237,7 @@ light_t *t_lspr[NUMSPRITES] =
 	&lspr[NOLIGHT],     // SPR_MSCB
 
 	// Collectible Items
-	&lspr[NOLIGHT],     // SPR_RING
+	&lspr[RINGSPARK_L],     // SPR_RING
 	&lspr[NOLIGHT],     // SPR_TRNG
 	&lspr[NOLIGHT],     // SPR_TOKE
 	&lspr[REDBALL_L],   // SPR_RFLG
@@ -302,6 +303,13 @@ light_t *t_lspr[NUMSPRITES] =
 	&lspr[NOLIGHT],     // SPR_CBLL
 	&lspr[NOLIGHT],     // SPR_AROW
 	&lspr[NOLIGHT],     // SPR_CFIR
+
+	// the letter
+	&lspr[NOLIGHT],		// SPR_LETR
+	
+	// Tutorial Scenery
+	&lspr[NOLIGHT],		// SPR_TUPL
+	&lspr[NOLIGHT],		// SPR_TUPF
 
 	// Greenflower Scenery
 	&lspr[NOLIGHT],     // SPR_FWR1
@@ -434,7 +442,7 @@ light_t *t_lspr[NUMSPRITES] =
 	&lspr[NOLIGHT],     // SPR_PPAL
 
 	// Powerup Indicators
-	&lspr[NOLIGHT],     // SPR_ARMA
+	&lspr[REDSHIELD_L],     // SPR_ARMA
 	&lspr[NOLIGHT],     // SPR_ARMF
 	&lspr[NOLIGHT],     // SPR_ARMB
 	&lspr[NOLIGHT],     // SPR_WIND
@@ -492,7 +500,7 @@ light_t *t_lspr[NUMSPRITES] =
 	&lspr[NOLIGHT],     // SPR_RAIN
 	&lspr[NOLIGHT],     // SPR_SNO1
 	&lspr[NOLIGHT],     // SPR_SPLH
-	&lspr[NOLIGHT],     // SPR_LSPL
+	&lspr[REDSMALL_L],     // SPR_LSPL
 	&lspr[NOLIGHT],     // SPR_SPLA
 	&lspr[NOLIGHT],     // SPR_SMOK
 	&lspr[NOLIGHT],     // SPR_BUBL
@@ -898,7 +906,7 @@ void HWR_WallLighting(FOutVector *wlVerts)
 		if (dynlights->mo[j]->state->nextstate == S_NULL)
 			Surf.PolyColor.s.alpha = (UINT8)(((float)dynlights->mo[j]->tics/(float)dynlights->mo[j]->state->tics)*Surf.PolyColor.s.alpha);
 
-		HWD.pfnDrawPolygon (&Surf, wlVerts, 4, LIGHTMAPFLAGS);
+		HWR_ProcessPolygon(&Surf, wlVerts, 4, LIGHTMAPFLAGS, SHADER_WALL, false);
 
 	} // end for (j = 0; j < dynlights->nb; j++)
 }
@@ -942,9 +950,6 @@ void HWR_PlaneLighting(FOutVector *clVerts, int nrClipVerts)
 			 continue;
 		dist_p2d = (clVerts[0].y-LIGHT_POS(j).y);
 		dist_p2d *= dist_p2d;
-		// done in SphereTouchBBox3D
-		//if (dist_p2d >= DL_SQRRADIUS(j))
-		//    continue;
 
 #ifdef DL_HIGH_QUALITY
 		s = 0.5f / DL_RADIUS(j);
@@ -966,119 +971,26 @@ void HWR_PlaneLighting(FOutVector *clVerts, int nrClipVerts)
 		// next state is null so fade out with alpha
 		if ((dynlights->mo[j]->state->nextstate == S_NULL))
 			Surf.PolyColor.s.alpha = (unsigned char)(((float)dynlights->mo[j]->tics/(float)dynlights->mo[j]->state->tics)*Surf.PolyColor.s.alpha);
-
-		HWD.pfnDrawPolygon (&Surf, clVerts, nrClipVerts, LIGHTMAPFLAGS);
-
+		
+		HWR_ProcessPolygon(&Surf, clVerts, nrClipVerts, LIGHTMAPFLAGS, SHADER_FLOOR, false);
 	} // end for (j = 0; j < dynlights->nb; j++)
 }
 
 
 static lumpnum_t coronalumpnum = LUMPERROR;
-#ifndef NEWCORONAS
-// --------------------------------------------------------------------------
-// coronas lighting
-// --------------------------------------------------------------------------
-void HWR_DoCoronasLighting(FOutVector *outVerts, gl_vissprite_t *spr)
-{
-	light_t   *p_lspr;
-
-	if (coronalumpnum == LUMPERROR)
-		return;
-
-	//CONS_Debug(DBG_RENDER, "sprite (type): %d (%s)\n", spr->type, sprnames[spr->type]);
-	p_lspr = t_lspr[spr->mobj->sprite];
-	if ((spr->mobj->state>=&states[S_EXPLODE1] && spr->mobj->state<=&states[S_EXPLODE3])
-	 || (spr->mobj->state>=&states[S_FATSHOTX1] && spr->mobj->state<=&states[S_FATSHOTX3]))
-	{
-		p_lspr = &lspr[ROCKETEXP_L];
-	}
-
-	if (cv_glcoronas.value && (p_lspr->type & CORONA_SPR))
-	{ // it's an object which emits light
-		FOutVector      light[4];
-		FSurfaceInfo    Surf;
-		float           cx = 0.0f, cy = 0.0f, cz = 0.0f; // gravity center
-		float           size;
-		UINT8           i;
-
-		switch (p_lspr->type)
-		{
-			case LIGHT_SPR:
-				size  = p_lspr->corona_radius  * ((outVerts[0].z+120.0f)/950.0f); // d'ou vienne ces constante ?
-				break;
-			case ROCKET_SPR:
-				p_lspr->corona_color = (((M_RandomByte()>>1)&0xff)<<24)|0x0040ff;
-				// don't need a break
-			case CORONA_SPR:
-				size  = p_lspr->corona_radius  * ((outVerts[0].z+60.0f)/100.0f); // d'ou vienne ces constante ?
-				break;
-			default:
-				I_Error("HWR_DoCoronasLighting: unknow light type %d",p_lspr->type);
-				return;
-		}
-		if (size > p_lspr->corona_radius)
-			size = p_lspr->corona_radius;
-		size *= FIXED_TO_FLOAT(cv_glcoronasize.value<<1);
-
-		// compute position doing average
-		for (i = 0; i < 4; i++)
-		{
-			cx += outVerts[i].x;
-			cy += outVerts[i].y;
-			cz += outVerts[i].z;
-		}
-		cx /= 4.0f;  cy /= 4.0f;  cz /= 4.0f;
-
-		// more realistique corona !
-		if (cz >= 255*8+250)
-			return;
-		Surf.PolyColor.rgba = p_lspr->corona_color;
-		if (cz > 250.0f)
-			Surf.PolyColor.s.alpha = 0xff-((int)cz-250)/8;
-		else
-			Surf.PolyColor.s.alpha = 0xff;
-
-		// do not be hide by sprite of the light itself !
-		cz = cz - 2.0f;
-
-		// Bp; je comprend pas, ou est la rotation haut/bas ?
-		//     tu ajoute un offset a y mais si la tu la reguarde de haut
-		//     sa devrais pas marcher ... comprend pas :(
-		//     (...) bon je croit que j'ai comprit il est tout pourit le code ?
-		//           car comme l'offset est minime sa ce voit pas !
-		light[0].x = cx-size;  light[0].z = cz;
-		light[0].y = cy-size*1.33f+p_lspr->light_yoffset;
-		light[0].s = 0.0f;   light[0].t = 0.0f;
-
-		light[1].x = cx+size;  light[1].z = cz;
-		light[1].y = cy-size*1.33f+p_lspr->light_yoffset;
-		light[1].s = 1.0f;   light[1].t = 0.0f;
-
-		light[2].x = cx+size;  light[2].z = cz;
-		light[2].y = cy+size*1.33f+p_lspr->light_yoffset;
-		light[2].s = 1.0f;   light[2].t = 1.0f;
-
-		light[3].x = cx-size;  light[3].z = cz;
-		light[3].y = cy+size*1.33f+p_lspr->light_yoffset;
-		light[3].s = 0.0f;   light[3].t = 1.0f;
-
-		// HWR_GetPic(coronalumpnum);  /// \todo use different coronas
-
-		HWD.pfnDrawPolygon (&Surf, light, 4, PF_Modulated | PF_Additive | PF_Corona | PF_NoDepthTest);
-	}
-}
-#endif
 
 #ifdef NEWCORONAS
-// use the lightlist of the frame to draw the coronas at the top of everythink
+// use the lightlist of the frame to draw the coronas at the top of everything
+// TODO: rewrite the way this works completely.
 void HWR_DrawCoronas(void)
 {
 	int       j;
 
 	if (!cv_glcoronas.value || dynlights->nb <= 0 || coronalumpnum == LUMPERROR)
-		return;
+		return; 
 
-	// HWR_GetPic(coronalumpnum);  /// \todo use different coronas
+	// HWR_GetPic(coronalumpnum);  /// \todo use different coronas // romoney5 TODO
+	ps_numlights.value.i = 0;
 	for (j = 0;j < dynlights->nb;j++)
 	{
 		FOutVector      light[4];
@@ -1101,11 +1013,11 @@ void HWR_DrawCoronas(void)
 			continue;
 		}
 
-		transform(&cx,&cy,&cz);
+		//transform(&cx,&cy,&cz);
 
 		// more realistique corona !
-		if (cz >= 255*8+250)
-			continue;
+		//if (cz <= 255*8+250)
+			//continue;
 		Surf.PolyColor.rgba = p_lspr->corona_color;
 		if (cz > 250.0f)
 			Surf.PolyColor.s.alpha = (UINT8)(0xff-(UINT8)(((int)cz-250)/8));
@@ -1119,7 +1031,7 @@ void HWR_DrawCoronas(void)
 				break;
 			case ROCKET_SPR:
 				Surf.PolyColor.s.alpha = (UINT8)((M_RandomByte()>>1)&0xff);
-				// don't need a break
+				// FALLTHROUGH
 			case CORONA_SPR:
 				size  = p_lspr->corona_radius  * ((cz+60.0f)/100.0f); // d'ou vienne ces constante ?
 				break;
@@ -1131,10 +1043,12 @@ void HWR_DrawCoronas(void)
 			size = p_lspr->corona_radius;
 		size = (float)(FIXED_TO_FLOAT(cv_glcoronasize.value<<1)*size);
 
+		size = (float)FIXED_TO_FLOAT(cv_glcoronasize.value<<1);
+
 		// put light little forward the sprite so there is no
 		// z-buffer problem (coplanar polygons)
 		// BP: use PF_Decal do not help :(
-		cz = cz - 5.0f;
+		cz = cz - 2.0f;
 
 		light[0].x = cx-size;  light[0].z = cz;
 		light[0].y = cy-size*1.33f;
@@ -1152,7 +1066,8 @@ void HWR_DrawCoronas(void)
 		light[3].y = cy+size*1.33f;
 		light[3].s = 0.0f;   light[3].t = 1.0f;
 
-		HWD.pfnDrawPolygon (&Surf, light, 4, PF_Modulated | PF_Additive | PF_NoDepthTest | PF_Corona);
+		ps_numlights.value.i++;
+		HWR_ProcessPolygon(&Surf, light, 4,  PF_Additive | PF_Modulated | PF_ColorMapped | PF_Corona | PF_Decal, SHADER_SPRITE, false);
 	}
 }
 #endif
@@ -1163,7 +1078,8 @@ void HWR_DrawCoronas(void)
 void HWR_ResetLights(void)
 {
 	while (dynlights->nb)
-		P_SetTarget(&dynlights->mo[--dynlights->nb], NULL);
+		// Yeah no trying to assign it via the function crashed the whole game let's not.
+		dynlights->mo[--dynlights->nb] = NULL;
 }
 
 // --------------------------------------------------------------------------
@@ -1178,7 +1094,7 @@ void HWR_SetLights(int viewnumber)
 // Add a light for dynamic lighting
 // The light position is already transformed execpt for mlook
 // --------------------------------------------------------------------------
-void HWR_DL_AddLight(gl_vissprite_t *spr, GLPatch_t *patch)
+void HWR_DL_AddLight(gl_vissprite_t *spr, patch_t *patch)
 {
 	light_t   *p_lspr;
 
@@ -1199,10 +1115,10 @@ void HWR_DL_AddLight(gl_vissprite_t *spr, GLPatch_t *patch)
 
 	// check if sprite contain dynamic light
 	p_lspr = t_lspr[spr->mobj->sprite];
-	if (!(p_lspr->type & DYNLIGHT_SPR))
-		return;
-	if ((p_lspr->type != LIGHT_SPR) || cv_glstaticlighting.value)
-		return;
+	// if (!(p_lspr->type & DYNLIGHT_SPR))
+	// 	return;
+	// if ((p_lspr->type != LIGHT_SPR) || cv_glstaticlighting.value)
+	// 	return;
 
 	LIGHT_POS(dynlights->nb).x = FIXED_TO_FLOAT(spr->mobj->x);
 	LIGHT_POS(dynlights->nb).y = FIXED_TO_FLOAT(spr->mobj->z)+FIXED_TO_FLOAT(spr->mobj->height>>1)+p_lspr->light_yoffset;
@@ -1220,14 +1136,19 @@ static GLPatch_t lightmappatch = { .mipmap = &lightmappatchmipmap };
 
 void HWR_InitLight(void)
 {
+	CONS_Printf("HWR_InitLight()...\n");
 	size_t i;
 
+	// what if we made this dynamic and on level load? just curious...
 	// precalculate sqr radius
 	for (i = 0;i < NUMLIGHTS;i++)
 		lspr[i].dynamic_sqrradius = lspr[i].dynamic_radius*lspr[i].dynamic_radius;
 
 	lightmappatch.mipmap->downloaded = false;
 	coronalumpnum = W_CheckNumForName("CORONA");
+	if (coronalumpnum == LUMPERROR) {
+		I_Error("CORONA lump not loaded!");
+	}
 }
 
 // -----------------+
@@ -1255,8 +1176,8 @@ static void HWR_SetLight(void)
 		}
 		lightmappatch.mipmap->format = GL_TEXFMT_ALPHA_INTENSITY_88;
 
-		lightmappatch.width = 128;
-		lightmappatch.height = 128;
+		//lightmappatch.width = 128;
+		//lightmappatch.height = 128;
 		lightmappatch.mipmap->width = 128;
 		lightmappatch.mipmap->height = 128;
 		lightmappatch.mipmap->flags = 0; //TF_WRAPXY; // DEBUG: view the overdraw !
@@ -1264,7 +1185,8 @@ static void HWR_SetLight(void)
 	HWD.pfnSetTexture(lightmappatch.mipmap);
 
 	// The system-memory data can be purged now.
-	Z_ChangeTag(lightmappatch.mipmap->data, PU_HWRCACHE_UNLOCKED);
+	// but what if we never purged it? just curious...
+	//Z_ChangeTag(lightmappatch.mipmap->data, PU_HWRCACHE_UNLOCKED);
 }
 
 //**********************************************************
