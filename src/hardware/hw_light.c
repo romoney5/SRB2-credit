@@ -990,7 +990,6 @@ void HWR_DrawCoronas(void)
 		return; 
 
 	// HWR_GetPic(coronalumpnum);  /// \todo use different coronas // romoney5 TODO
-	ps_numlights.value.i = 0;
 	for (j = 0;j < dynlights->nb;j++)
 	{
 		FOutVector      light[4];
@@ -1066,7 +1065,6 @@ void HWR_DrawCoronas(void)
 		light[3].y = cy+size*1.33f;
 		light[3].s = 0.0f;   light[3].t = 1.0f;
 
-		ps_numlights.value.i++;
 		HWR_ProcessPolygon(&Surf, light, 4,  PF_Additive | PF_Modulated | PF_ColorMapped | PF_Corona | PF_Decal, SHADER_SPRITE, false);
 	}
 }
