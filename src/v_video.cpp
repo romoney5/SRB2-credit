@@ -13,6 +13,8 @@
 ///        Functions to draw patches (by post) directly to screen.
 ///        Functions to blit a block to the screen.
 
+#include <cmath>
+
 #include "doomdef.h"
 #include "r_local.h"
 #include "p_local.h" // stplyr
@@ -331,10 +333,10 @@ static void LoadPalette(const char *lumpname)
 	Z_Free(pLocalPalette);
 	Z_Free(pMasterPalette);
 
-	pLocalPalette = Z_Malloc(sizeof (*pLocalPalette)*palsize, PU_STATIC, NULL);
-	pMasterPalette = Z_Malloc(sizeof (*pMasterPalette)*palsize, PU_STATIC, NULL);
+	pLocalPalette = static_cast<RGBA_t*>(Z_Malloc(sizeof (*pLocalPalette)*palsize, PU_STATIC, NULL));
+	pMasterPalette = static_cast<RGBA_t*>(Z_Malloc(sizeof (*pMasterPalette)*palsize, PU_STATIC, NULL));
 
-	pal = W_CacheLumpNum(lumpnum, PU_CACHE);
+	pal = static_cast<UINT8*>(W_CacheLumpNum(lumpnum, PU_CACHE));
 	for (i = 0; i < palsize; i++)
 	{
 #ifdef BACKWARDSCOMPATCORRECTION
@@ -1070,13 +1072,13 @@ void V_DrawContinueIcon(INT32 x, INT32 y, INT32 flags, INT32 skinnum, UINT16 ski
 	{
 		spritedef_t *sprdef = &skins[skinnum]->sprites[SPR2_XTRA];
 		spriteframe_t *sprframe = &sprdef->spriteframes[XTRA_CONTINUE];
-		patch_t *patch = W_CachePatchNum(sprframe->lumppat[0], PU_PATCH);
-		const UINT8 *colormap = R_GetTranslationColormap(skinnum, skincolor, GTC_CACHE);
+		patch_t *patch = static_cast<patch_t*>(W_CachePatchNum(sprframe->lumppat[0], PU_PATCH));
+		const UINT8 *colormap = R_GetTranslationColormap(skinnum, static_cast<skincolornum_t>(skincolor), GTC_CACHE);
 
 		V_DrawMappedPatch(x, y, flags, patch, colormap);
 	}
 	else
-		V_DrawScaledPatch(x - 10, y - 14, flags, W_CachePatchName("CONTINS", PU_PATCH));
+		V_DrawScaledPatch(x - 10, y - 14, flags, static_cast<patch_t*>(W_CachePatchName("CONTINS", PU_PATCH)));
 }
 
 //
@@ -1743,7 +1745,7 @@ void V_DrawFlatFill(INT32 x, INT32 y, INT32 w, INT32 h, lumpnum_t flatnum)
 	lflatsize = R_GetFlatSize(W_LumpLength(flatnum));
 	flatshift = R_GetFlatBits(lflatsize);
 
-	flat = W_CacheLumpNum(flatnum, PU_CACHE);
+	flat = static_cast<UINT8*>(W_CacheLumpNum(flatnum, PU_CACHE));
 
 	dest = screens[0] + y*vid.dup*vid.width + x*vid.dup;
 	deststop = screens[0] + vid.rowbytes * vid.height;
@@ -1848,7 +1850,7 @@ void V_DrawFadeConsBack(INT32 plines)
 
 	// heavily simplified -- we don't need to know x or y position,
 	// just the stop position
-	deststop = screens[0] + vid.rowbytes * min(plines, vid.height);
+	deststop = screens[0] + vid.rowbytes * std::min(plines, vid.height);
 	for (buf = screens[0]; buf < deststop; ++buf)
 		*buf = consolebgmap[*buf];
 }
@@ -2358,7 +2360,7 @@ void V_DrawNameTag(INT32 x, INT32 y, INT32 option, fixed_t scale, UINT8 *basecol
 					Z_Free(str);
 				// Find string length, do a malloc...
 				len = (last_token-first_token)+1;
-				str = ZZ_Alloc(len);
+				str = static_cast<char*>(ZZ_Alloc(len));
 				// Copy the line
 				strncpy(str, first_token, len-1);
 				str[len-1] = '\0';
@@ -2470,7 +2472,7 @@ INT32 V_FontStringWidth(const char *string, INT32 option, fontdef_t font)
 		else
 			w += (charwidth ? charwidth : (font.chars[c]->width)) + font.kerning;
 	}
-	w = max(wline, w);
+	w = std::max(wline, w);
 
 	if (option & (V_NOSCALESTART|V_NOSCALEPATCH))
 		w *= vid.dup;
@@ -2645,7 +2647,7 @@ Unoptimized version
 			if (heatshifter)
 				Z_Free(heatshifter);
 
-			heatshifter = Z_Calloc(height * sizeof(boolean), PU_STATIC, NULL);
+			heatshifter = static_cast<boolean*>(Z_Calloc(height * sizeof(boolean), PU_STATIC, NULL));
 
 			for (y = 0; y < height; y++)
 			{
