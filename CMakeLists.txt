@@ -98,6 +98,9 @@ find_package(ZLIB REQUIRED)
 find_package(PNG REQUIRED)
 find_package(CURL REQUIRED)
 find_package(miniupnpc QUIET)
+find_package(VPX REQUIRED)
+find_package(Vorbis REQUIRED)
+find_package(VorbisEnc REQUIRED)
 
 
 if(${PROJECT_SOURCE_DIR} MATCHES ${PROJECT_BINARY_DIR})
