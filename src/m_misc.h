@@ -35,7 +35,8 @@ extern "C" {
 typedef enum {
 	MM_OFF = 0,
 	MM_GIF,
-	MM_SCREENSHOT
+	MM_SCREENSHOT,
+	MM_AVRECORDER,
 } moviemode_t;
 extern moviemode_t moviemode;
 

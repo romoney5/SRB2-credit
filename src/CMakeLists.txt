@@ -27,6 +27,7 @@ add_executable(SRB2SDL2 MACOSX_BUNDLE WIN32
 	m_aatree.c
 	m_anigif.c
 	m_argv.c
+	m_avrecorder.cpp
 	m_bbox.c
 	m_cheat.c
 	m_cond.c
@@ -167,6 +168,7 @@ add_subdirectory(hwr2)
 add_subdirectory(io)
 add_subdirectory(netcode)
 add_subdirectory(rhi)
+add_subdirectory(media)
 
 # OS macros
 if (UNIX)
