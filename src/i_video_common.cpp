@@ -131,6 +131,10 @@ static void temp_legacy_finishupdate_draws()
 		|| (simulated_lag != 0 && consoleplayer == serverplayer && Playing())
 		))
 		SCR_DisplayLocalPing();
+
+#ifdef SRB2_CONFIG_ENABLE_WEBM_MOVIES
+	M_AVRecorder_DrawFrameRate();
+#endif
 }
 
 #ifdef HWRENDER

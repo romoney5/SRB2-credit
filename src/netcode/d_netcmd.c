@@ -53,6 +53,10 @@
 #include "../m_perfstats.h"
 #include "../u_list.h"
 
+#ifdef SRB2_CONFIG_ENABLE_WEBM_MOVIES
+#include "../m_avrecorder.h"
+#endif
+
 #include <time.h>
 
 #ifdef NETGAME_DEVMODE
@@ -724,6 +728,11 @@ void D_RegisterClientCommands(void)
 	CV_RegisterVar(&cv_moviemode);
 	CV_RegisterVar(&cv_movie_option);
 	CV_RegisterVar(&cv_movie_folder);
+
+#ifdef SRB2_CONFIG_ENABLE_WEBM_MOVIES
+	M_AVRecorder_AddCommands();
+#endif
+
 	// PNG variables
 	CV_RegisterVar(&cv_zlib_level);
 	CV_RegisterVar(&cv_zlib_memory);

@@ -46,7 +46,9 @@
 #include "command.h" // cv_execversion
 
 #include "m_anigif.h"
+#ifdef SRB2_CONFIG_ENABLE_WEBM_MOVIES
 #include "m_avrecorder.h"
+#endif
 
 // So that the screenshot menu auto-updates...
 #include "m_menu.h"
@@ -904,6 +906,9 @@ static inline moviemode_t M_StartMovieGIF(const char *pathname)
 
 static inline moviemode_t M_StartMovieAVRecorder(const char *pathname)
 {
+#ifndef SRB2_CONFIG_ENABLE_WEBM_MOVIES
+	return MM_OFF;
+#else
 	const char *ext = M_AVRecorder_GetFileExtension();
 	const char *freename;
 
@@ -919,6 +924,7 @@ static inline moviemode_t M_StartMovieAVRecorder(const char *pathname)
 	}
 
 	return MM_AVRECORDER;
+#endif
 }
 
 void M_StartMovie(void)
@@ -966,11 +972,13 @@ void M_StartMovie(void)
 		CONS_Printf(M_GetText("Movie mode enabled (%s).\n"), "GIF");
 	else if (moviemode == MM_SCREENSHOT)
 		CONS_Printf(M_GetText("Movie mode enabled (%s).\n"), "screenshots");
+#ifdef SRB2_CONFIG_ENABLE_WEBM_MOVIES
 	else if (moviemode == MM_AVRECORDER)
 	{
 		CONS_Printf(M_GetText("Movie mode enabled (%s).\n"), M_AVRecorder_GetCurrentFormat());
 		M_AVRecorder_PrintCurrentConfiguration();
 	}
+#endif
 
     movieframesrecorded = 0;
 	//singletics = (moviemode != MM_OFF);
@@ -993,6 +1001,7 @@ void M_LegacySaveFrame(void)
 	static tic_t oldtic = 0;
 	float old_size;
 
+#ifdef SRB2_CONFIG_ENABLE_WEBM_MOVIES
 	if (moviemode == MM_AVRECORDER)
 	{
 		// TODO: replace once hwr2 twodee is finished
@@ -1007,6 +1016,7 @@ void M_LegacySaveFrame(void)
 		}
 		return;
 	}
+#endif
 
 	// skip interpolated frames for other modes
 	if (oldtic == I_GetTime())
@@ -1096,9 +1106,11 @@ void M_StopMovie(void)
 			break;
 		case MM_SCREENSHOT:
 			break;
+#ifdef SRB2_CONFIG_ENABLE_WEBM_MOVIES
 		case MM_AVRECORDER:
 			M_AVRecorder_Close();
 			break;
+#endif
 		default:
 			return;
 	}

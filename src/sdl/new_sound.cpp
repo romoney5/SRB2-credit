@@ -24,7 +24,10 @@
 #include "../audio/sound_effect_player.hpp"
 #include "../cxxutil.hpp"
 #include "../io/streams.hpp"
+
+#ifdef SRB2_CONFIG_ENABLE_WEBM_MOVIES
 #include "../m_avrecorder.hpp"
+#endif
 
 #ifdef SRB2_CONFIG_ENABLE_WEBM_MOVIES
 #include "../m_avrecorder.hpp"

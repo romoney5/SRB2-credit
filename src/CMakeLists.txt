@@ -27,7 +27,6 @@ add_executable(SRB2SDL2 MACOSX_BUNDLE WIN32
 	m_aatree.c
 	m_anigif.c
 	m_argv.c
-	m_avrecorder.cpp
 	m_bbox.c
 	m_cheat.c
 	m_cond.c
@@ -108,6 +107,10 @@ add_executable(SRB2SDL2 MACOSX_BUNDLE WIN32
 	lua_inputlib.c
 )
 
+if(SRB2_CONFIG_ENABLE_WEBM_MOVIES)
+	target_sources(SRB2SDL2 PRIVATE m_avrecorder.cpp)
+endif()
+
 if(NOT SRB2_CONFIG_SKIP_COMPTIME)
 	# This updates the modification time for comptime.c at the
 	# end of building so when the build system is ran next time,
@@ -168,7 +171,9 @@ add_subdirectory(hwr2)
 add_subdirectory(io)
 add_subdirectory(netcode)
 add_subdirectory(rhi)
-add_subdirectory(media)
+if(SRB2_CONFIG_ENABLE_WEBM_MOVIES)
+	add_subdirectory(media)
+endif()
 
 # OS macros
 if (UNIX)
@@ -470,14 +475,18 @@ target_link_libraries(SRB2SDL2 PRIVATE glad::glad)
 target_link_libraries(SRB2SDL2 PRIVATE fmt::fmt-header-only)
 target_link_libraries(SRB2SDL2 PRIVATE imgui::imgui)
 target_link_libraries(SRB2SDL2 PRIVATE Tracy::TracyClient)
-target_link_libraries(SRB2SDL2 PRIVATE webm::libwebm_mkvmuxer)
-target_link_libraries(SRB2SDL2 PRIVATE libyuv::libyuv)
-target_link_libraries(SRB2SDL2 PRIVATE Vorbis::vorbis Vorbis::vorbisenc)
-#target_link_libraries(SRB2SDL2 PRIVATE Ogg::ogg)
-if(unofficial-libvpx_FOUND)
-	target_link_libraries(SRB2SDL2 PRIVATE unofficial::libvpx::libvpx)
-else()
-	target_link_libraries(SRB2SDL2 PRIVATE libvpx::libvpx)
+if(SRB2_CONFIG_ENABLE_WEBM_MOVIES)
+	target_link_libraries(SRB2SDL2 PRIVATE webm::libwebm_mkvmuxer)
+	target_link_libraries(SRB2SDL2 PRIVATE libyuv::libyuv)
+	target_link_libraries(SRB2SDL2 PRIVATE Vorbis::vorbis Vorbis::vorbisenc)
+	#target_link_libraries(SRB2SDL2 PRIVATE Ogg::ogg)
+	if(unofficial-libvpx_FOUND)
+		target_link_libraries(SRB2SDL2 PRIVATE unofficial::libvpx::libvpx)
+	else()
+		target_link_libraries(SRB2SDL2 PRIVATE libvpx::libvpx)
+	endif()
+
+	target_compile_definitions(SRB2SDL2 PRIVATE -DSRB2_CONFIG_ENABLE_WEBM_MOVIES)
 endif()
 
 if("${CMAKE_SYSTEM_NAME}" MATCHES Windows)
