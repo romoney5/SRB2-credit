@@ -929,10 +929,7 @@ void F_IntroTicker(void)
 #ifdef HWRENDER
 					if (moviemode && rendermode == render_opengl)
 						M_LegacySaveFrame();
-					else
 #endif
-					if (moviemode && rendermode == render_soft)
-						I_CaptureVideoFrame();
 				}
 			}
 

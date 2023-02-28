@@ -48,6 +48,7 @@
 #include "m_anigif.h"
 #ifdef SRB2_CONFIG_ENABLE_WEBM_MOVIES
 #include "m_avrecorder.h"
+#include "m_avrecorder.hpp"
 #endif
 
 // So that the screenshot menu auto-updates...
@@ -985,6 +986,8 @@ void M_StartMovie(void)
 #endif
 }
 
+static void M_SaveFrame_AVRecorder(uint32_t width, uint32_t height, tcb::span<const std::byte> data);
+
 void M_LegacySaveFrame(void)
 {
 #if NUMSCREENS > 2
@@ -1004,17 +1007,11 @@ void M_LegacySaveFrame(void)
 #ifdef SRB2_CONFIG_ENABLE_WEBM_MOVIES
 	if (moviemode == MM_AVRECORDER)
 	{
-		// TODO: replace once hwr2 twodee is finished
-		if (rendermode == render_soft)
-		{
-			M_AVRecorder_CopySoftwareScreen();
-		}
-
 		if (M_AVRecorder_IsExpired())
 		{
 			M_StopMovie();
+			return;
 		}
-		return;
 	}
 #endif
 
@@ -1057,6 +1054,15 @@ void M_LegacySaveFrame(void)
 			}
 
 			return;
+		case MM_AVRECORDER:
+#if defined(SRB2_CONFIG_ENABLE_WEBM_MOVIES) && defined(HWRENDER)
+			{
+				UINT8 *linear = HWR_GetScreenshot();
+				M_SaveFrame_AVRecorder(vid.width, vid.height, tcb::as_bytes(tcb::span(linear, 3 * vid.width * vid.height)));
+				free(linear);
+			}
+#endif
+			return;
 		default:
 			return;
 	}
@@ -1083,12 +1089,38 @@ static void M_SaveFrame_GIF(uint32_t width, uint32_t height, tcb::span<const std
 	GIF_frame_rgb24(width, height, reinterpret_cast<const uint8_t*>(data.data()));
 }
 
+static void M_SaveFrame_AVRecorder(uint32_t width, uint32_t height, tcb::span<const std::byte> data)
+{
+#ifdef SRB2_CONFIG_ENABLE_WEBM_MOVIES
+	if (M_AVRecorder_IsExpired())
+	{
+		M_StopMovie();
+		return;
+	}
+
+	auto frame = g_av_recorder->new_staging_video_frame(width, height);
+	if (!frame)
+	{
+		// Not time to submit a frame!
+		return;
+	}
+
+	auto data_begin = reinterpret_cast<const uint8_t*>(data.data());
+	auto data_end = reinterpret_cast<const uint8_t*>(data.data() + data.size_bytes());
+	std::copy(data_begin, data_end, frame->screen.begin());
+	g_av_recorder->push_staging_video_frame(std::move(frame));
+#endif
+}
+
 void M_SaveFrame(uint32_t width, uint32_t height, tcb::span<const std::byte> data)
 {
 	switch (moviemode)
 	{
 	case MM_GIF:
 		M_SaveFrame_GIF(width, height, data);
+		break;
+	case MM_AVRECORDER:
+		M_SaveFrame_AVRecorder(width, height, data);
 		break;
 	default:
 		break;

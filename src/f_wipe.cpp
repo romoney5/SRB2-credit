@@ -838,10 +838,7 @@ void F_RunWipe(UINT8 wipetype, boolean drawMenu, boolean reverse)
 #ifdef HWRENDER
 		if (moviemode && rendermode == render_opengl)
 			M_LegacySaveFrame();
-		else
 #endif
-		if (moviemode && rendermode == render_soft)
-			I_CaptureVideoFrame();
 
 		NetKeepAlive(); // Update the network so we don't cause timeouts
 	}

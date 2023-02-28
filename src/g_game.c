@@ -1998,10 +1998,7 @@ void G_PreLevelTitleCard(void)
 #ifdef HWRENDER
 		if (moviemode && rendermode == render_opengl)
 			M_LegacySaveFrame();
-		else
 #endif
-		if (moviemode && rendermode != render_none)
-			I_CaptureVideoFrame();
 	}
 	if (!cv_showhud.value)
 		wipestyleflags = WSF_CROSSFADE;
