@@ -1926,8 +1926,8 @@ static void R_ProjectSprite(mobj_t *thing)
 
 		if (thing->renderflags & RF_PIVOTROTATION)
 		{
-			pivot.x = FixedMul(thing->spritexpivot, spr_width);
-			pivot.y = FixedMul(thing->spriteypivot, spr_height);
+			pivot.x = FixedMul(interp.spritexpivot, spr_width);
+			pivot.y = FixedMul(interp.spriteypivot, spr_height);
 		}
 		else if (thing->renderflags & RF_PIVOTATOFFSETS)
 		{

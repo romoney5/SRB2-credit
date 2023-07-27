@@ -1999,6 +1999,8 @@ mobj_t *P_SpawnGhostMobj(mobj_t *mobj)
 	ghost->spriteyscale = mobj->spriteyscale;
 	ghost->spritexoffset = mobj->spritexoffset;
 	ghost->spriteyoffset = mobj->spriteyoffset;
+	ghost->spritexpivot = mobj->spritexpivot;
+	ghost->spriteypivot = mobj->spriteypivot;
 
 	ghost->fuse = ghost->info->damage;
 	ghost->skin = mobj->skin;

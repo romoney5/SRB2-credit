@@ -305,6 +305,7 @@ typedef struct mobj_s
 	fixed_t spritexpivot, spriteypivot;
 	fixed_t old_spritexscale, old_spriteyscale;
 	fixed_t old_spritexoffset, old_spriteyoffset;
+	fixed_t old_spritexpivot, old_spriteypivot;
 	struct pslope_s *floorspriteslope; // The slope that the floorsprite is rotated by
 
 	struct msecnode_s *touching_sectorlist; // a linked list of sectors where this object appears
@@ -445,6 +446,7 @@ typedef struct precipmobj_s
 	fixed_t spritexpivot, spriteypivot;
 	fixed_t old_spritexscale, old_spriteyscale;
 	fixed_t old_spritexoffset, old_spriteyoffset;
+	fixed_t old_spritexpivot, old_spriteypivot;
 	struct pslope_s *floorspriteslope; // The slope that the floorsprite is rotated by
 
 	struct mprecipsecnode_s *touching_sectorlist; // a linked list of sectors where this object appears

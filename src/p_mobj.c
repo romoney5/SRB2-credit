@@ -10683,6 +10683,7 @@ mobj_t *P_SpawnMobj(fixed_t x, fixed_t y, fixed_t z, mobjtype_t type)
 	mobj->blendmode = AST_TRANSLUCENT;
 	mobj->spritexscale = mobj->spriteyscale = mobj->scale;
 	mobj->spritexoffset = mobj->spriteyoffset = 0;
+	mobj->spritexpivot = mobj->spriteypivot = 0;
 	mobj->floorspriteslope = NULL;
 
 	// set subsector and/or block links
@@ -14181,6 +14182,8 @@ mobj_t *P_SpawnMobjFromMobj(mobj_t *mobj, fixed_t xofs, fixed_t yofs, fixed_t zo
 	newmobj->old_spriteyscale = mobj->old_spriteyscale;
 	newmobj->old_spritexoffset = mobj->old_spritexoffset;
 	newmobj->old_spriteyoffset = mobj->old_spriteyoffset;
+	newmobj->old_spritexpivot = mobj->old_spritexpivot;
+	newmobj->old_spriteypivot = mobj->old_spriteypivot;
 
 	return newmobj;
 }
