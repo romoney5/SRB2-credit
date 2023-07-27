@@ -1917,7 +1917,7 @@ static void R_ProjectSprite(mobj_t *thing)
 	vector2_t sprite_offset = { spr_offset, spr_topoffset };
 
 	// calculate the rotated shape
-	angle_t rollangle = thing->spriteroll;
+	angle_t rollangle = R_SpriteRotationAngle(&interp);
 
 	if (rollangle && !splat)
 	{
