@@ -1,8 +1,9 @@
 // SONIC ROBO BLAST 2
 //-----------------------------------------------------------------------------
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2018-2022 by Jaime Ita Passos.
-// Copyright (C) 2019-2021 by Sonic Team Junior.
+// Copyright (C) 2005-2009 by Andrey "entryway" Budko.
+// Copyright (C) 2018-2023 by "Lactozilla".
+// Copyright (C) 2019-2023 by Sonic Team Junior.
 //
 // This program is free software distributed under the
 // terms of the GNU General Public License, version 2.
@@ -446,7 +447,7 @@ void *Picture_FlatConvert(
 	for (y = 0; y < inheight; y++)
 		for (x = 0; x < inwidth; x++)
 		{
-			void *input;
+			void *input = NULL;
 			INT32 in_y = y;
 			size_t offs = ((y * inwidth) + x), in_offs;
 
@@ -1419,7 +1420,6 @@ static void R_ParseSpriteInfoFrame(spriteinfo_t *info)
 	UINT8 frameFrame = 0xFF;
 	INT16 frameXPivot = 0;
 	INT16 frameYPivot = 0;
-	rotaxis_t frameRotAxis = 0;
 
 	// Sprite identifier
 	sprinfoToken = M_GetToken(NULL);
@@ -1470,12 +1470,6 @@ static void R_ParseSpriteInfoFrame(spriteinfo_t *info)
 				{
 					Z_Free(sprinfoToken);
 					sprinfoToken = M_GetToken(NULL);
-					if ((stricmp(sprinfoToken, "X")==0) || (stricmp(sprinfoToken, "XAXIS")==0) || (stricmp(sprinfoToken, "ROLL")==0))
-						frameRotAxis = ROTAXIS_X;
-					else if ((stricmp(sprinfoToken, "Y")==0) || (stricmp(sprinfoToken, "YAXIS")==0) || (stricmp(sprinfoToken, "PITCH")==0))
-						frameRotAxis = ROTAXIS_Y;
-					else if ((stricmp(sprinfoToken, "Z")==0) || (stricmp(sprinfoToken, "ZAXIS")==0) || (stricmp(sprinfoToken, "YAW")==0))
-						frameRotAxis = ROTAXIS_Z;
 				}
 				Z_Free(sprinfoToken);
 
@@ -1492,7 +1486,6 @@ static void R_ParseSpriteInfoFrame(spriteinfo_t *info)
 	// set fields
 	info->pivot[frameFrame].x = frameXPivot;
 	info->pivot[frameFrame].y = frameYPivot;
-	info->pivot[frameFrame].rotaxis = frameRotAxis;
 }
 
 //
