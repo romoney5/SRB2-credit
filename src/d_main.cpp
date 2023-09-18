@@ -464,7 +464,7 @@ static void D_Display(void)
 
 	// STUPID race condition...
 	if (wipegamestate == GS_INTRO && gamestate == GS_TITLESCREEN)
-		wipegamestate = FORCEWIPEOFF;
+		wipegamestate = static_cast<gamestate_t>(FORCEWIPEOFF);
 	else
 	{
 		wipegamestate = gamestate;
@@ -632,8 +632,8 @@ static void D_Display(void)
 			// Check for Mega Genesis fade
 			if (F_ShouldColormapFade())
 			{
-				wipestyleflags |= WSF_FADEIN;
-				wipestyleflags &= ~WSF_FADEOUT;
+				wipestyleflags = static_cast<wipestyleflags_t>(wipestyleflags | WSF_FADEIN);
+				wipestyleflags = static_cast<wipestyleflags_t>(wipestyleflags & ~WSF_FADEOUT);
 			}
 
 			F_RunWipe(wipetypepost, gamestate != GS_TIMEATTACK && gamestate != GS_TITLESCREEN);
@@ -763,7 +763,7 @@ void D_SRB2Loop(void)
 		lumpnum_t gstartuplumpnum = W_CheckNumForPatchName("STARTUP");
 		if (gstartuplumpnum == LUMPERROR)
 			gstartuplumpnum = W_GetNumForPatchName("MISSING");
-		V_DrawScaledPatch(0, 0, 0, W_CachePatchNum(gstartuplumpnum, PU_PATCH));
+		V_DrawScaledPatch(0, 0, 0, static_cast<patch_t*>(W_CachePatchNum(gstartuplumpnum, PU_PATCH)));
 	}
 #ifdef __EMSCRIPTEN__
 	emscripten_set_main_loop(D_RunFrame, 0, 1);
@@ -1027,7 +1027,7 @@ void D_StartTitle(void)
 	// In case someone exits out at the same time they start a time attack run,
 	// reset modeattacking
 	modeattacking = ATTACKING_NONE;
-	marathonmode = 0;
+	marathonmode = static_cast<marathonmode_t>(0);
 
 	// empty maptol so mario/etc sounds don't play in sound test when they shouldn't
 	maptol = 0;
@@ -1055,7 +1055,7 @@ void D_StartTitle(void)
 		CV_SetValue(&cv_mousemove, tutorialmousemove);
 		CV_SetValue(&cv_analog[0], tutorialanalog);
 		M_StartMessage("Do you want to \x82save the recommended \x82movement controls?\x80\n\nPress 'Y' or 'Enter' to confirm\nPress 'N' or any key to keep \nyour current controls",
-			M_TutorialSaveControlResponse, MM_YESNO);
+			reinterpret_cast<void*>(M_TutorialSaveControlResponse), MM_YESNO);
 	}
 	tutorialmode = false;
 }
@@ -1063,13 +1063,13 @@ void D_StartTitle(void)
 #define REALLOC_FILE_LIST \
 	if (list->files == NULL) \
 	{ \
-		list->files = calloc(2, sizeof(list->files)); \
+		list->files = static_cast<char**>(calloc(2, sizeof(list->files))); \
 		list->numfiles = 1; \
 	} \
 	else \
 	{ \
 		index = list->numfiles; \
-		list->files = realloc(list->files, sizeof(list->files) * ((++list->numfiles) + 1)); \
+		list->files = static_cast<char**>(realloc(list->files, sizeof(list->files) * ((++list->numfiles) + 1))); \
 		if (list->files == NULL) \
 			I_Error("%s: No more free memory to add file %s", __FUNCTION__, file); \
 	}
@@ -1081,7 +1081,7 @@ static void D_AddFile(addfilelist_t *list, const char *file)
 
 	REALLOC_FILE_LIST
 
-	newfile = malloc(strlen(file) + 1);
+	newfile = static_cast<char*>(malloc(strlen(file) + 1));
 	if (!newfile)
 		I_Error("D_AddFile: No more free memory to add file %s", file);
 
@@ -1096,7 +1096,7 @@ static void D_AddFolder(addfilelist_t *list, const char *file)
 
 	REALLOC_FILE_LIST
 
-	newfile = malloc(strlen(file) + 2); // Path delimiter + NULL terminator
+	newfile = static_cast<char*>(malloc(strlen(file) + 2)); // Path delimiter + NULL terminator
 	if (!newfile)
 		I_Error("D_AddFolder: No more free memory to add folder %s", file);
 
@@ -1343,8 +1343,8 @@ void D_SRB2Main(void)
 		CONS_Printf(M_GetText("Development mode ON.\n"));
 
 	// default savegame
-	strcpy(savegamename, SAVEGAMENAME"%u.ssg");
-	strcpy(liveeventbackup, "live"SAVEGAMENAME".bkp"); // intentionally not ending with .ssg
+	strcpy(savegamename, SAVEGAMENAME "%u.ssg");
+	strcpy(liveeventbackup, "live" SAVEGAMENAME ".bkp"); // intentionally not ending with .ssg
 
 	{
 		const char *userhome = D_Home(); //Alam: path to home
@@ -1355,7 +1355,7 @@ void D_SRB2Main(void)
 			I_Error("Please set $HOME to your home directory\n");
 #else
 			if (dedicated)
-				snprintf(configfile, sizeof configfile, "d"CONFIGFILENAME);
+				snprintf(configfile, sizeof configfile, "d" CONFIGFILENAME);
 			else
 				snprintf(configfile, sizeof configfile, CONFIGFILENAME);
 #endif
@@ -1367,7 +1367,7 @@ void D_SRB2Main(void)
 			snprintf(srb2home, sizeof srb2home, "%s" PATHSEP DEFAULTDIR, userhome);
 			snprintf(downloaddir, sizeof downloaddir, "%s" PATHSEP "DOWNLOAD", srb2home);
 			if (dedicated)
-				snprintf(configfile, sizeof configfile, "%s" PATHSEP "d"CONFIGFILENAME, srb2home);
+				snprintf(configfile, sizeof configfile, "%s" PATHSEP "d" CONFIGFILENAME, srb2home);
 			else
 				snprintf(configfile, sizeof configfile, "%s" PATHSEP CONFIGFILENAME, srb2home);
 
@@ -1669,9 +1669,9 @@ void D_SRB2Main(void)
 
 	// user settings come before "+" parameters.
 	if (dedicated)
-		COM_ImmedExecute(va("exec \"%s"PATHSEP"adedserv.cfg\"\n", srb2home));
+		COM_ImmedExecute(va("exec \"%s" PATHSEP "adedserv.cfg\"\n", srb2home));
 	else
-		COM_ImmedExecute(va("exec \"%s"PATHSEP"autoexec.cfg\" -noerror\n", srb2home));
+		COM_ImmedExecute(va("exec \"%s" PATHSEP "autoexec.cfg\" -noerror\n", srb2home));
 
 	if (!autostart)
 		M_PushSpecialParameters(); // push all "+" parameters at the command buffer
@@ -1883,8 +1883,8 @@ static boolean check_top_dir(const char **path, const char *top)
 
 static int cmp_strlen_desc(const void *A, const void *B)
 {
-	const char *pA = A;
-	const char *pB = B;
+	const char *pA = static_cast<const char*>(A);
+	const char *pB = static_cast<const char*>(B);
 	size_t As = strlen(pA);
 	size_t Bs = strlen(pB);
 	return ((int)Bs - (int)As);
