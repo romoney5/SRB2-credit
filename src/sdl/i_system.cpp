@@ -27,6 +27,8 @@
 #include <emscripten.h>
 #endif
 
+#include <thread>
+
 #include <signal.h>
 
 #ifdef _WIN32
@@ -212,6 +214,8 @@ static char returnWadPath[256];
 #include "../netcode/commands.h"
 #include "../g_game.h"
 #include "../filesrch.h"
+#include "../s_sound.h"
+#include "../core/thread_pool.h"
 #include "endtxt.h"
 #include "sdlmain.h"
 
@@ -233,6 +237,8 @@ static char returnWadPath[256];
 #include "../netcode/d_clisrv.h"
 #include "../byteptr.h"
 #endif
+
+static std::thread::id g_main_thread_id;
 
 // A little more than the minimum sleep duration on Windows.
 // May be incorrect for other platforms, but we don't currently have a way to
@@ -464,6 +470,14 @@ static void I_ReportSignal(int num, int coredumped)
 #ifndef NEWSIGNALHANDLER
 FUNCNORETURN static ATTRNORETURN void signal_handler(INT32 num)
 {
+	if (g_main_thread_id != std::this_thread::get_id())
+	{
+		// Do not attempt any sort of recovery if this signal triggers off the main thread
+		signal(num, SIG_DFL);
+		raise(num);
+		exit(-2);
+	}
+
 	D_QuitNetGame(); // Fix server freezes
 	CL_AbortDownloadResume();
 #ifdef UNIXBACKTRACE
@@ -822,6 +836,8 @@ static inline void I_ShutdownConsole(void){}
 //
 static void I_RegisterSignals (void)
 {
+	g_main_thread_id = std::this_thread::get_id();
+
 #ifdef SIGINT
 	signal(SIGINT , quit_handler);
 #endif
@@ -946,7 +962,7 @@ void I_OutputMsg(const char *fmt, ...)
 					return;
 				}
 
-				ReadConsoleOutputCharacter(co, oldLines, oldLength, coordNextWrite, &bytesWritten);
+				ReadConsoleOutputCharacter(co, (LPSTR)oldLines, oldLength, coordNextWrite, &bytesWritten);
 
 				// Move to where we what to print - which is where we would've been,
 				// had console input not been in the way,
@@ -1116,7 +1132,7 @@ void I_ShutdownJoystick(void)
 
 void I_GetJoystickEvents(void)
 {
-	static event_t event = {0,0,0,0,false};
+	static event_t event {};
 	INT32 i = 0;
 	UINT64 joyhats = 0;
 #if 0
@@ -1386,7 +1402,7 @@ void I_ShutdownJoystick2(void)
 
 void I_GetJoystick2Events(void)
 {
-	static event_t event = {0,0,0,0,false};
+	static event_t event {};
 	INT32 i = 0;
 	UINT64 joyhats = 0;
 #if 0
@@ -1754,7 +1770,7 @@ const char *I_GetJoyName(INT32 joyindex)
 #define DEG2RAD (0.017453292519943295769236907684883l) // TAU/360 or PI/180
 #define MUMBLEUNIT (64.0f) // FRACUNITS in a Meter
 
-static struct {
+static struct mumble_s {
 #ifdef WINMUMBLE
 	UINT32 uiVersion;
 	DWORD uiTick;
@@ -1787,7 +1803,7 @@ static void I_SetupMumble(void)
 	if (!hMap)
 		return;
 
-	mumble = MapViewOfFile(hMap, FILE_MAP_ALL_ACCESS, 0, 0, sizeof(*mumble));
+	mumble = static_cast<mumble_s*>(MapViewOfFile(hMap, FILE_MAP_ALL_ACCESS, 0, 0, sizeof(*mumble)));
 	if (!mumble)
 		CloseHandle(hMap);
 #elif defined (HAVE_SHM)
@@ -1994,7 +2010,7 @@ static void I_PoolMouse2(void)
 	DWORD i;
 
 	ClearCommError(mouse2filehandle, &dwErrorFlags, &ComStat);
-	dwLength = min(MOUSECOMBUFFERSIZE, ComStat.cbInQue);
+	dwLength = std::min<DWORD>(MOUSECOMBUFFERSIZE, ComStat.cbInQue);
 
 	if (dwLength <= 0)
 		return;
@@ -2469,6 +2485,8 @@ INT32 I_StartupSystem(void)
 	SDL_GetVersion(&SDLlinked);
 	I_start_threads();
 	I_AddExitFunc(I_stop_threads);
+	I_ThreadPoolInit();
+	I_AddExitFunc(I_ThreadPoolShutdown);
 	I_StartupConsole();
 #ifdef NEWSIGNALHANDLER
 	// This is useful when debugging. It lets GDB attach to
@@ -2570,6 +2588,12 @@ void I_Error(const char *error, ...)
 	va_list argptr;
 	char buffer[8192];
 
+	if (std::this_thread::get_id() != g_main_thread_id)
+	{
+		// Do not attempt a graceful shutdown. Errors off the main thread are unresolvable.
+		exit(-2);
+	}
+
 	// recursive error detecting
 	if (shutdowning)
 	{
@@ -2604,7 +2628,7 @@ void I_Error(const char *error, ...)
 			// on the target system
 			if (!M_CheckParm("-dedicated"))
 				SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
-					"SRB2 "VERSIONSTRING" Recursive Error",
+					"SRB2 " VERSIONSTRING " Recursive Error",
 					buffer, NULL);
 
 			W_Shutdown();
@@ -2649,7 +2673,7 @@ void I_Error(const char *error, ...)
 	// on the target system
 	if (!M_CheckParm("-dedicated"))
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
-			"SRB2 "VERSIONSTRING" Error",
+			"SRB2 " VERSIONSTRING " Error",
 			buffer, NULL);
 	// Note that SDL_ShowSimpleMessageBox does *not* require SDL to be
 	// initialized at the time, so calling it after SDL_Quit() is
@@ -2977,7 +3001,7 @@ const char *I_ClipboardPaste(void)
 */
 static boolean isWadPathOk(const char *path)
 {
-	char *wad3path = malloc(256);
+	char *wad3path = static_cast<char*>(malloc(256));
 
 	if (!wad3path)
 		return false;
@@ -3085,7 +3109,7 @@ static const char *locateWad(void)
 	I_OutputMsg(",HOME/" DEFAULTDIR);
 	if ((envstr = I_GetEnv("HOME")) != NULL)
 	{
-		char *tmp = malloc(strlen(envstr) + 1 + sizeof(DEFAULTDIR));
+		char *tmp = static_cast<char*>(malloc(strlen(envstr) + 1 + sizeof(DEFAULTDIR)));
 		strcpy(tmp, envstr);
 		strcat(tmp, "/");
 		strcat(tmp, DEFAULTDIR);
