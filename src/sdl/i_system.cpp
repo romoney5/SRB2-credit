@@ -2483,10 +2483,6 @@ INT32 I_StartupSystem(void)
 	SDL_version SDLlinked;
 	SDL_VERSION(&SDLcompiled)
 	SDL_GetVersion(&SDLlinked);
-	I_start_threads();
-	I_AddExitFunc(I_stop_threads);
-	I_ThreadPoolInit();
-	I_AddExitFunc(I_ThreadPoolShutdown);
 	I_StartupConsole();
 #ifdef NEWSIGNALHANDLER
 	// This is useful when debugging. It lets GDB attach to
@@ -2494,6 +2490,10 @@ INT32 I_StartupSystem(void)
 	if (!M_CheckParm("-nofork"))
 		I_Fork();
 #endif
+	I_start_threads();
+	I_AddExitFunc(I_stop_threads);
+	I_ThreadPoolInit();
+	I_AddExitFunc(I_ThreadPoolShutdown);
 	I_RegisterSignals();
 	I_OutputMsg("Compiled for SDL version: %d.%d.%d\n",
 	 SDLcompiled.major, SDLcompiled.minor, SDLcompiled.patch);
