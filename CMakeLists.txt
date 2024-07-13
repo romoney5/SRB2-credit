@@ -70,6 +70,7 @@ option(SRB2_CONFIG_FORCE_NO_MS_BITFIELDS "Compile without -mno-ms-bitfields comp
 option(SRB2_CONFIG_SKIP_COMPTIME "Skip regenerating comptime. To speed up iterative debug builds in IDEs." OFF)
 # SRB2_CONFIG_PROFILEMODE is probably superceded by some CMake setting.
 option(SRB2_CONFIG_PROFILEMODE "Compile for profiling (GCC only)." OFF)
+option(SRB2_CONFIG_TRACY "Compile with Tracy profiling enabled" OFF)
 set(SRB2_CONFIG_ASSET_DIRECTORY "" CACHE PATH "Path to directory that contains all asset files for the installer. If set, assets will be part of installation and cpack.")
 
 # Enable CCache
