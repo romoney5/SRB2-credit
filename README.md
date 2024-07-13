@@ -84,10 +84,7 @@ Icon credits goes to ClovesCloestarSRB2 and his addon [New Springs](https://mb.s
 
 ## Dependencies
 - SDL2 (Linux/OS X only)
-- SDL2-Mixer (Linux/OS X only)
 - libupnp (Linux/OS X only)
-- libgme (Linux/OS X only)
-- libopenmpt (Linux/OS X only)
 
 ## Compiling
 
