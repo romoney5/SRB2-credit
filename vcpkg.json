@@ -17,8 +17,6 @@
       "platform": "wasm32",
       "version>=": "7.74.0#5"
     },
-    "libgme",
-    "libopenmpt",
     "libpng",
     "miniupnpc",
     {
@@ -34,28 +32,6 @@
       ],
       "platform": "linux",
       "version>=": "2.30.6#2"
-    },
-    {
-      "name": "sdl2-mixer-ext",
-      "features": [
-        {
-          "name": "fluidsynth",
-          "platform": "!static"
-        },
-        {
-          "name": "libflac",
-          "platform": "!emscripten"
-        },
-        "libgme",
-        "libmodplug",
-        "libvorbis",
-        "libxmp",
-        "mpg123",
-        "opusfile",
-        "pxtone",
-        "timidity"
-      ],
-      "version>=": "2.6.0#0"
     },
     "zlib"
   ]
