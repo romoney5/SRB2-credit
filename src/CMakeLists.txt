@@ -476,6 +476,7 @@ else()
 endif()
 
 target_link_libraries(SRB2SDL2 PRIVATE tcbrindle::span)
+target_link_libraries(SRB2SDL2 PRIVATE fmt::fmt-header-only)
 target_link_libraries(SRB2SDL2 PRIVATE Tracy::TracyClient)
 
 if(TARGET miniupnpc::miniupnpc)
