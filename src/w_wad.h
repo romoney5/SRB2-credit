@@ -20,6 +20,10 @@
 
 #include "m_aatree.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifdef __GNUG__
 #pragma interface
 #endif
@@ -245,5 +249,9 @@ void W_UnlockCachedPatch(void *patch);
 void W_VerifyFileMD5(UINT16 wadfilenum, const char *matchmd5);
 
 int W_VerifyNMUSlumps(const char *filename, boolean exit_on_error);
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif // __W_WAD__

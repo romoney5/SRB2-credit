@@ -26,6 +26,10 @@
 #include "taglist.h"
 #include "m_fixed.h" // See the mapthing_t scale.
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //
 // Map level types.
 // The following data structures define the persistent format
@@ -224,5 +228,9 @@ typedef struct
 #define ZSHIFT 4
 
 #define NUMMAPS 1035
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif // __DOOMDATA__

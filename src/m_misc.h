@@ -20,6 +20,11 @@
 
 #include "d_event.h" // Screenshot responder
 #include "command.h"
+#include "w_wad.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef enum {
 	MM_OFF = 0,
@@ -123,7 +128,10 @@ FUNCMATH UINT8 M_CountBits(UINT32 num, UINT8 size);
 // Rounds off floating numbers and checks for 0 - 255 bounds
 int M_RoundUp(double number);
 
-#include "w_wad.h"
 extern char configfile[MAX_WADPATH];
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif

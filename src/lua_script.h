@@ -24,6 +24,10 @@
 #include "blua/lualib.h"
 #include "blua/lauxlib.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define lua_optboolean(L, i) (!lua_isnoneornil(L, i) && lua_toboolean(L, i))
 #define lua_opttrueboolean(L, i) (lua_isnoneornil(L, i) || lua_toboolean(L, i))
 
@@ -171,5 +175,9 @@ void COM_Lua_f(void);
 
 #define INLEVEL if (! ISINLEVEL)\
 return luaL_error(L, "This can only be used in a level!");
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif/*LUA_SCRIPT_H*/

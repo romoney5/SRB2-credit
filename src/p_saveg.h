@@ -14,6 +14,10 @@
 #ifndef __P_SAVEG__
 #define __P_SAVEG__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifdef __GNUG__
 #pragma interface
 #endif
@@ -81,5 +85,9 @@ void P_ReadStringN(save_t *p, char *s, size_t n);
 void P_ReadStringL(save_t *p, char *s, size_t n);
 void P_ReadString(save_t *p, char *s);
 void P_ReadMem(save_t *p, void *s, size_t n);
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif

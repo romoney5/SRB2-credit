@@ -17,6 +17,10 @@
 #include "command.h"
 #include "screen.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if NUMSCREENS > 2
 #define HAVE_ANIGIF
 #endif
@@ -30,5 +34,9 @@ float GIF_GetSizeMB(void);
 
 extern consvar_t cv_gif_optimize, cv_gif_downscale, cv_gif_dynamicdelay, cv_gif_localcolortable, cv_gif_maxsize, cv_gif_rolling;
 extern CV_PossibleValue_t gif_maxsize_cons_t[];
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif
