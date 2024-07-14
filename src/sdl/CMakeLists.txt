@@ -54,7 +54,6 @@ target_link_libraries(SRB2SDL2
 	PRIVATE
 	SDL2::SDL2main
 )
-message("${BUILDSYSTEM_TARGETS}")
 
 if("${CMAKE_SYSTEM_NAME}" MATCHES Linux)
 	target_link_libraries(SRB2SDL2 PRIVATE m rt)
