@@ -642,7 +642,7 @@ static lumpinfo_t* ResGetLumpsZip (FILE* handle, UINT16* nlmp)
 			dotpos = fullname + strlen(fullname); // Watch for files without extension.
 
 		memset(lump_p->name, '\0', 9); // Making sure they're initialized to 0. Is it necessary?
-		strncpy(lump_p->name, trimname, std::min(8, dotpos - trimname));
+		strncpy(lump_p->name, trimname, std::min<size_t>(8, dotpos - trimname));
 		lump_p->hash = quickncasehash(lump_p->name, 8);
 
 		lump_p->longname = static_cast<char*>(Z_Calloc(dotpos - trimname + 1, PU_STATIC, NULL));
