@@ -1226,7 +1226,6 @@ static void IdentifyVersion(void)
 	D_AddFile(&startupwadfiles, va(pandf,srb2waddir, "patch.pk3"));
 #endif
 
-#if !defined (HAVE_SDL) || defined (HAVE_MIXER) || true
 	{
 #define MUSICTEST(str) \
 		{\
@@ -1241,7 +1240,6 @@ static void IdentifyVersion(void)
 		MUSICTEST("music.pk3")
 		//MUSICTEST("patch_music.pk3")
 	}
-#endif
 }
 
 static void
