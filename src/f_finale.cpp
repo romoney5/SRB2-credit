@@ -872,7 +872,7 @@ void F_IntroTicker(void)
 				F_IntroDrawer();
 
 				F_WipeEndScreen();
-				F_RunWipe(99,true);
+				F_RunWipe(99,true, false);
 			}
 
 			S_ChangeMusicInternal("_intro", false);
@@ -888,7 +888,7 @@ void F_IntroTicker(void)
 				F_IntroDrawer();
 
 				F_WipeEndScreen();
-				F_RunWipe(99,true);
+				F_RunWipe(99,true, false);
 			}
 		}
 		else if (intro_scenenum == 16)
@@ -902,7 +902,7 @@ void F_IntroTicker(void)
 				F_IntroDrawer();
 
 				F_WipeEndScreen();
-				F_RunWipe(99,true);
+				F_RunWipe(99,true, false);
 			}
 
 			// Stay on black for a bit. =)
@@ -926,8 +926,13 @@ void F_IntroTicker(void)
 					I_unlock_mutex(m_menu_mutex);
 					I_FinishUpdate(); // Update the screen with the image Tails 06-19-2001
 
-					if (moviemode) // make sure we save frames for the white hold too
-						M_SaveFrame();
+#ifdef HWRENDER
+					if (moviemode && rendermode == render_opengl)
+						M_LegacySaveFrame();
+					else
+#endif
+					if (moviemode && rendermode == render_soft)
+						I_CaptureVideoFrame();
 				}
 			}
 
@@ -959,7 +964,7 @@ void F_IntroTicker(void)
 			F_IntroDrawer();
 
 			F_WipeEndScreen();
-			F_RunWipe(99,true);
+			F_RunWipe(99,true, false);
 		}
 		else if ((intro_scenenum == 5 && intro_curtime == 5*TICRATE)
 			|| (intro_scenenum == 7 && intro_curtime == 6*TICRATE)
@@ -972,7 +977,7 @@ void F_IntroTicker(void)
 			F_IntroDrawer();
 
 			F_WipeEndScreen();
-			F_RunWipe(99,true);
+			F_RunWipe(99,true, false);
 		}
 	}
 
@@ -3916,7 +3921,7 @@ static void F_AdvanceToNextScene(void)
 			V_DrawFill(0,0,BASEVIDWIDTH,BASEVIDHEIGHT,cutscenes[cutnum]->scene[scenenum].fadecolor);
 
 			F_WipeEndScreen();
-			F_RunWipe(cutscenes[cutnum]->scene[scenenum].fadeinid, true);
+			F_RunWipe(cutscenes[cutnum]->scene[scenenum].fadeinid, true, false);
 
 			F_WipeStartScreen();
 		}
@@ -3960,7 +3965,7 @@ static void F_AdvanceToNextScene(void)
 		F_CutsceneDrawer();
 
 		F_WipeEndScreen();
-		F_RunWipe(cutscenes[cutnum]->scene[scenenum].fadeoutid, true);
+		F_RunWipe(cutscenes[cutnum]->scene[scenenum].fadeoutid, true, false);
 	}
 }
 

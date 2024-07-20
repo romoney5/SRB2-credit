@@ -1786,8 +1786,13 @@ static boolean CL_ServerConnectionTicker(const char *tmpsave, tic_t *oldtic, tic
 			M_Drawer(); //Needed for drawing messageboxes on the connection screen
 			I_unlock_mutex(m_menu_mutex);
 			I_UpdateNoVsync(); // page flip or blit buffer
-			if (moviemode)
-				M_SaveFrame();
+#ifdef HWRENDER
+			if (moviemode && rendermode == render_opengl)
+				M_LegacySaveFrame();
+			else
+#endif
+			if (moviemode && rendermode != render_none)
+				I_CaptureVideoFrame();
 			S_UpdateSounds();
 			S_UpdateClosedCaptions();
 		}
