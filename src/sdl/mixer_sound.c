@@ -37,6 +37,7 @@
 #include "../sounds.h"
 #include "../s_sound.h"
 #include "../i_sound.h"
+#include "../i_midimusic.h"
 #include "../w_wad.h"
 #include "../z_zone.h"
 #include "../byteptr.h"
@@ -817,6 +818,7 @@ static void mix_openmpt(void *udata, Uint8 *stream, int len)
 
 void I_InitMusic(void)
 {
+	I_MID_InitMusic(0);
 }
 
 void I_ShutdownMusic(void)

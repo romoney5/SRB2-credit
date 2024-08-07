@@ -18,7 +18,8 @@
 #include <string.h>
 
 #include "midifallback.h"
-#include "i_printf.h"
+//#include "i_printf.h"
+#include "console.h"
 
 static const byte presets[128][128] =
 {
@@ -208,8 +209,10 @@ midi_fallback_t MIDI_BankLSBFallback(byte idx, byte value)
         fallback.type = FALLBACK_BANK_LSB;
         fallback.value = 0;
 
-        I_Printf(VB_DEBUG, "midifallback: ch=%d [lsb=%d] to [lsb=%d]",
-                 idx, value, fallback.value);
+        //I_Printf(VB_DEBUG, "midifallback: ch=%d [lsb=%d] to [lsb=%d]",
+        //         idx, value, fallback.value);
+		CONS_Debug(DBG_DETAILED, "midifallback: ch=%d [lsb=%d] to [lsb=%d]\n",
+                   idx, value, fallback.value);
     }
 
     return fallback;
@@ -244,8 +247,10 @@ midi_fallback_t MIDI_ProgramFallback(byte idx, byte program)
                 fallback.value = presets[variation & ~7][program];
             }
 
-            I_Printf(VB_DEBUG, "midifallback: ch=%d pc=%d [msb=%d] to [msb=%d]",
-                     idx, program, variation, fallback.value);
+            //I_Printf(VB_DEBUG, "midifallback: ch=%d pc=%d [msb=%d] to [msb=%d]",
+            //         idx, program, variation, fallback.value);
+			CONS_Debug(DBG_DETAILED, "midifallback: ch=%d pc=%d [msb=%d] to [msb=%d]\n",
+                       idx, program, variation, fallback.value);
         }
     }
     else // Drums Channel
@@ -262,8 +267,10 @@ midi_fallback_t MIDI_ProgramFallback(byte idx, byte program)
             fallback.type = FALLBACK_DRUMS;
             fallback.value = drums[program & ~7];
 
-            I_Printf(VB_DEBUG, "midifallback: ch=%d (drums) [pc=%d] to [pc=%d]",
-                     idx, program, fallback.value);
+            //I_Printf(VB_DEBUG, "midifallback: ch=%d (drums) [pc=%d] to [pc=%d]",
+            //         idx, program, fallback.value);
+			CONS_Debug(DBG_DETAILED, "midifallback: ch=%d (drums) [pc=%d] to [pc=%d]\n",
+                       idx, program, fallback.value);
         }
     }
 

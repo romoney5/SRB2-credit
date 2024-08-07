@@ -72,6 +72,11 @@ r_portal.c
 screen.c
 taglist.c
 v_video.c
+memio.c
+i_midimusic.c
+midifallback.c
+midifile.c
+midiout.c
 s_sound.c
 sounds.c
 w_wad.c

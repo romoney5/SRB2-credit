@@ -16,6 +16,8 @@
 //
 
 // TODO: Remove commented out code
+// TODO: Check if I need casts for the UINT64 values
+// TODO: Make sure I_SleepDuration is an appropriate replacement for I_SleepUS (microseconds)
 
 #include "SDL.h"
 
@@ -27,20 +29,34 @@
 #include "console.h"
 #include "i_sound.h"
 //#include "i_timer.h"
-#include "i_time.h" // TODO: Add functions as needed from Woof
+#include "i_time.h"
+#include "i_system.h"
 #include "m_array.h"
-#include "m_config.h"
+//#include "m_config.h" // TODO: Replace with SRB2's config system
 #include "memio.h"
 #include "midiout.h"
 #include "midifallback.h"
 #include "midifile.h"
-#include "mus2mid.h"
+//#include "mus2mid.h" // TODO: Make sure there's no remnants of this (not planning to add MUS support, since SRB2 doesn't already)
 
 static SDL_Thread *player_thread_handle;
 static SDL_mutex *music_lock;
 static SDL_atomic_t player_thread_running;
 
 static boolean music_initialized;
+
+// Moved from Woof's i_sound.c
+static boolean IsMid(byte *mem, int len)
+{
+    return len > 4 && !memcmp(mem, "MThd", 4);
+}
+
+/*
+static boolean IsMus(byte *mem, int len)
+{
+    return len > 4 && !memcmp(mem, "MUS\x1a", 4);
+}
+*/
 
 // Tempo control variables
 
@@ -64,7 +80,8 @@ enum
     RESET_NUM,
 };
 
-static int midi_complevel = COMP_STANDARD;
+//static int midi_complevel = COMP_STANDARD;
+static int midi_complevel = COMP_FULL;
 static int midi_reset_type = RESET_TYPE_GM;
 static int midi_reset_delay = -1;
 static boolean midi_ctf = true;
@@ -162,23 +179,27 @@ static void RestartTimer(uint64_t offset)
 {
     if (pause_time)
     {
-        start_time += (I_GetTimeUS() - pause_time);
+        //start_time += (I_GetTimeUS() - pause_time);
+		start_time += ((uint64_t)I_GetPrecisePrecision() - pause_time);
         pause_time = 0;
     }
     else
     {
-        start_time = I_GetTimeUS() - offset;
+        //start_time = I_GetTimeUS() - offset;
+		start_time = (uint64_t)I_GetPrecisePrecision() - offset;
     }
 }
 
 static void PauseTimer(void)
 {
-    pause_time = I_GetTimeUS();
+    //pause_time = I_GetTimeUS();
+	pause_time = (uint64_t)I_GetPrecisePrecision();
 }
 
 static uint64_t CurrentTime(void)
 {
-    return I_GetTimeUS() - start_time;
+    //return I_GetTimeUS() - start_time;
+	return (uint64_t)I_GetPrecisePrecision() - start_time;
 }
 
 // Sends a channel message with the second parameter overridden to zero. Only
@@ -302,7 +323,8 @@ static void SendManualVolumeMsg(byte channel, byte volume)
     unsigned int scaled_volume;
 
     scaled_volume = lroundf((float)volume * volume_factor);
-    scaled_volume = MIN(scaled_volume, 127);
+    //scaled_volume = MIN(scaled_volume, 127);
+	scaled_volume = min(scaled_volume, 127);
 
     SendControlChange(channel, MIDI_CONTROLLER_VOLUME_MSB, scaled_volume);
 
@@ -419,7 +441,8 @@ static void ResetDelayBytes(uint32_t length)
     {
         // MIDI transfer period is 320 us per byte (MIDI 1.0 Electrical Spec
         // Update CA-033, page 2).
-        I_SleepUS(320 * length);
+        //I_SleepUS(320 * length);
+		I_SleepDuration(320 * length);
     }
 }
 
@@ -1132,9 +1155,10 @@ static void InitEMIDI(void)
 
 static boolean RegisterSong(void)
 {
-    if (IsMid(song.lump_data, song.lump_length))
-    {
+    //if (IsMid(song.lump_data, song.lump_length))
+    //{
         song.file = MIDI_LoadFile(song.lump_data, song.lump_length);
+	/*
     }
     else
     {
@@ -1160,6 +1184,7 @@ static boolean RegisterSong(void)
         mem_fclose(instream);
         mem_fclose(outstream);
     }
+	*/
 
     if (song.file == NULL)
     {
@@ -1200,7 +1225,8 @@ static int PlayerThread(void *unused)
     {
         if (sleep)
         {
-            I_SleepUS(500);
+            //I_SleepUS(500);
+			I_SleepDuration(500);
             sleep = false;
         }
 
@@ -1244,7 +1270,8 @@ static int PlayerThread(void *unused)
                     }
                     if (remaining_time > 0)
                     {
-                        I_SleepUS(remaining_time);
+                        //I_SleepUS(remaining_time);
+						I_SleepDuration(remaining_time);
                     }
                     ProcessEvent(position.event, position.track);
                     midi_state = STATE_PLAYING;
@@ -1284,7 +1311,7 @@ static void GetDevices(void)
     }
 }
 
-static boolean I_MID_InitMusic(int device)
+boolean I_MID_InitMusic(int device)
 {
     GetDevices();
 
@@ -1305,6 +1332,7 @@ static boolean I_MID_InitMusic(int device)
         return false;
     }
 
+	// TODO: Always use COMP_FULL no matter what
     switch (midi_complevel)
     {
         case COMP_VANILLA:
@@ -1369,7 +1397,7 @@ static void I_MID_StopSong(void *handle)
     SendNotesSoundOff();
 }
 
-static void I_MID_PlaySong(void *handle, boolean looping)
+void I_MID_PlaySong(void *handle, boolean looping)
 {
     if (!music_initialized)
     {
@@ -1419,7 +1447,8 @@ static void *I_MID_RegisterSong(void *data, int len)
         return NULL;
     }
 
-    if (!IsMid(data, len) && !IsMus(data, len))
+    //if (!IsMid(data, len) && !IsMus(data, len))
+	if (!IsMid(data, len))
     {
         return NULL;
     }

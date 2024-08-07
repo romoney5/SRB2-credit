@@ -15,9 +15,10 @@
 
 #include <stdlib.h>
 
-#include "config.h"
+//#include "config.h"
 #include "doomtype.h"
-#include "i_printf.h"
+//#include "i_printf.h"
+#include "console.h"
 
 #define MIDI_DEFAULT_BUFFER_SIZE 32
 
@@ -31,26 +32,30 @@
 #include <mmsystem.h>
 #include <mmreg.h>
 
-#include "m_io.h"
+//#include "m_io.h"
 
 static HMIDIOUT hMidiOut;
 static HANDLE hCallbackEvent;
 
+// TODO: Figure out what to do with M_ConvertWideToUtf8
+
 static void MidiError(const char *prefix, MMRESULT result)
 {
+	/*
     wchar_t werror[MAXERRORLENGTH];
 
     if (midiOutGetErrorTextW(result, (LPWSTR)werror, MAXERRORLENGTH)
         == MMSYSERR_NOERROR)
     {
         char *error = M_ConvertWideToUtf8(werror);
-        I_Printf(VB_ERROR, "%s: %s", prefix, error);
+		CONS_Alert(CONS_ERROR, "%s: %s\n", prefix, error);
         free(error);
     }
     else
     {
-        I_Printf(VB_ERROR, "%s: Unknown error", prefix);
-    }
+		*/
+        CONS_Alert(CONS_ERROR, "%s: Unknown error\n", prefix);
+    //}
 }
 
 static void CALLBACK MidiOutProc(HMIDIOUT hmo, UINT wMsg, DWORD_PTR dwInstance,
@@ -128,7 +133,8 @@ const char *MIDI_GetDeviceName(int device)
     result = midiOutGetDevCapsW(device, &caps, sizeof(caps));
     if (result == MMSYSERR_NOERROR)
     {
-        return M_ConvertWideToUtf8(caps.szPname);
+        //return M_ConvertWideToUtf8(caps.szPname);
+		return M_GetText("TEST");
     }
     else
     {
@@ -201,7 +207,7 @@ static boolean Init(void)
     err = snd_seq_open(&seq, "default", SND_SEQ_OPEN_OUTPUT, 0);
     if (err < 0)
     {
-        I_Printf(VB_ERROR, "Init: %s", snd_strerror(err));
+        CONS_Alert(CONS_ERROR, "Init: %s\n", snd_strerror(err));
         seq = NULL;
         return false;
     }
@@ -288,7 +294,7 @@ static void SendMessage(const byte *message, unsigned int length)
             int err = snd_seq_event_output(seq, &ev);
             if (err < 0)
             {
-                I_Printf(VB_ERROR, "SendMessage: %s", snd_strerror(err));
+                CONS_Alert(CONS_ERROR, "SendMessage: %s\n", snd_strerror(err));
                 return;
             }
             break;
@@ -343,7 +349,7 @@ boolean MIDI_OpenDevice(int device)
         SND_SEQ_PORT_TYPE_MIDI_GENERIC | SND_SEQ_PORT_TYPE_APPLICATION);
     if (vport < 0)
     {
-        I_Printf(VB_ERROR, "MIDI_OpenDevice: %s", snd_strerror(vport));
+        CONS_Alert(CONS_ERROR, "MIDI_OpenDevice: %s\n", snd_strerror(vport));
         Cleanup();
         return false;
     }
@@ -359,7 +365,7 @@ boolean MIDI_OpenDevice(int device)
     err = snd_seq_subscribe_port(seq, subscription);
     if (err < 0)
     {
-        I_Printf(VB_ERROR, "MIDI_OpenDevice: %s", snd_strerror(err));
+        CONS_Alert(CONS_ERROR, "MIDI_OpenDevice: %s\n", snd_strerror(err));
         Cleanup();
         return false;
     }
@@ -494,7 +500,7 @@ static void SendMessage(const byte *message, unsigned int length)
 
     if (MIDISend(port, endpoint, packet_list) != noErr)
     {
-        I_Printf(VB_ERROR, "SendMessage: MIDISend failed");
+        CONS_Alert(CONS_ERROR, "SendMessage: MIDISend failed\n");
     }
 }
 
@@ -515,7 +521,7 @@ void MIDI_SendShortMsg(const byte *message, unsigned int length)
     if (MusicDeviceMIDIEvent(unit, data[0], data[1], data[2], 0)
         != noErr)
     {
-        I_Printf(VB_ERROR, "MIDI_SendShortMsg: MusicDeviceMIDIEvent failed");
+        CONS_Alert(CONS_ERROR, "MIDI_SendShortMsg: MusicDeviceMIDIEvent failed\n");
     }
 }
 
@@ -529,7 +535,7 @@ void MIDI_SendLongMsg(const byte *message, unsigned int length)
 
     if (MusicDeviceSysEx(unit, message, length) != noErr)
     {
-        I_Printf(VB_ERROR, "MIDI_SendLongMsg: MusicDeviceSysEx failed");
+        CONS_Alert(CONS_ERROR, "MIDI_SendLongMsg: MusicDeviceSysEx failed\n");
     }
 }
 
@@ -548,15 +554,15 @@ const char *MIDI_GetDeviceName(int device)
     return devices[device].name;
 }
 
-#define CHECK_ERR(stmt)                                           \
-    do                                                            \
-    {                                                             \
-        if ((stmt) != noErr)                                      \
-        {                                                         \
-            I_Printf(VB_ERROR, "%s: " #stmt " failed", __func__); \
-            Cleanup();                                            \
-            return false;                                         \
-        }                                                         \
+#define CHECK_ERR(stmt)                                                 \
+    do                                                                  \
+    {                                                                   \
+        if ((stmt) != noErr)                                            \
+        {                                                               \
+            CONS_Alert(CONS_ERROR, "%s: " #stmt " failed\n", __func__); \
+            Cleanup();                                                  \
+            return false;                                               \
+        }                                                               \
     } while (0)
 
 static boolean OpenDLSSynth(void)
