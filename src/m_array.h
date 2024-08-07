@@ -92,7 +92,7 @@ inline static void *M_ArrayGrow(void *v, size_t esize, int n)
     {
         p = array_ptr(v);
         //p = I_Realloc(p, sizeof(m_array_buffer_t) + (p->capacity + n) * esize);
-		p = Z_Realloc(p, sizeof(m_array_buffer_t) + (p->capacity + n) * esize, PU_STATIC, NULL); // TODO: Make sure this doesn't cause problems
+		p = realloc(p, sizeof(m_array_buffer_t) + (p->capacity + n) * esize); // TODO: Make sure this doesn't cause problems
         p->capacity += n;
     }
     else

@@ -23,4 +23,7 @@
 boolean I_MID_InitMusic(int device);
 
 // Plays a MIDI song
-void I_MID_PlaySong(void *handle, boolean looping)
+void I_MID_PlaySong(void *handle, boolean looping);
+
+// Registers a MIDI song
+void *I_MID_RegisterSong(void *data, int len);

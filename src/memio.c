@@ -42,7 +42,7 @@ struct _MEMFILE
 // Open a memory area for reading
 
 MEMFILE *mem_fopen_read(void *buf, size_t buflen)
-{
+{	
     MEMFILE *file;
 
     file = Z_Malloc(sizeof(MEMFILE), PU_STATIC, 0);

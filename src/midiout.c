@@ -41,21 +41,20 @@ static HANDLE hCallbackEvent;
 
 static void MidiError(const char *prefix, MMRESULT result)
 {
-	/*
     wchar_t werror[MAXERRORLENGTH];
 
     if (midiOutGetErrorTextW(result, (LPWSTR)werror, MAXERRORLENGTH)
         == MMSYSERR_NOERROR)
     {
-        char *error = M_ConvertWideToUtf8(werror);
+        //char *error = M_ConvertWideToUtf8(werror);
+		char *error = M_GetText("ERROR!!!");
 		CONS_Alert(CONS_ERROR, "%s: %s\n", prefix, error);
         free(error);
     }
     else
     {
-		*/
         CONS_Alert(CONS_ERROR, "%s: Unknown error\n", prefix);
-    //}
+    }
 }
 
 static void CALLBACK MidiOutProc(HMIDIOUT hmo, UINT wMsg, DWORD_PTR dwInstance,
@@ -134,7 +133,7 @@ const char *MIDI_GetDeviceName(int device)
     if (result == MMSYSERR_NOERROR)
     {
         //return M_ConvertWideToUtf8(caps.szPname);
-		return M_GetText("TEST");
+		return M_GetText("Microsoft GS Wavetable Synth");
     }
     else
     {

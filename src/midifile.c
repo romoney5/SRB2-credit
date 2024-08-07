@@ -29,6 +29,11 @@
 #define HEADER_CHUNK_ID "MThd"
 #define TRACK_CHUNK_ID  "MTrk"
 
+// haleyjd 09/09/10: packing required
+//#if defined(_MSC_VER)
+#  pragma pack(push, 1)
+//#endif
+
 typedef struct
 {
     byte chunk_id[4];
@@ -42,6 +47,11 @@ typedef struct
     unsigned short num_tracks;
     unsigned short time_division;
 } midi_header_t;
+
+// haleyjd 09/09/10: packing off.
+//#if defined(_MSC_VER)
+#  pragma pack(pop)
+//#endif
 
 typedef struct
 {
@@ -84,7 +94,7 @@ static boolean CheckChunkHeader(chunk_header_t *chunk, const char *expected_id)
 {
     boolean result;
 
-    result = (memcmp((char *)chunk->chunk_id, expected_id, 4) == 0);
+    result = (memcmp((const char *)chunk->chunk_id, expected_id, 4) == 0);
 
     if (!result)
     {

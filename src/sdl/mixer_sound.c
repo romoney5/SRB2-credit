@@ -38,6 +38,7 @@
 #include "../s_sound.h"
 #include "../i_sound.h"
 #include "../i_midimusic.h"
+#include "../midifile.h"
 #include "../w_wad.h"
 #include "../z_zone.h"
 #include "../byteptr.h"
@@ -1265,6 +1266,11 @@ boolean I_LoadSong(char *data, size_t len)
 			return true; // All good and we're ready for music playback!
 	}
 #endif
+	
+	//if (I_SongType() == MU_MID)
+	//{
+		I_MID_RegisterSong((void*)data, len);
+	//}
 
 	// Let's see if Mixer is able to load this.
 	rw = SDL_RWFromMem(data, len);
@@ -1378,10 +1384,23 @@ boolean I_PlaySong(boolean looping)
 		CONS_Alert(CONS_ERROR, "Mix_PlayMusic: %s\n", Mix_GetError());
 		return false;
 	}
-	else if ((I_SongType() == MU_MOD || I_SongType() == MU_MID || I_SongType() == MU_MID_EX) && Mix_PlayMusic(music, looping ? -1 : 0) == -1) // if MOD, loop forever
+	else if ((I_SongType() == MU_MOD || I_SongType() == MU_MID_EX) && Mix_PlayMusic(music, looping ? -1 : 0) == -1) // if MOD, loop forever
 	{
 		CONS_Alert(CONS_ERROR, "Mix_PlayMusic: %s\n", Mix_GetError());
 		return false;
+	}
+	/*
+	else if (I_SongType() == MU_MID)
+	{
+		// TODO: FINISH THIS
+		
+		return false;
+	}
+	*/
+	
+	if (I_SongType() == MU_MID)
+	{
+		I_MID_PlaySong(music, looping);
 	}
 
 	is_looping = looping;

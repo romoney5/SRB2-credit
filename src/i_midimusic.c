@@ -1440,7 +1440,7 @@ static void I_MID_ResumeSong(void *handle)
     SDL_UnlockMutex(music_lock);
 }
 
-static void *I_MID_RegisterSong(void *data, int len)
+void *I_MID_RegisterSong(void *data, int len)
 {
     if (!music_initialized)
     {
