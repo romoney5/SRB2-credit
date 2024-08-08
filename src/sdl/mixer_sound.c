@@ -1401,6 +1401,7 @@ boolean I_PlaySong(boolean looping)
 	if (I_SongType() == MU_MID)
 	{
 		I_MID_PlaySong(music, looping);
+		I_MID_SetMusicVolume(music_volume);
 	}
 
 	is_looping = looping;
@@ -1439,6 +1440,11 @@ void I_StopSong(void)
 #endif
 	if (music)
 	{
+		if (I_SongType() == MU_MID)
+		{
+			I_MID_StopSong(music);
+			I_MID_UnRegisterSong(music);
+		}
 		Mix_UnregisterEffect(MIX_CHANNEL_POST, count_music_bytes);
 		Mix_HookMusicFinished(NULL);
 		Mix_HaltMusic();
@@ -1482,15 +1488,22 @@ void I_SetMusicVolume(UINT8 volume)
 	if (!I_SongPlaying())
 		return;
 
+/*
 #ifdef _WIN32
 	if (I_SongType() == MU_MID)
+	{
 		// HACK: Until we stop using native MIDI,
 		// disable volume changes
 		music_volume = 31;
+		I_MID_SetMusicVolume(music_volume);
+	}
 	else
 #endif
-		music_volume = volume;
-
+*/
+	music_volume = volume;
+	
+	if (I_SongType() == MU_MID)
+		I_MID_SetMusicVolume(2 * music_volume);
 	Mix_VolumeMusic(get_real_volume(music_volume));
 }
 

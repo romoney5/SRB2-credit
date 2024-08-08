@@ -78,6 +78,7 @@ add_executable(SRB2SDL2 MACOSX_BUNDLE WIN32
 	screen.c
 	taglist.c
 	v_video.c
+	m_io.c
 	memio.c
 	midifallback.c
 	midifile.c

@@ -29,29 +29,44 @@
 #define HEADER_CHUNK_ID "MThd"
 #define TRACK_CHUNK_ID  "MTrk"
 
-// haleyjd 09/09/10: packing required
-//#if defined(_MSC_VER)
-#  pragma pack(push, 1)
-//#endif
+#if defined(__GNUC__)
+ #define PACKED_PREFIX
+ #if defined(_WIN32) && !defined(__clang__)
+  #define PACKED_SUFFIX __attribute__((packed,gcc_struct))
+ #else
+  #define PACKED_SUFFIX __attribute__((packed))
+ #endif
+#elif defined(__WATCOMC__)
+ #define PACKED_PREFIX _Packed
+ #define PACKED_SUFFIX
+#else
+ #define PACKED_PREFIX
+ #define PACKED_SUFFIX
+#endif
 
-typedef struct
+// haleyjd 09/09/10: packing required
+#if defined(_MSC_VER)
+#  pragma pack(push, 1)
+#endif
+
+typedef PACKED_PREFIX struct
 {
     byte chunk_id[4];
     unsigned int chunk_size;
-} chunk_header_t;
+} PACKED_SUFFIX chunk_header_t;
 
-typedef struct
+typedef PACKED_PREFIX struct
 {
     chunk_header_t chunk_header;
     unsigned short format_type;
     unsigned short num_tracks;
     unsigned short time_division;
-} midi_header_t;
+} PACKED_SUFFIX midi_header_t;
 
 // haleyjd 09/09/10: packing off.
-//#if defined(_MSC_VER)
+#if defined(_MSC_VER)
 #  pragma pack(pop)
-//#endif
+#endif
 
 typedef struct
 {

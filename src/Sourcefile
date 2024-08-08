@@ -72,6 +72,7 @@ r_portal.c
 screen.c
 taglist.c
 v_video.c
+m_io.c
 memio.c
 midifallback.c
 midifile.c

@@ -32,7 +32,7 @@
 #include <mmsystem.h>
 #include <mmreg.h>
 
-//#include "m_io.h"
+#include "m_io.h"
 
 static HMIDIOUT hMidiOut;
 static HANDLE hCallbackEvent;
@@ -132,8 +132,8 @@ const char *MIDI_GetDeviceName(int device)
     result = midiOutGetDevCapsW(device, &caps, sizeof(caps));
     if (result == MMSYSERR_NOERROR)
     {
-        //return M_ConvertWideToUtf8(caps.szPname);
-		return M_GetText("Microsoft GS Wavetable Synth");
+        return M_ConvertWideToUtf8(caps.szPname);
+		//return M_GetText("SC-VA");
     }
     else
     {

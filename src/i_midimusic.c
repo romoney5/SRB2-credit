@@ -83,8 +83,8 @@ enum
 //static int midi_complevel = COMP_STANDARD;
 static int midi_complevel = COMP_FULL;
 static int midi_reset_type = RESET_TYPE_GM;
-static int midi_reset_delay = -1;
-static boolean midi_ctf = true;
+static int midi_reset_delay = 0;
+static boolean midi_ctf = false;
 
 static const byte gm_system_on[] =
 {
@@ -175,31 +175,41 @@ static uint64_t TicksToUS(uint32_t ticks)
     return (uint64_t)ticks * us_per_beat / ticks_per_beat;
 }
 
+static uint64_t I_MIDI_GetTimeUS(void)
+{
+	return I_GetPreciseTime() / (I_GetPrecisePrecision() / 1000000);
+}
+
+static void I_MIDI_SleepUS(uint64_t us)
+{
+	I_SleepDuration(us);
+}
+
 static void RestartTimer(uint64_t offset)
 {
     if (pause_time)
     {
         //start_time += (I_GetTimeUS() - pause_time);
-		start_time += ((uint64_t)I_GetPrecisePrecision() - pause_time);
+		start_time += (I_MIDI_GetTimeUS() - pause_time);
         pause_time = 0;
     }
     else
     {
         //start_time = I_GetTimeUS() - offset;
-		start_time = (uint64_t)I_GetPrecisePrecision() - offset;
+		start_time = I_MIDI_GetTimeUS() - offset;
     }
 }
 
 static void PauseTimer(void)
 {
     //pause_time = I_GetTimeUS();
-	pause_time = (uint64_t)I_GetPrecisePrecision();
+	pause_time = I_MIDI_GetTimeUS();
 }
 
 static uint64_t CurrentTime(void)
 {
     //return I_GetTimeUS() - start_time;
-	return (uint64_t)I_GetPrecisePrecision() - start_time;
+	return I_MIDI_GetTimeUS() - start_time;
 }
 
 // Sends a channel message with the second parameter overridden to zero. Only
@@ -442,7 +452,7 @@ static void ResetDelayBytes(uint32_t length)
         // MIDI transfer period is 320 us per byte (MIDI 1.0 Electrical Spec
         // Update CA-033, page 2).
         //I_SleepUS(320 * length);
-		I_SleepDuration(320 * length);
+		I_MIDI_SleepUS(320 * length);
     }
 }
 
@@ -1226,7 +1236,7 @@ static int PlayerThread(void *unused)
         if (sleep)
         {
             //I_SleepUS(500);
-			I_SleepDuration(500);
+			I_MIDI_SleepUS(500);
             sleep = false;
         }
 
@@ -1271,7 +1281,7 @@ static int PlayerThread(void *unused)
                     if (remaining_time > 0)
                     {
                         //I_SleepUS(remaining_time);
-						I_SleepDuration(remaining_time);
+						I_MIDI_SleepUS(remaining_time);
                     }
                     ProcessEvent(position.event, position.track);
                     midi_state = STATE_PLAYING;
@@ -1359,7 +1369,7 @@ boolean I_MID_InitMusic(int device)
     return true;
 }
 
-static void I_MID_SetMusicVolume(int volume)
+void I_MID_SetMusicVolume(int volume)
 {
     static int last_volume = -1;
 
@@ -1382,7 +1392,7 @@ static void I_MID_SetMusicVolume(int volume)
     SDL_UnlockMutex(music_lock);
 }
 
-static void I_MID_StopSong(void *handle)
+void I_MID_StopSong(void *handle)
 {
     if (!music_initialized || !SDL_AtomicGet(&player_thread_running))
     {
@@ -1459,7 +1469,7 @@ void *I_MID_RegisterSong(void *data, int len)
     return (void *)1;
 }
 
-static void I_MID_UnRegisterSong(void *handle)
+void I_MID_UnRegisterSong(void *handle)
 {
     if (!music_initialized)
     {
