@@ -2844,7 +2844,7 @@ static void HWR_LinkDrawHackFinish(void)
 	linkdrawcount = 0;
 }
 
-static void HWR_DrawDropShadow(mobj_t *thing, fixed_t scale)
+static void HWR_DrawDropShadow(mobj_t *thing, gl_vissprite_t *spr, fixed_t scale)
 {
 	patch_t *gpatch;
 	FOutVector shadowVerts[4];
@@ -2903,7 +2903,7 @@ static void HWR_DrawDropShadow(mobj_t *thing, fixed_t scale)
 	if (alpha >= 255) return;
 	alpha = 255 - alpha;
 
-	gpatch = (patch_t *)W_CachePatchName("DSHADOW", PU_SPRITE);
+	gpatch = (cv_shadow.value == 2) ? spr->gpatch : (patch_t *)W_CachePatchName("DSHADOW", PU_SPRITE);
 	if (!(gpatch && ((GLPatch_t *)gpatch->hardware)->mipmap->format)) return;
 	HWR_GetPatch(gpatch);
 
@@ -2928,6 +2928,47 @@ static void HWR_DrawDropShadow(mobj_t *thing, fixed_t scale)
 	shadowVerts[1].x = shadowVerts[0].x = fx - offset;
 	shadowVerts[1].z = shadowVerts[2].z = fy - offset;
 	shadowVerts[0].z = shadowVerts[3].z = fy + offset;
+
+	if (cv_shadow.value == 2)
+	{
+		shadowVerts[0].x = shadowVerts[3].x = spr->x1;
+		shadowVerts[2].x = shadowVerts[1].x = spr->x2;
+		shadowVerts[0].z = shadowVerts[3].z = spr->z1;
+		shadowVerts[2].z = shadowVerts[1].z = spr->z2;
+
+		if (thing && fabsf(fscale - 1.0f) > 1.0E-36f)
+		{
+			// Always a pixel above the floor, perfectly flat.
+			for (i = 0; i < 4; i++)
+			{
+				if (groundslope)
+					slopez = P_GetSlopeZAt(groundslope, FLOAT_TO_FIXED(shadowVerts[i].x), FLOAT_TO_FIXED(shadowVerts[i].z));
+				shadowVerts[i].y = (groundslope ? FIXED_TO_FLOAT(slopez) : FIXED_TO_FLOAT(groundz))/2 + flip * 0.05f;
+			}
+
+			// Now transform the TOP vertices along the floor in the direction of the camera
+			shadowVerts[3].x = spr->x1 + (gpatch->height + fscale + offset) * gl_viewcos;
+			shadowVerts[2].x = spr->x2 + (gpatch->height + fscale + offset) * gl_viewcos;
+			shadowVerts[3].z = spr->z1 + (gpatch->height + fscale + offset) * gl_viewsin;
+			shadowVerts[2].z = spr->z2 + (gpatch->height + fscale + offset) * gl_viewsin;
+		}
+		else
+		{
+			// Always a pixel above the floor, perfectly flat.
+			for (i = 0; i < 4; i++)
+			{
+				if (groundslope)
+					slopez = P_GetSlopeZAt(groundslope, FLOAT_TO_FIXED(shadowVerts[i].x), FLOAT_TO_FIXED(shadowVerts[i].z));
+				shadowVerts[i].y = (groundslope ? FIXED_TO_FLOAT(slopez) : FIXED_TO_FLOAT(groundz))/2 + flip * 0.05f;
+			}
+
+			// Now transform the TOP vertices along the floor in the direction of the camera
+			shadowVerts[3].x = spr->x1 + (gpatch->height + offset) * gl_viewcos;
+			shadowVerts[2].x = spr->x2 + (gpatch->height + offset) * gl_viewcos;
+			shadowVerts[3].z = spr->z1 + (gpatch->height + offset) * gl_viewsin;
+			shadowVerts[2].z = spr->z2 + (gpatch->height + offset) * gl_viewsin;
+		}
+	}
 
 	for (i = 0; i < 4; i++)
 	{
@@ -2957,6 +2998,21 @@ static void HWR_DrawDropShadow(mobj_t *thing, fixed_t scale)
 	shadowVerts[3].t = shadowVerts[2].t = 0;
 	shadowVerts[0].t = shadowVerts[1].t = ((GLPatch_t *)gpatch->hardware)->max_t;
 
+
+	if (cv_shadow.value == 2)
+	{
+		if (spr->flip)
+		{
+			shadowVerts[0].s = shadowVerts[3].s = ((GLPatch_t *)gpatch->hardware)->max_s;
+			shadowVerts[2].s = shadowVerts[1].s = 0;
+		}
+		else
+		{
+			shadowVerts[0].s = shadowVerts[3].s = 0;
+			shadowVerts[2].s = shadowVerts[1].s = ((GLPatch_t *)gpatch->hardware)->max_s;
+		}
+	}
+
 	if (!(thing->renderflags & RF_NOCOLORMAPS))
 	{
 		if (thing->subsector->sector->numlights)
@@ -2979,6 +3035,13 @@ static void HWR_DrawDropShadow(mobj_t *thing, fixed_t scale)
 		shader = SHADER_SPRITE;
 		blendmode |= PF_ColorMapped;
 		sSurf.LightInfo.light_level = 0;
+	}
+
+	if (cv_shadow.value == 2)
+	{
+		sSurf.PolyColor.s.red = 0x00;
+		sSurf.PolyColor.s.blue = 0x00;
+		sSurf.PolyColor.s.green = 0x00;
 	}
 
 	HWR_ProcessPolygon(&sSurf, shadowVerts, 4, blendmode, shader, false);
@@ -4252,7 +4315,7 @@ static void HWR_DrawSprites(void)
 		{
 			if (spr->mobj && spr->mobj->shadowscale && cv_shadow.value && !skipshadow)
 			{
-				HWR_DrawDropShadow(spr->mobj, spr->mobj->shadowscale);
+				HWR_DrawDropShadow(spr->mobj, spr, spr->mobj->shadowscale);
 			}
 
 			if ((spr->mobj->flags2 & MF2_LINKDRAW) && spr->mobj->tracer)
@@ -4264,7 +4327,7 @@ static void HWR_DrawSprites(void)
 				// to the same tracer, so the tracer's shadow only gets drawn once.
 				if (cv_shadow.value && !skipshadow && spr->dispoffset < 0 && spr->mobj->tracer->shadowscale)
 				{
-					HWR_DrawDropShadow(spr->mobj->tracer, spr->mobj->tracer->shadowscale);
+					HWR_DrawDropShadow(spr->mobj->tracer, spr, spr->mobj->tracer->shadowscale);
 					skipshadow = true;
 					// The next sprite in this loop should be either another linkdraw sprite or the tracer.
 					// When the tracer is inevitably encountered, skipshadow will cause it's shadow
