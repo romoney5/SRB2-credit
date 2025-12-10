@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.136
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.11222.15 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Srb2DD", "src\win32\Srb2win-vc10.vcxproj", "{0F554F1D-ED49-4D65-A9A7-F63C57F277BE}"
 EndProject
@@ -9,7 +9,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libpng", "libs\libpng-src\p
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "r_opengl", "src\hardware\r_opengl\r_opengl-vc10.vcxproj", "{51137D5C-4E81-4955-AACF-EA3092006051}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "libs\zlib\projects\visualc10\zlib.vcxproj", "{73A5729C-7323-41D4-AB48-8A03C9F81603}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "libs\zlib\contrib\vstudio\vc26", "{73A5729C-7323-41D4-AB48-8A03C9F81603}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "s_openal", "src\hardware\s_openal\s_openal-vc10.vcxproj", "{E662D0B3-412D-4D55-A5EC-8CBD680DDCBE}"
 EndProject

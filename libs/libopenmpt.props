@@ -6,6 +6,7 @@
     <IncludePath>$(SolutionDir)libs\libopenmpt\inc;$(IncludePath)</IncludePath>
 	<LibraryPath Condition="'$(Platform)' == 'Win32'">$(SolutionDir)libs\libopenmpt\lib\x86;$(LibraryPath)</LibraryPath>
     <LibraryPath Condition="'$(Platform)' == 'x64'">$(SolutionDir)libs\libopenmpt\lib\x86_64;$(LibraryPath)</LibraryPath>
+	<LibraryPath Condition="'$(Platform)' == 'ARM64'">$(SolutionDir)libs\libopenmpt\lib\ARM64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <Link>

@@ -3995,7 +3995,11 @@ static void Command_Version_f(void)
 	if (sizeof(void*) == 4)
 		CONS_Printf("32-bit ");
 	else if (sizeof(void*) == 8)
+#ifndef _M_ARM64
 		CONS_Printf("64-bit ");
+#else
+		CONS_Printf("ARM64 ");
+#endif
 	else // 16-bit? 128-bit?
 		CONS_Printf("Bits Unknown ");
 
