@@ -572,7 +572,8 @@ int COM_AddLuaCommand(const char *name)
 	cmd->function = COM_Lua_f;
 	cmd->flags = COM_LUA | COM_LUACOM;
 	cmd->next = com_commands;
-	cmd->luacmd = false;
+	cmd->replaced = false;
+	cmd->luacmd = true;
 	com_commands = cmd;
 	return 0;
 }
