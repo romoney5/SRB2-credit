@@ -192,8 +192,6 @@ void R_DrawColumnClamped_8(void)
 	}
 }
 
-/*
-
 void R_Draw2sMultiPatchColumn_8(void)
 {
 	INT32 count;
@@ -376,8 +374,6 @@ void R_Draw2sMultiPatchTranslucentColumn_8(void)
 		}
 	}
 }
-
-*/
 
 /**	\brief The R_DrawShadeColumn_8 function
 	Experiment to make software go faster. Taken from the Boom source
