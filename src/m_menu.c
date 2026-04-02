@@ -170,7 +170,8 @@ static  INT32   (*setupcontrols)[2];  // pointer to the gamecontrols of the play
 
 // shhh... what am I doing... nooooo!
 static INT32 vidm_testingmode = 0;
-static INT32 vidm_previousmode;
+static INT32 vidm_previouswidth;
+static INT32 vidm_previousheight;
 static INT32 vidm_selected = 0;
 static INT32 vidm_nummodes;
 static INT32 vidm_column_size;
@@ -1321,35 +1322,38 @@ static menuitem_t OP_Camera2ExtendedOptionsMenu[] =
 enum
 {
 	op_video_resolution = 1,
-#if defined (__unix__) || defined (UNIXCOMMON) || defined (HAVE_SDL)
-	op_video_fullscreen,
-#endif
-	op_video_vsync,
-	op_video_renderer,
+	op_video_renderer = 5,
 };
 
 static menuitem_t OP_VideoOptionsMenu[] =
 {
 	{IT_HEADER, NULL, "Screen", NULL, 0},
-	{IT_STRING | IT_CALL,  NULL, "Set Resolution...",       M_VideoModeMenu,          6},
+	{IT_STRING | IT_CALL, NULL, "Set Resolution...",  M_VideoModeMenu,    6},  // op_video_resolution
+	{IT_STRING | IT_CVAR, NULL, "Fullscreen (F11)",   &cv_fullscreen,     11},
+	{IT_STRING | IT_CVAR, NULL, "Vertical Sync",      &cv_vidwait,        16},
 
-#if defined (__unix__) || defined (UNIXCOMMON) || defined (HAVE_SDL)
-	{IT_STRING|IT_CVAR,      NULL, "Fullscreen (F11)",          &cv_fullscreen,      11},
-#endif
-	{IT_STRING | IT_CVAR, NULL, "Vertical Sync",                &cv_vidwait,         16},
+	{IT_HEADER, NULL, "Renderer", NULL, 25},
 #ifdef HWRENDER
-	{IT_STRING | IT_CVAR, NULL, "Renderer (F10)",               &cv_renderer,        21},
+	{IT_STRING | IT_CVAR, NULL, "Renderer (F10)",    &cv_renderer,        31}, // op_video_renderer
 #else
-	{IT_TRANSTEXT | IT_PAIR, "Renderer", "Software",            &cv_renderer,        21},
+	{IT_TRANSTEXT | IT_PAIR, "Renderer", "Software", &cv_renderer,        31},
+#endif
+	{IT_STRING | IT_CVAR
+	 | IT_CV_FLOATSLIDER, NULL, "Field of view",     &cv_fov,             36},
+	{IT_STRING | IT_CVAR, NULL, "FPS Cap",           &cv_fpscap,          41},
+#ifdef HWRENDER
+	{IT_CALL | IT_STRING, NULL, "OpenGL Options...", M_OpenGLOptionsMenu, 46},
+#else
+	{IT_TRANSTEXT,        NULL, "OpenGL Options...", NULL, 46},
 #endif
 
-	{IT_HEADER, NULL, "Color Profile", NULL, 30},
-	{IT_STRING | IT_CVAR | IT_CV_SLIDER, NULL, "Brightness", &cv_globalgamma,36},
-	{IT_STRING | IT_CVAR | IT_CV_SLIDER, NULL, "Saturation", &cv_globalsaturation, 41},
-	{IT_SUBMENU|IT_STRING, NULL, "Advanced Settings...",     &OP_ColorOptionsDef,  46},
+	{IT_HEADER, NULL, "Color Profile", NULL, 55},
+	{IT_STRING | IT_CVAR | IT_CV_SLIDER, NULL, "Brightness", &cv_globalgamma,      61},
+	{IT_STRING | IT_CVAR | IT_CV_SLIDER, NULL, "Saturation", &cv_globalsaturation, 66},
+	{IT_SUBMENU|IT_STRING, NULL, "Advanced Settings...",     &OP_ColorOptionsDef,  71},
 
-	{IT_HEADER, NULL, "Heads-Up Display", NULL, 55},
-	{IT_STRING | IT_CVAR, NULL, "Show HUD",                  &cv_showhud,          61},
+	{IT_HEADER, NULL, "Heads-Up Display", NULL, 80},
+	{IT_STRING | IT_CVAR, NULL, "Show HUD",           &cv_showhud,        86},
 	{IT_STRING | IT_CVAR | IT_CV_SLIDER,
 	                      NULL, "HUD Transparency",          &cv_translucenthud,   66},
 	{IT_STRING | IT_CVAR, NULL, "Score/Time/Rings",          &cv_timetic,          71},
@@ -3959,7 +3963,7 @@ void M_Ticker(void)
 	{
 		// restore the previous video mode
 		if (--vidm_testingmode == 0)
-			setmodeneeded = vidm_previousmode + 1;
+			SCR_ChangeResolution(vidm_previouswidth, vidm_previousheight);
 	}
 
 	if (currentMenu == &OP_ScreenshotOptionsDef)
@@ -13951,71 +13955,42 @@ static modedesc_t modedescs[MAXMODEDESCS];
 
 static void M_VideoModeMenu(INT32 choice)
 {
-	INT32 i, j, vdup, nummodes, width, height;
-	const char *desc;
-
 	(void)choice;
 
 	memset(modedescs, 0, sizeof(modedescs));
 
-	VID_PrepareModeList(); // FIXME: hack
-
 	vidm_nummodes = 0;
-	vidm_selected = 0;
-	nummodes = VID_NumModes();
+	vidm_selected = -1;
 
-	i = 0;
-
-	for (; i < nummodes && vidm_nummodes < MAXMODEDESCS; i++)
+	for (INT32 i = 0; i < MAXWINMODES && vidm_nummodes < MAXMODEDESCS; i++)
 	{
-		desc = VID_GetModeName(i);
-		if (desc)
+		modedesc_t *desc = &modedescs[vidm_nummodes];
+
+		INT32 width = windowedModes[i][0];
+		INT32 height = windowedModes[i][1];
+
+		desc->width = width;
+		desc->height = height;
+
+		snprintf(desc->desc, sizeof desc->desc, "%dx%d", width, height);
+
+		if (width == vid.width && height == vid.height)
+			vidm_selected = vidm_nummodes;
+
+		vidm_nummodes++;
+	}
+
+	// Find closest resolution in the list that matches the current one
+	if (vidm_selected < 0)
+	{
+		for (INT32 i = 0; i < vidm_nummodes; i++)
 		{
-			vdup = 0;
-
-			// when a resolution exists both under VGA and VESA, keep the
-			// VESA mode, which is always a higher modenum
-			for (j = 0; j < vidm_nummodes; j++)
-			{
-				if (!strcmp(modedescs[j].desc, desc))
-				{
-					// mode(0): 320x200 is always standard VGA, not vesa
-					if (modedescs[j].modenum)
-					{
-						modedescs[j].modenum = i;
-						vdup = 1;
-
-						if (i == vid.modenum)
-							vidm_selected = j;
-					}
-					else
-						vdup = 1;
-
-					break;
-				}
-			}
-
-			if (!vdup)
-			{
-				modedescs[vidm_nummodes].modenum = i;
-				modedescs[vidm_nummodes].desc = desc;
-
-				if (i == vid.modenum)
-					vidm_selected = vidm_nummodes;
-
-				// Pull out the width and height
-				sscanf(desc, "%u%*c%u", &width, &height);
-
-				// Show multiples of 320x200 as green.
-				if (SCR_IsAspectCorrect(width, height))
-					modedescs[vidm_nummodes].goodratio = 1;
-
-				vidm_nummodes++;
-			}
+			if (modedescs[i].width >= vid.width && modedescs[i].height >= vid.height)
+				vidm_selected = i;
 		}
 	}
 
-	vidm_column_size = (vidm_nummodes+2) / 3;
+	vidm_column_size = (vidm_nummodes + 2) / 3;
 
 	M_SetupNextMenu(&OP_VideoModeDef);
 }
@@ -14028,9 +14003,7 @@ static void M_DrawMainVideoMenu(void)
 		INT32 y = currentMenu->y+currentMenu->menuitems[1].alphaKey*2;
 		if (itemOn == 7)
 			y -= 10;
-		V_DrawRightAlignedString(BASEVIDWIDTH - currentMenu->x, y,
-		(SCR_IsAspectCorrect(vid.width, vid.height) ? V_GREENMAP : V_YELLOWMAP),
-			va("%dx%d", vid.width, vid.height));
+		V_DrawRightAlignedString(BASEVIDWIDTH - currentMenu->x, y, V_YELLOWMAP, va("%dx%d", vid.width, vid.height));
 	}
 }
 
@@ -14051,9 +14024,8 @@ static void M_DrawVideoMode(void)
 	{
 		if (i == vidm_selected)
 			V_DrawString(row, col, V_YELLOWMAP, modedescs[i].desc);
-		// Show multiples of 320x200 as green.
 		else
-			V_DrawString(row, col, (modedescs[i].goodratio) ? V_GREENMAP : 0, modedescs[i].desc);
+			V_DrawString(row, col, 0, modedescs[i].desc);
 
 		col += 8;
 		if ((i % vidm_column_size) == (vidm_column_size-1))
@@ -14068,11 +14040,9 @@ static void M_DrawVideoMode(void)
 		INT32 testtime = (vidm_testingmode/TICRATE) + 1;
 
 		V_DrawCenteredString(BASEVIDWIDTH/2, OP_VideoModeDef.y + 116, MENUCAPS,
-			va("Previewing mode %c%dx%d",
-				(SCR_IsAspectCorrect(vid.width, vid.height)) ? 0x83 : 0x80,
-				vid.width, vid.height));
+			va("Previewing resolution %dx%d", vid.width, vid.height));
 		V_DrawCenteredString(BASEVIDWIDTH/2, OP_VideoModeDef.y + 138, MENUCAPS,
-			"Press ENTER again to keep this mode");
+			"Press ENTER again to keep this resolution");
 		V_DrawCenteredString(BASEVIDWIDTH/2, OP_VideoModeDef.y + 150, MENUCAPS,
 			va("Wait %d second%s", testtime, (testtime > 1) ? "s" : ""));
 		V_DrawCenteredString(BASEVIDWIDTH/2, OP_VideoModeDef.y + 158, MENUCAPS,
@@ -14080,28 +14050,24 @@ static void M_DrawVideoMode(void)
 	}
 	else
 	{
-		V_DrawFill(60, OP_VideoModeDef.y + 98, 200, 12, 159);
-		V_DrawFill(60, OP_VideoModeDef.y + 114, 200, 20, 159);
+		INT32 y1 = OP_VideoModeDef.y + 120;
+		INT32 y2 = y1 + 12 + 4;
 
-		V_DrawCenteredString(BASEVIDWIDTH/2, OP_VideoModeDef.y + 100, MENUCAPS,
-			va("Current mode is %c%dx%d",
-				(SCR_IsAspectCorrect(vid.width, vid.height)) ? 0x83 : 0x80,
-				vid.width, vid.height));
-		V_DrawCenteredString(BASEVIDWIDTH/2, OP_VideoModeDef.y + 116, (cv_fullscreen.value ? 0 : V_TRANSLUCENT)|MENUCAPS,
-			va("Default mode is %c%dx%d",
-				(SCR_IsAspectCorrect(cv_scr_width.value, cv_scr_height.value)) ? 0x83 : (!(VID_GetModeForSize(cv_scr_width.value, cv_scr_height.value)+1) ? 0x85 : 0x80),
+		INT32 width = 256;
+
+		V_DrawFill(BASEVIDWIDTH/2 - (width / 2), y1, width, 12, 159);
+		V_DrawFill(BASEVIDWIDTH/2 - (width / 2), y2, width, 20, 159);
+
+		V_DrawCenteredString(BASEVIDWIDTH/2, y1 + 2, MENUCAPS,
+			va("Current resolution is %dx%d", vid.width, vid.height));
+		V_DrawCenteredString(BASEVIDWIDTH/2, y2 + 2, (cv_fullscreen.value ? 0 : V_TRANSLUCENT)|MENUCAPS,
+			va("Default resolution is %c%dx%d",
+				!SCR_IsValidResolution(cv_scr_width.value, cv_scr_height.value) ? 0x85 : 0x80,
 				cv_scr_width.value, cv_scr_height.value));
-		V_DrawCenteredString(BASEVIDWIDTH/2, OP_VideoModeDef.y + 124, (cv_fullscreen.value ? V_TRANSLUCENT : 0)|MENUCAPS,
-			va("Windowed mode is %c%dx%d",
-				(SCR_IsAspectCorrect(cv_scr_width_w.value, cv_scr_height_w.value)) ? 0x83 : (!(VID_GetModeForSize(cv_scr_width_w.value, cv_scr_height_w.value)+1) ? 0x85 : 0x80),
+		V_DrawCenteredString(BASEVIDWIDTH/2, y2 + 2 + 8, (cv_fullscreen.value ? V_TRANSLUCENT : 0)|MENUCAPS,
+			va("Windowed resolution is %c%dx%d",
+				!SCR_IsValidResolution(cv_scr_width_w.value, cv_scr_height_w.value) ? 0x85 : 0x80,
 				cv_scr_width_w.value, cv_scr_height_w.value));
-
-		V_DrawCenteredString(BASEVIDWIDTH/2, OP_VideoModeDef.y + 138,
-			V_GREENMAP|MENUCAPS, "Green modes are recommended.");
-		V_DrawCenteredString(BASEVIDWIDTH/2, OP_VideoModeDef.y + 146,
-			V_YELLOWMAP|MENUCAPS, "Other modes may have visual errors.");
-		V_DrawCenteredString(BASEVIDWIDTH/2, OP_VideoModeDef.y + 158,
-			V_YELLOWMAP|MENUCAPS, "Larger modes may have performance issues.");
 	}
 
 	// Draw the cursor for the VidMode menu
@@ -14247,7 +14213,7 @@ static void M_HandleVideoMode(INT32 ch)
 	{
 		// change back to the previous mode quickly
 		case KEY_ESCAPE:
-			setmodeneeded = vidm_previousmode + 1;
+			SCR_ChangeResolution(vidm_previouswidth, vidm_previousheight);
 			vidm_testingmode = 0;
 			break;
 
@@ -14289,18 +14255,20 @@ static void M_HandleVideoMode(INT32 ch)
 			break;
 
 		case KEY_ENTER:
-			if (vid.modenum == modedescs[vidm_selected].modenum)
+			if (vid.width == modedescs[vidm_selected].width && vid.height == modedescs[vidm_selected].height)
 			{
 				S_StartSound(NULL, sfx_strpst);
-				SCR_SetDefaultMode();
+				SCR_SetDefaultMode(vid.width, vid.height);
 			}
 			else
 			{
 				S_StartSound(NULL, sfx_menu1);
 				vidm_testingmode = 15*TICRATE;
-				vidm_previousmode = vid.modenum;
-				if (!setmodeneeded) // in case the previous setmode was not finished
-					setmodeneeded = modedescs[vidm_selected].modenum + 1;
+				vidm_previouswidth = vid.width;
+				vidm_previousheight = vid.height;
+
+				if (!vid.change.set) // in case the previous setmode was not finished
+					SCR_ChangeResolution(modedescs[vidm_selected].width, modedescs[vidm_selected].height);
 			}
 			break;
 
@@ -14318,9 +14286,9 @@ static void M_HandleVideoMode(INT32 ch)
 			CV_Set(&cv_scr_width_w, cv_scr_width_w.defaultvalue);
 			CV_Set(&cv_scr_height_w, cv_scr_height_w.defaultvalue);
 			if (cv_fullscreen.value)
-				setmodeneeded = VID_GetModeForSize(cv_scr_width.value, cv_scr_height.value)+1;
+				SCR_ChangeResolution(cv_scr_width.value, cv_scr_height.value);
 			else
-				setmodeneeded = VID_GetModeForSize(cv_scr_width_w.value, cv_scr_height_w.value)+1;
+				SCR_ChangeResolution(cv_scr_width_w.value, cv_scr_height_w.value);
 			break;
 
 		case KEY_F10: // Renderer toggle, also processed inside menus
