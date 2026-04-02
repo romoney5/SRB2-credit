@@ -14023,9 +14023,9 @@ static void M_DrawVideoMode(void)
 	for (i = 0; i < vidm_nummodes; i++)
 	{
 		if (i == vidm_selected)
-			V_DrawString(row, col, V_YELLOWMAP, modedescs[i].desc);
+			V_DrawString(row, col, V_YELLOWMAP|MENUCAPS, modedescs[i].desc);
 		else
-			V_DrawString(row, col, 0, modedescs[i].desc);
+			V_DrawString(row, col, MENUCAPS, modedescs[i].desc);
 
 		col += 8;
 		if ((i % vidm_column_size) == (vidm_column_size-1))
