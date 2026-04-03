@@ -1320,38 +1320,32 @@ static menuitem_t OP_Camera2ExtendedOptionsMenu[] =
 enum
 {
 	op_video_resolution = 1,
-	op_video_renderer = 5,
+	op_video_renderer = 4,
 };
 
 static menuitem_t OP_VideoOptionsMenu[] =
 {
 	{IT_HEADER, NULL, "Screen", NULL, 0},
-	{IT_STRING | IT_CALL, NULL, "Set Resolution...",  M_VideoModeMenu,    6},  // op_video_resolution
-	{IT_STRING | IT_CVAR, NULL, "Fullscreen (F11)",   &cv_fullscreen,     11},
-	{IT_STRING | IT_CVAR, NULL, "Vertical Sync",      &cv_vidwait,        16},
+	{IT_STRING | IT_CALL,  NULL, "Set Resolution...",       M_VideoModeMenu,          6},
 
-	{IT_HEADER, NULL, "Renderer", NULL, 25},
-#ifdef HWRENDER
-	{IT_STRING | IT_CVAR, NULL, "Renderer (F10)",    &cv_renderer,        31}, // op_video_renderer
-#else
-	{IT_TRANSTEXT | IT_PAIR, "Renderer", "Software", &cv_renderer,        31},
+#if defined (__unix__) || defined (UNIXCOMMON) || defined (HAVE_SDL)
+	{IT_STRING|IT_CVAR,      NULL, "Fullscreen (F11)",          &cv_fullscreen,      11},
 #endif
-	{IT_STRING | IT_CVAR
-	 | IT_CV_FLOATSLIDER, NULL, "Field of view",     &cv_fov,             36},
-	{IT_STRING | IT_CVAR, NULL, "FPS Cap",           &cv_fpscap,          41},
+	{IT_STRING | IT_CVAR, NULL, "Vertical Sync",                &cv_vidwait,         16},
 #ifdef HWRENDER
-	{IT_CALL | IT_STRING, NULL, "OpenGL Options...", M_OpenGLOptionsMenu, 46},
+	{IT_STRING | IT_CVAR, NULL, "Renderer (F10)",               &cv_renderer,        21},
 #else
-	{IT_TRANSTEXT,        NULL, "OpenGL Options...", NULL, 46},
+	{IT_TRANSTEXT | IT_PAIR, "Renderer", "Software",            &cv_renderer,        21},
 #endif
+	// {IT_STRING | IT_CVAR, NULL, "GUI Scale",            &cv_scr_scale,        26},
 
-	{IT_HEADER, NULL, "Color Profile", NULL, 55},
-	{IT_STRING | IT_CVAR | IT_CV_SLIDER, NULL, "Brightness", &cv_globalgamma,      61},
-	{IT_STRING | IT_CVAR | IT_CV_SLIDER, NULL, "Saturation", &cv_globalsaturation, 66},
-	{IT_SUBMENU|IT_STRING, NULL, "Advanced Settings...",     &OP_ColorOptionsDef,  71},
+	{IT_HEADER, NULL, "Color Profile", NULL, 30},
+	{IT_STRING | IT_CVAR | IT_CV_SLIDER, NULL, "Brightness", &cv_globalgamma,36},
+	{IT_STRING | IT_CVAR | IT_CV_SLIDER, NULL, "Saturation", &cv_globalsaturation, 41},
+	{IT_SUBMENU|IT_STRING, NULL, "Advanced Settings...",     &OP_ColorOptionsDef,  46},
 
-	{IT_HEADER, NULL, "Heads-Up Display", NULL, 80},
-	{IT_STRING | IT_CVAR, NULL, "Show HUD",           &cv_showhud,        86},
+	{IT_HEADER, NULL, "Heads-Up Display", NULL, 55},
+	{IT_STRING | IT_CVAR, NULL, "Show HUD",                  &cv_showhud,          61},
 	{IT_STRING | IT_CVAR | IT_CV_SLIDER,
 	                      NULL, "HUD Transparency",          &cv_translucenthud,   66},
 	{IT_STRING | IT_CVAR, NULL, "Score/Time/Rings",          &cv_timetic,          71},
@@ -5915,7 +5909,7 @@ static void M_DrawRecordAttackForeground(void)
 		INT32 y = ((i*height) - (height - ((FixedInt(recatkdrawtimer*2))%height)));
 		// don't draw above the screen
 		{
-			INT32 sy = FixedMul(y, vid.dup<<FRACBITS) >> FRACBITS;
+			INT32 sy = FixedMul(y, (INT32)(vid.dup * FRACUNIT)) >> FRACBITS; //romoney5TODO:
 			if (vid.height != BASEVIDHEIGHT * vid.dup)
 				sy += (vid.height - (BASEVIDHEIGHT * vid.dup)) / 2;
 			if ((sy+height) < 0)
@@ -6583,7 +6577,7 @@ static void M_DrawAddons(void)
 
 // 29 pixels of padding on both sides (58)
 // #define boxwidth (MAXSTRINGLENGTH*8+6)
-#define boxwidth ((vid.width / vid.dup) - 58)
+#define boxwidth ((INT32)(vid.width / vid.dup) - 58)
 	x -= (boxwidth - (MAXSTRINGLENGTH*8+6))/2;
 
 	m = (BASEVIDHEIGHT - currentMenu->y + 2) - (y - 1);
@@ -14021,7 +14015,7 @@ static void M_DrawMainVideoMenu(void)
 		INT32 y = currentMenu->y+currentMenu->menuitems[1].alphaKey*2;
 		if (itemOn == 7)
 			y -= 10;
-		V_DrawRightAlignedString(BASEVIDWIDTH - currentMenu->x, y, MENUCOLOR, va("%dx%d", vid.width, vid.height));
+		V_DrawRightAlignedString(BASEVIDWIDTH - currentMenu->x, y, MENUCOLOR|MENUCAPS, va("%dx%d", vid.width, vid.height));
 	}
 }
 

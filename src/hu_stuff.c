@@ -2561,7 +2561,7 @@ static inline void HU_DrawSpectatorTicker(void)
 		if (playeringame[i] && players[i].spectator)
 			totallength += (signed)strlen(player_names[i]) * 8 + 16;
 
-	length -= (leveltime % (totallength + (vid.width / vid.dup)));
+	length -= (leveltime % (totallength + (vid.width / (INT32)vid.dup)));
 	length += (vid.width / vid.dup);
 
 	for (i = 0; i < MAXPLAYERS; i++)

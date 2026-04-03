@@ -47,7 +47,8 @@ typedef struct viddef_s
 	INT32 height;
 	INT32 recalc; // if true, recalc vid-based stuff
 
-	INT32 dup; // scale 1, 2, 3 value for menus & overlays
+	float dup; // scale 1, 2, 3 value for menus & overlays
+	// romoney5: w double
 	INT32/*fixed_t*/ fdup; // same as dup, but exact value when aspect ratio isn't 320/200
 	INT32 bpp; // BYTES per pixel: 1 = 256color, 2 = highcolor
 
@@ -173,6 +174,7 @@ extern CV_PossibleValue_t cv_renderer_t[];
 extern INT32 scr_bpp;
 
 extern consvar_t cv_scr_width, cv_scr_height, cv_scr_width_w, cv_scr_height_w, cv_scr_depth, cv_fullscreen;
+extern consvar_t cv_scr_scale;
 extern consvar_t cv_renderer;
 // wait for page flipping to end or not
 extern consvar_t cv_vidwait;

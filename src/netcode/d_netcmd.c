@@ -962,6 +962,7 @@ void D_RegisterClientCommands(void)
 	CV_RegisterVar(&cv_scr_height);
 	CV_RegisterVar(&cv_scr_width_w);
 	CV_RegisterVar(&cv_scr_height_w);
+	CV_RegisterVar(&cv_scr_scale);
 
 	CV_RegisterVar(&cv_soundtest);
 

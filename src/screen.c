@@ -95,6 +95,9 @@ consvar_t cv_scr_width_w = CVAR_INIT ("scr_width_w", "640", CV_SAVE, CV_Unsigned
 consvar_t cv_scr_height_w = CVAR_INIT ("scr_height_w", "400", CV_SAVE, CV_Unsigned, NULL);
 consvar_t cv_scr_depth = CVAR_INIT ("scr_depth", "16 bits", CV_SAVE, scr_depth_cons_t, NULL);
 
+static CV_PossibleValue_t scr_scale_cons_t[] = {{FRACUNIT * 10 / 100, "MIN"}, {FRACUNIT * 2000 / 100, "MAX"}, {-1, "Auto"}, {-2, "Fractional"}, {0, NULL}};
+consvar_t cv_scr_scale = CVAR_INIT ("scr_scale", "Auto", CV_SAVE|CV_FLOAT|CV_CALL, scr_scale_cons_t, V_Recalc);
+
 CV_PossibleValue_t cv_renderer_t[] = {
 	{1, "Software"},
 #ifdef HWRENDER
@@ -806,9 +809,9 @@ void SCR_DisplayMarathonInfo(void)
 #define PRIMEV1 13
 #define PRIMEV2 17 // I can't believe it! I'm on TV!
 		antisplice[0] += (entertic - oldentertics)*PRIMEV2;
-		antisplice[0] %= PRIMEV1*((vid.width/vid.dup)+1);
+		antisplice[0] %= PRIMEV1*((INT32)(vid.width/vid.dup)+1);
 		antisplice[1] += (entertic - oldentertics)*PRIMEV1;
-		antisplice[1] %= PRIMEV1*((vid.width/vid.dup)+1);
+		antisplice[1] %= PRIMEV1*((INT32)(vid.width/vid.dup)+1);
 		str = va("%i:%02i:%02i.%02i",
 			G_TicsToHours(marathontime),
 			G_TicsToMinutes(marathontime, false),
