@@ -518,7 +518,7 @@ void V_DrawStretchyFixedPatch(fixed_t x, fixed_t y, fixed_t pscale, fixed_t vsca
 	UINT32 blendmode = ((scrn & V_BLENDMASK) >> V_BLENDSHIFT);
 
 	fixed_t col, ofs, colfrac, rowfrac, fdup, vdup;
-	INT32 dup;
+	float dup;
 	column_t *column;
 	UINT8 *desttop, *dest, *deststart, *destend;
 	const UINT8 *source, *deststop;
@@ -709,7 +709,7 @@ void V_DrawStretchyFixedPatch(fixed_t x, fixed_t y, fixed_t pscale, fixed_t vsca
 				}
 			}
 
-			if (vid.width != BASEVIDWIDTH * dup)
+			if (true) //(vid.width != BASEVIDWIDTH * dup)
 			{
 				// dup adjustments pretend that screen width is BASEVIDWIDTH * dup,
 				// so center this imaginary screen
@@ -722,7 +722,7 @@ void V_DrawStretchyFixedPatch(fixed_t x, fixed_t y, fixed_t pscale, fixed_t vsca
 				else if (perplayershuffle & 8)
 					x += (vid.width - (BASEVIDWIDTH * dup)) / 4;
 			}
-			if (vid.height != BASEVIDHEIGHT * dup)
+			if (true) //(vid.height != BASEVIDHEIGHT * dup)
 			{
 				// same thing here
 				if (scrn & V_SNAPTOBOTTOM)
@@ -1257,7 +1257,7 @@ void V_DrawFill(INT32 x, INT32 y, INT32 w, INT32 h, INT32 c)
 		h *= vid.dup;
 
 		// Center it if necessary
-		if (vid.width != BASEVIDWIDTH * vid.dup)
+		if (true) //(vid.width != BASEVIDWIDTH * vid.dup)
 		{
 			// dup adjustments pretend that screen width is BASEVIDWIDTH * dup,
 			// so center this imaginary screen
@@ -1270,7 +1270,7 @@ void V_DrawFill(INT32 x, INT32 y, INT32 w, INT32 h, INT32 c)
 			else if (perplayershuffle & 8)
 				x += (vid.width - (BASEVIDWIDTH * vid.dup)) / 4;
 		}
-		if (vid.height != BASEVIDHEIGHT * vid.dup)
+		if (true) //(vid.height != BASEVIDHEIGHT * vid.dup)
 		{
 			// same thing here
 			if (c & V_SNAPTOBOTTOM)
@@ -1475,7 +1475,7 @@ void V_DrawFillConsoleMap(INT32 x, INT32 y, INT32 w, INT32 h, INT32 c)
 		h *= vid.dup;
 
 		// Center it if necessary
-		if (vid.width != BASEVIDWIDTH * vid.dup)
+		if (true) //(vid.width != BASEVIDWIDTH * vid.dup)
 		{
 			// dup adjustments pretend that screen width is BASEVIDWIDTH * dup,
 			// so center this imaginary screen
@@ -1488,7 +1488,7 @@ void V_DrawFillConsoleMap(INT32 x, INT32 y, INT32 w, INT32 h, INT32 c)
 			else if (perplayershuffle & 8)
 				x += (vid.width - (BASEVIDWIDTH * vid.dup)) / 4;
 		}
-		if (vid.height != BASEVIDHEIGHT * vid.dup)
+		if (true) //(vid.height != BASEVIDHEIGHT * vid.dup)
 		{
 			// same thing here
 			if (c & V_SNAPTOBOTTOM)
@@ -1500,6 +1500,7 @@ void V_DrawFillConsoleMap(INT32 x, INT32 y, INT32 w, INT32 h, INT32 c)
 			else if (perplayershuffle & 2)
 				y += (vid.height - (BASEVIDHEIGHT * vid.dup)) / 4;
 		}
+		// romoney5: holy code duplication
 	}
 
 	if (x >= vid.width || y >= vid.height)
@@ -1657,7 +1658,7 @@ void V_DrawFadeFill(INT32 x, INT32 y, INT32 w, INT32 h, INT32 c, UINT16 color, U
 		h *= vid.dup;
 
 		// Center it if necessary
-		if (vid.width != BASEVIDWIDTH * vid.dup)
+		if (true) //(vid.width != BASEVIDWIDTH * vid.dup)
 		{
 			// dup adjustments pretend that screen width is BASEVIDWIDTH * dup,
 			// so center this imaginary screen
@@ -1670,7 +1671,7 @@ void V_DrawFadeFill(INT32 x, INT32 y, INT32 w, INT32 h, INT32 c, UINT16 color, U
 			else if (perplayershuffle & 8)
 				x += (vid.width - (BASEVIDWIDTH * vid.dup)) / 4;
 		}
-		if (vid.height != BASEVIDHEIGHT * vid.dup)
+		if (true) //(vid.height != BASEVIDHEIGHT * vid.dup)
 		{
 			// same thing here
 			if (c & V_SNAPTOBOTTOM)
@@ -1745,7 +1746,7 @@ void V_DrawFlatFill(INT32 x, INT32 y, INT32 w, INT32 h, lumpnum_t flatnum)
 
 	flat = W_CacheLumpNum(flatnum, PU_CACHE);
 
-	dest = screens[0] + y*vid.dup*vid.width + x*vid.dup;
+	dest = screens[0] + (INT32)(y*vid.dup*vid.width + x*vid.dup);
 	deststop = screens[0] + vid.rowbytes * vid.height;
 
 	// from V_DrawScaledPatch
@@ -1753,19 +1754,19 @@ void V_DrawFlatFill(INT32 x, INT32 y, INT32 w, INT32 h, lumpnum_t flatnum)
 	{
 		// dup adjustments pretend that screen width is BASEVIDWIDTH * dup,
 		// so center this imaginary screen
-		dest += (vid.width - (BASEVIDWIDTH * vid.dup)) / 2;
+		dest += (vid.width - (INT32)(BASEVIDWIDTH * vid.dup)) / 2;
 	}
-	if (vid.height != BASEVIDHEIGHT * vid.dup)
+	if (vid.height != (INT32)(BASEVIDHEIGHT * vid.dup))
 	{
 		// same thing here
-		dest += (vid.height - (BASEVIDHEIGHT * vid.dup)) * vid.width / 2;
+		dest += (vid.height - (INT32)(BASEVIDHEIGHT * vid.dup)) * vid.width / 2;
 	}
 
 	w *= vid.dup;
 	h *= vid.dup;
 
-	dx = FixedDiv(FRACUNIT, vid.dup<<(FRACBITS-2));
-	dy = FixedDiv(FRACUNIT, vid.dup<<(FRACBITS-2));
+	dx = FixedDiv(FRACUNIT, (INT32)vid.dup<<(FRACBITS-2));
+	dy = FixedDiv(FRACUNIT, (INT32)vid.dup<<(FRACBITS-2));
 
 	yfrac = 0;
 	for (v = 0; v < h; v++, dest += vid.width)
@@ -2072,15 +2073,15 @@ void V_DrawFontStringAtFixed(fixed_t x, fixed_t y, INT32 option, fixed_t pscale,
 
 	if (option & V_NOSCALESTART)
 	{
-		dupx = vid.dup<<FRACBITS;
-		dupy = vid.dup<<FRACBITS;
+		dupx = (INT32)(vid.dup * FRACUNIT);
+		dupy = (INT32)(vid.dup * FRACUNIT);
 		scrwidth = vid.width;
 	}
 	else
 	{
 		dupx = pscale;
 		dupy = vscale;
-		scrwidth = FixedDiv(vid.width<<FRACBITS, vid.dup);
+		scrwidth = (INT32)(vid.width * FRACUNIT / vid.dup);
 		left = (scrwidth - (BASEVIDWIDTH << FRACBITS))/2;
 		scrwidth -= left;
 	}
@@ -2663,7 +2664,7 @@ Unoptimized version
 			{
 				// Shift this row of pixels to the right by 2
 				tmpscr[y*vid.width] = srcscr[y*vid.width];
-				M_Memcpy(&tmpscr[y*vid.width+vid.dup], &srcscr[y*vid.width], vid.width-vid.dup);
+				M_Memcpy(&tmpscr[y*vid.width+(INT32)vid.dup], &srcscr[y*vid.width], vid.width-(INT32)vid.dup);
 			}
 			else
 				M_Memcpy(&tmpscr[y*vid.width], &srcscr[y*vid.width], vid.width);
@@ -2765,15 +2766,35 @@ void V_Recalc(void)
 	// Set dup based on width or height, whichever is less
 	if (((vid.width*FRACUNIT) / BASEVIDWIDTH) < ((vid.height*FRACUNIT) / BASEVIDHEIGHT))
 	{
-		vid.dup = vid.width / BASEVIDWIDTH;
+		vid.dup = (double)vid.width / BASEVIDWIDTH;
 		vid.fdup = (vid.width*FRACUNIT) / BASEVIDWIDTH;
 	}
 	else
 	{
-		vid.dup = vid.height / BASEVIDHEIGHT;
+		vid.dup = (double)vid.height / BASEVIDHEIGHT;
 		vid.fdup = (vid.height*FRACUNIT) / BASEVIDHEIGHT;
 	}
 
-	vid.meddup = (UINT8)(vid.dup >> 1) + 1;
+	vid.meddup = (UINT8)(vid.dup / 2) + 1;
 	vid.smalldup = (UINT8)(vid.dup / 3) + 1;
+
+	// now scale it accordingly
+	switch(cv_scr_scale.value)
+	{
+		case -1: // auto (integer)
+		{
+			vid.dup = (INT32)vid.dup;
+			break;
+		}
+		case -2: // fractional (decimal auto-scaling)
+		{
+			break;
+		}
+
+		default: // custom scale
+		{
+			vid.dup = (float)cv_scr_scale.value / FRACUNIT;
+			break;
+		}
+	}
 }

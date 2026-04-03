@@ -480,7 +480,7 @@ static void GIF_headwrite(void)
 	// Image width/height
 	if (gif_downscale)
 	{
-		scrbuf_downscaleamt = vid.dup;
+		scrbuf_downscaleamt = (float)vid.fdup / FRACUNIT; // get the original vid.dup
 		rwidth = (vid.width / scrbuf_downscaleamt);
 		rheight = (vid.height / scrbuf_downscaleamt);
 	}

@@ -537,7 +537,7 @@ void Y_IntermissionDrawer(void)
 
 		if (animatetic && (tic_t)intertic >= animatetic)
 		{
-			const INT32 scradjust = (vid.width/vid.dup)>>3; // 40 for BASEVIDWIDTH
+			const INT32 scradjust = (INT32)(vid.width/vid.dup)>>3; // 40 for BASEVIDWIDTH
 			INT32 animatetimer = (intertic - animatetic);
 			if (animatetimer <= 16)
 			{
