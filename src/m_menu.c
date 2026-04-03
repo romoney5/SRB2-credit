@@ -5894,7 +5894,7 @@ static void M_DrawRecordAttackForeground(void)
 		INT32 y = ((i*height) - (height - ((FixedInt(recatkdrawtimer*2))%height)));
 		// don't draw above the screen
 		{
-			INT32 sy = FixedMul(y, (INT32)(vid.dup * FRACUNIT)) >> FRACBITS; //romoney5TODO:
+			INT32 sy = FixedMul(y, (INT32)(vid.dup * FRACUNIT)) >> FRACBITS;
 			if (vid.height != BASEVIDHEIGHT * vid.dup)
 				sy += (vid.height - (BASEVIDHEIGHT * vid.dup)) / 2;
 			if ((sy+height) < 0)
