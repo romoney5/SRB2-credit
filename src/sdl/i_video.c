@@ -339,7 +339,13 @@ static SDL_bool SDLSetMode(INT32 width, INT32 height, SDL_bool fullscreen, SDL_b
 				SDL_SetWindowFullscreen(window, 0);
 			}
 
-			SDL_SetWindowSize(window, width, height);
+			// only resize the window if the dimensions are different,
+			// otherwise it may keep expanding in height
+			int wwidth, wheight;
+			SDL_GetWindowSize(window, &wwidth, &wheight);
+
+			if (wwidth != width || wheight != height)
+				SDL_SetWindowSize(window, width, height);
 
 			if (reposition)
 			{
