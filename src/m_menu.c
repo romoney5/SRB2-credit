@@ -5895,8 +5895,7 @@ static void M_DrawRecordAttackForeground(void)
 		// don't draw above the screen
 		{
 			INT32 sy = FixedMul(y, (INT32)(vid.dup * FRACUNIT)) >> FRACBITS;
-			if (vid.height != BASEVIDHEIGHT * vid.dup)
-				sy += (vid.height - (BASEVIDHEIGHT * vid.dup)) / 2;
+			sy += (vid.height - (BASEVIDHEIGHT * vid.dup)) / 2;
 			if ((sy+height) < 0)
 				continue;
 		}
@@ -5925,8 +5924,7 @@ static void M_DrawNightsAttackMountains(void)
 	INT32 x = FixedInt(-bgscrollx) % w;
 	INT32 y = BASEVIDHEIGHT - (background->height * 2);
 
-	if (vid.height != BASEVIDHEIGHT * vid.dup)
-		V_DrawFill(0, 0, BASEVIDWIDTH, BASEVIDHEIGHT, 158);
+	V_DrawFill(0, 0, BASEVIDWIDTH, BASEVIDHEIGHT, 158);
 	V_DrawFill(0, y+50, vid.width, BASEVIDHEIGHT, V_SNAPTOLEFT|31);
 
 	V_DrawScaledPatch(x, y, V_SNAPTOLEFT, background);
@@ -8413,8 +8411,7 @@ static void M_DrawLoadGameData(void)
 	INT32 i, prev_i = 1, savetodraw, x, y, hsep = 90;
 	skin_t *charskin = NULL;
 
-	if (vid.width != BASEVIDWIDTH*vid.dup)
-		hsep = (hsep*vid.width)/(BASEVIDWIDTH*vid.dup);
+	hsep = (hsep*vid.width)/(BASEVIDWIDTH*vid.dup);
 
 	for (i = 2; prev_i; i = -(i + ((UINT32)i >> 31))) // draws from outwards in; 2, -2, 1, -1, 0
 	{

@@ -702,8 +702,8 @@ void V_DrawStretchyFixedPatch(fixed_t x, fixed_t y, fixed_t pscale, fixed_t vsca
 				}
 			}
 
-			if (vid.width != BASEVIDWIDTH * dup)
-			{
+			// if (vid.width != BASEVIDWIDTH * dup)
+			// {
 				// dup adjustments pretend that screen width is BASEVIDWIDTH * dup,
 				// so center this imaginary screen
 				if (scrn & V_SNAPTORIGHT)
@@ -714,9 +714,9 @@ void V_DrawStretchyFixedPatch(fixed_t x, fixed_t y, fixed_t pscale, fixed_t vsca
 					x -= (vid.width - (BASEVIDWIDTH * dup)) / 4;
 				else if (perplayershuffle & 8)
 					x += (vid.width - (BASEVIDWIDTH * dup)) / 4;
-			}
-			if (vid.height != BASEVIDHEIGHT * dup)
-			{
+			// }
+			// if (vid.height != BASEVIDHEIGHT * dup)
+			// {
 				// same thing here
 				if (scrn & V_SNAPTOBOTTOM)
 					y += (vid.height - (BASEVIDHEIGHT * dup));
@@ -726,7 +726,7 @@ void V_DrawStretchyFixedPatch(fixed_t x, fixed_t y, fixed_t pscale, fixed_t vsca
 					y -= (vid.height - (BASEVIDHEIGHT * dup)) / 4;
 				else if (perplayershuffle & 2)
 					y += (vid.height - (BASEVIDHEIGHT * dup)) / 4;
-			}
+			// }
 		}
 
 		desttop += (y*vid.width) + x;
@@ -1267,8 +1267,8 @@ void V_DrawFill(INT32 x, INT32 y, INT32 w, INT32 h, INT32 c)
 		h *= vid.dup;
 
 		// Center it if necessary
-		if (vid.width != BASEVIDWIDTH * vid.dup)
-		{
+		// if (vid.width != BASEVIDWIDTH * vid.dup)
+		// {
 			// dup adjustments pretend that screen width is BASEVIDWIDTH * dup,
 			// so center this imaginary screen
 			if (c & V_SNAPTORIGHT)
@@ -1279,9 +1279,9 @@ void V_DrawFill(INT32 x, INT32 y, INT32 w, INT32 h, INT32 c)
 				x -= (vid.width - (BASEVIDWIDTH * vid.dup)) / 4;
 			else if (perplayershuffle & 8)
 				x += (vid.width - (BASEVIDWIDTH * vid.dup)) / 4;
-		}
-		if (vid.height != BASEVIDHEIGHT * vid.dup)
-		{
+		// }
+		// if (vid.height != BASEVIDHEIGHT * vid.dup)
+		// {
 			// same thing here
 			if (c & V_SNAPTOBOTTOM)
 				y += (vid.height - (BASEVIDHEIGHT * vid.dup));
@@ -1291,7 +1291,7 @@ void V_DrawFill(INT32 x, INT32 y, INT32 w, INT32 h, INT32 c)
 				y -= (vid.height - (BASEVIDHEIGHT * vid.dup)) / 4;
 			else if (perplayershuffle & 2)
 				y += (vid.height - (BASEVIDHEIGHT * vid.dup)) / 4;
-		}
+		// }
 	}
 
 	if (x >= vid.width || y >= vid.height)
@@ -1471,8 +1471,8 @@ void V_DrawFixedFill(fixed_t x, fixed_t y, fixed_t w, fixed_t h, INT32 c)
 		h >>= FRACBITS;
 		
 		// Center it if necessary
-		if (vid.width != BASEVIDWIDTH * vid.dup)
-		{
+		// if (vid.width != BASEVIDWIDTH * vid.dup)
+		// {
 			// dup adjustments pretend that screen width is BASEVIDWIDTH * dup,
 			// so center this imaginary screen
 			if (c & V_SNAPTORIGHT)
@@ -1483,9 +1483,9 @@ void V_DrawFixedFill(fixed_t x, fixed_t y, fixed_t w, fixed_t h, INT32 c)
 				x -= (vid.width - (BASEVIDWIDTH * vid.dup)) / 4;
 			else if (perplayershuffle & 8)
 				x += (vid.width - (BASEVIDWIDTH * vid.dup)) / 4;
-		}
-		if (vid.height != BASEVIDHEIGHT * vid.dup)
-		{
+		// }
+		// if (vid.height != BASEVIDHEIGHT * vid.dup)
+		// {
 			// same thing here
 			if (c & V_SNAPTOBOTTOM)
 				y += (vid.height - (BASEVIDHEIGHT * vid.dup));
@@ -1495,7 +1495,7 @@ void V_DrawFixedFill(fixed_t x, fixed_t y, fixed_t w, fixed_t h, INT32 c)
 				y -= (vid.height - (BASEVIDHEIGHT * vid.dup)) / 4;
 			else if (perplayershuffle & 2)
 				y += (vid.height - (BASEVIDHEIGHT * vid.dup)) / 4;
-		}
+		// }
 	}
 
 	if (x >= vid.width || y >= vid.height)
@@ -1687,8 +1687,8 @@ void V_DrawFillConsoleMap(INT32 x, INT32 y, INT32 w, INT32 h, INT32 c)
 		h *= vid.dup;
 
 		// Center it if necessary
-		if (vid.width != BASEVIDWIDTH * vid.dup)
-		{
+		// if (vid.width != BASEVIDWIDTH * vid.dup)
+		// {
 			// dup adjustments pretend that screen width is BASEVIDWIDTH * dup,
 			// so center this imaginary screen
 			if (c & V_SNAPTORIGHT)
@@ -1699,9 +1699,9 @@ void V_DrawFillConsoleMap(INT32 x, INT32 y, INT32 w, INT32 h, INT32 c)
 				x -= (vid.width - (BASEVIDWIDTH * vid.dup)) / 4;
 			else if (perplayershuffle & 8)
 				x += (vid.width - (BASEVIDWIDTH * vid.dup)) / 4;
-		}
-		if (vid.height != BASEVIDHEIGHT * vid.dup)
-		{
+		// }
+		// if (vid.height != BASEVIDHEIGHT * vid.dup)
+		// {
 			// same thing here
 			if (c & V_SNAPTOBOTTOM)
 				y += (vid.height - (BASEVIDHEIGHT * vid.dup));
@@ -1711,7 +1711,7 @@ void V_DrawFillConsoleMap(INT32 x, INT32 y, INT32 w, INT32 h, INT32 c)
 				y -= (vid.height - (BASEVIDHEIGHT * vid.dup)) / 4;
 			else if (perplayershuffle & 2)
 				y += (vid.height - (BASEVIDHEIGHT * vid.dup)) / 4;
-		}
+		// }
 	}
 
 	if (x >= vid.width || y >= vid.height)
@@ -1869,8 +1869,8 @@ void V_DrawFadeFill(INT32 x, INT32 y, INT32 w, INT32 h, INT32 c, UINT16 color, U
 		h *= vid.dup;
 
 		// Center it if necessary
-		if (vid.width != BASEVIDWIDTH * vid.dup)
-		{
+		// if (vid.width != BASEVIDWIDTH * vid.dup)
+		// {
 			// dup adjustments pretend that screen width is BASEVIDWIDTH * dup,
 			// so center this imaginary screen
 			if (c & V_SNAPTORIGHT)
@@ -1881,9 +1881,9 @@ void V_DrawFadeFill(INT32 x, INT32 y, INT32 w, INT32 h, INT32 c, UINT16 color, U
 				x -= (vid.width - (BASEVIDWIDTH * vid.dup)) / 4;
 			else if (perplayershuffle & 8)
 				x += (vid.width - (BASEVIDWIDTH * vid.dup)) / 4;
-		}
-		if (vid.height != BASEVIDHEIGHT * vid.dup)
-		{
+		// }
+		// if (vid.height != BASEVIDHEIGHT * vid.dup)
+		// {
 			// same thing here
 			if (c & V_SNAPTOBOTTOM)
 				y += (vid.height - (BASEVIDHEIGHT * vid.dup));
@@ -1893,7 +1893,7 @@ void V_DrawFadeFill(INT32 x, INT32 y, INT32 w, INT32 h, INT32 c, UINT16 color, U
 				y -= (vid.height - (BASEVIDHEIGHT * vid.dup)) / 4;
 			else if (perplayershuffle & 2)
 				y += (vid.height - (BASEVIDHEIGHT * vid.dup)) / 4;
-		}
+		// }
 	}
 
 	if (x >= vid.width || y >= vid.height)
@@ -1961,17 +1961,17 @@ void V_DrawFlatFill(INT32 x, INT32 y, INT32 w, INT32 h, lumpnum_t flatnum)
 	deststop = screens[0] + vid.rowbytes * vid.height;
 
 	// from V_DrawScaledPatch
-	if (vid.width != BASEVIDWIDTH * vid.dup)
-	{
+	// if (vid.width != BASEVIDWIDTH * vid.dup)
+	// {
 		// dup adjustments pretend that screen width is BASEVIDWIDTH * dup,
 		// so center this imaginary screen
 		dest += (vid.width - (INT32)(BASEVIDWIDTH * vid.dup)) / 2;
-	}
-	if (vid.height != (INT32)(BASEVIDHEIGHT * vid.dup))
-	{
+	// }
+	// if (vid.height != BASEVIDHEIGHT * vid.dup)
+	// {
 		// same thing here
 		dest += (vid.height - (INT32)(BASEVIDHEIGHT * vid.dup)) * vid.width / 2;
-	}
+	// }
 
 	w *= vid.dup;
 	h *= vid.dup;

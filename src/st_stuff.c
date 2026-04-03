@@ -520,7 +520,7 @@ static void ST_drawDebugInfo(void)
 
 #define VFLAGS V_MONOSPACE|V_SNAPTOTOP|V_SNAPTORIGHT
 
-	if ((moviemode == MM_GIF && cv_gif_downscale.value) || vid.dup == 1)
+	if ((moviemode == MM_GIF && cv_gif_downscale.value) || vid.dup < 1.5)
 	{
 		textscale = FRACUNIT;
 		lowh = ((vid.height/vid.dup) - 16);
