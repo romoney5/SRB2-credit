@@ -794,7 +794,7 @@ void V_DrawCroppedPatch(fixed_t x, fixed_t y, fixed_t pscale, fixed_t vscale, IN
 	fixed_t col, ofs, colfrac, rowfrac, fdup, vdup;
 	INT32 dup;
 	column_t *column;
-	UINT8 *desttop, *dest, *deststart, *destend;
+	UINT8 *desttop, *dest; //, *deststart, *destend;
 	const UINT8 *source, *deststop;
 	fixed_t pwidth; // patch width
 
@@ -1049,8 +1049,8 @@ void V_DrawCroppedPatch(fixed_t x, fixed_t y, fixed_t pscale, fixed_t vscale, IN
 	else
 		pwidth = patch->width * dup;
 
-	deststart = desttop;
-	destend = desttop + pwidth;
+	// deststart = desttop;
+	// destend = desttop + pwidth;
 
 	for (col = sx; (col>>FRACBITS) < patch->width && (col - sx) < w; col += colfrac, ++x, desttop++)
 	{
