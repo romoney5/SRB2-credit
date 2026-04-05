@@ -350,7 +350,7 @@ menu_t OP_SoundOptionsDef;
 menu_t OP_SoundAdvancedDef;
 
 //Misc
-menu_t OP_DataOptionsDef, OP_ScreenshotOptionsDef, OP_EraseDataDef;
+menu_t OP_ClientOptionsDef, OP_DataOptionsDef, OP_ScreenshotOptionsDef, OP_EraseDataDef;
 menu_t OP_ServerOptionsDef;
 menu_t OP_MonitorToggleDef;
 static void M_ScreenshotOptions(INT32 choice);
@@ -1066,8 +1066,9 @@ static menuitem_t OP_MainMenu[] =
 	{IT_SUBMENU | IT_STRING, NULL, "Sound Options...",     &OP_SoundOptionsDef, 60},
 
 	{IT_CALL    | IT_STRING, NULL, "Server Options...",    M_ServerOptions,     80},
+	{IT_SUBMENU | IT_STRING, NULL, "Network Options...",   &OP_ClientOptionsDef,90},
 
-	{IT_SUBMENU | IT_STRING, NULL, "Data Options...",      &OP_DataOptionsDef, 100},
+	{IT_SUBMENU | IT_STRING, NULL, "Data Options...",      &OP_DataOptionsDef, 110},
 };
 
 static menuitem_t OP_P1ControlsMenu[] =
@@ -1531,6 +1532,22 @@ static menuitem_t OP_SoundAdvancedMenu[] =
 
 #undef OPENMPT_MENUOFFSET
 #undef MIXERX_MENUOFFSET
+
+static menuitem_t OP_ClientOptionsMenu[] =
+{
+	{IT_HEADER, NULL, "Delay Options", NULL, 0},
+	{IT_STRING | IT_CVAR | IT_CV_SLIDER, NULL, "Minimum Delay",       &cv_mindelay,           12},
+	{IT_STRING | IT_CVAR,				 NULL, "Gentleman's Delay",       &cv_gentlemens,   22},
+
+	{IT_STRING | IT_CVAR | IT_CV_SLIDER, NULL, "Tic Buffer",       &cv_netticbuffer,         42},
+	{IT_STRING | IT_CVAR | IT_CV_SLIDER, NULL, "Connection Timeout",       &cv_nettimeout,   52},
+
+	{IT_STRING | IT_CVAR, NULL, "Return to Server Browser",       &cv_returnfromconnect,         72},
+	{IT_STRING | IT_CVAR, NULL, "Server Info",       &cv_showserverinfo,   82},
+
+	{IT_STRING | IT_CVAR, NULL, "Screen Fades",       &cv_wipes,   102},
+	{IT_STRING | IT_CVAR, NULL, "Network Statistics",       &cv_netstat,   112},
+};
 
 static menuitem_t OP_DataOptionsMenu[] =
 {
@@ -2255,6 +2272,10 @@ menu_t OP_OpenGLLightingDef = DEFAULTMENUSTYLE(
 	"M_VIDEO", OP_OpenGLLightingMenu, &OP_OpenGLOptionsDef, 60, 40);
 #endif // ALAM_LIGHTING
 #endif // HWRENDER
+
+menu_t OP_ClientOptionsDef = DEFAULTMENUSTYLE(
+	MTREE2(MN_OP_MAIN, MN_OP_CLIENT),
+	"M_DATA", OP_ClientOptionsMenu, &OP_MainDef, 30, 30);
 
 menu_t OP_DataOptionsDef = DEFAULTMENUSTYLE(
 	MTREE2(MN_OP_MAIN, MN_OP_DATA),
