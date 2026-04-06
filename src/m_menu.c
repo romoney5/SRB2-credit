@@ -196,8 +196,8 @@ static huddrawlist_h luahuddrawlist_playersetup;
 //
 
 static void M_GoBack(INT32 choice);
-static void M_StopMessage(INT32 choice);
-static boolean stopstopmessage = false;
+
+boolean stopstopmessage = false;
 
 static void M_HandleServerPage(INT32 choice);
 static void M_RoomMenu(INT32 choice);
@@ -4076,6 +4076,14 @@ static void M_InitCharacterDescription(INT32 i)
 
 void M_InitCharacterTables(INT32 num)
 {
+	if (!num)
+	{
+		Z_Free(description);
+		description = NULL;
+		numdescriptions = 0;
+		return;
+	}
+
 	INT32 i = numdescriptions;
 
 	description = Z_Realloc(description, sizeof(description_t) * num, PU_STATIC, NULL);
@@ -6248,7 +6256,7 @@ static void M_DrawMessageMenu(void)
 }
 
 // default message handler
-static void M_StopMessage(INT32 choice)
+void M_StopMessage(INT32 choice)
 {
 	(void)choice;
 	if (menuactive)

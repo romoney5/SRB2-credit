@@ -553,6 +553,7 @@ static int lib_cvRegisterVar(lua_State *L)
 	}
 
 	cvar->flags |= CV_ALLOWLUA | CV_LUAVAR;
+
 	// actually time to register it to the console now! Finally!
 	cvar->flags |= CV_MODIFIED;
 	CV_RegisterVar(cvar);

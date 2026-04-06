@@ -172,6 +172,8 @@ hudinfo_t hudinfo[NUMHUDITEMS] =
 	{ 288, 176, V_SNAPTORIGHT|V_SNAPTOBOTTOM}, // HUD_POWERUPS
 };
 
+static hudinfo_t basehudinfo[NUMHUDITEMS];
+
 static huddrawlist_h luahuddrawlist_game[2];
 static huddrawlist_h luahuddrawlist_uncappedgame[2];
 static huddrawlist_h luahuddrawlist_titlecard;
@@ -409,14 +411,10 @@ void ST_ReloadSkinFaceGraphics(void)
 		ST_LoadFaceGraphics(i);
 }
 
-static inline void ST_InitData(void)
+void ST_UnLoadFaceGraphics(INT32 skinnum)
 {
-	// 'link' the statusbar display to a player, which could be
-	// another player than consoleplayer, for example, when you
-	// change the view in a multiplayer demo with F12.
-	stplyr = &players[displayplayer];
-
-	st_palette = -1;
+	W_UnlockCachedPatch(faceprefix[skinnum]);
+	W_UnlockCachedPatch(superprefix[skinnum]);
 }
 
 static inline void ST_Stop(void)
@@ -434,7 +432,12 @@ void ST_Start(void)
 	if (!st_stopped)
 		ST_Stop();
 
-	ST_InitData();
+	// 'link' the statusbar display to a player, which could be
+	// another player than consoleplayer, for example, when you
+	// change the view in a multiplayer demo with F12.
+	stplyr = &players[displayplayer];
+
+	st_palette = -1;
 	st_stopped = false;
 }
 
@@ -453,6 +456,13 @@ void ST_Init(void)
 	luahuddrawlist_uncappedgame[0] = LUA_HUD_CreateDrawList();
 	luahuddrawlist_uncappedgame[1] = LUA_HUD_CreateDrawList();
 	luahuddrawlist_titlecard = LUA_HUD_CreateDrawList();
+
+	memcpy(basehudinfo, hudinfo, sizeof(hudinfo));
+}
+
+void ST_RestoreHudInfo(void)
+{
+	memcpy(hudinfo, basehudinfo, sizeof(hudinfo));
 }
 
 // change the status bar too, when pressing F12 while viewing a demo.
