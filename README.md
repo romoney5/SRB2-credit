@@ -15,7 +15,7 @@ You can compile the source code normally (see "Compiling") and put the binary in
 - Joining netgame shows progress bar on "checking files" ([Lugent's PR](https://git.do.srb2.org/STJr/SRB2/-/merge_requests/2446) [Lugent's PR](https://git.do.srb2.org/STJr/SRB2/-/merge_requests/2556))
 - Easily rejoin servers you've played before! ("`connect last`", Multiplayer -> Rejoin Previous Servers...)
 - Draw gif information to hud ("`moviemodeinfo`")
-- Crosshairs can invert pixels behind, to improve their visibility ("`crosshair_invert`")
+- Crosshairs can invert pixels behind, to improve their visibility ("`crosshair_invert`" and "`crosshair2_invert`")
 - Thin captions and thin FPS! (Load "tinyfontfix.pk3" for music note on thin captions)
 - Countdown beep isn't ear piercingly loud!
 - Snake download game background fixed!
@@ -24,6 +24,7 @@ You can compile the source code normally (see "Compiling") and put the binary in
 - See your ping in frame delay instead of milliseconds! ("`pingmeasurement`")
 - Tics per second counter! ("`showtps`") (Code from [SRB2Classic](https://codeberg.org/srb2classic/srb2classic) and TSoURDt3rd)
 - Compact FPS/TPS info! ("`compactinfo`")
+- Lowercase menus inspired by SRB2Kart Saturn! ("`menucaps`")
 
 ## Visual
 - Toggable mobj pitch/roll functional (3d rotation for models on slopes, like DRRR). Option located in Video Settings -> Level -> "Pitch/Roll Rotation"
@@ -32,26 +33,39 @@ You can compile the source code normally (see "Compiling") and put the binary in
 - Better "Fake Contrast"! (https://git.do.srb2.org/STJr/SRB2/-/merge_requests/2680, @GLideKS)
 - View rollangle is interpolated!
 - Experimental translation support for models! ("`gl_modeltranslations`")
-- Render distance for OpenGL! ("`gr_renderdistance`", @GLideKS)
+- Render distance for OpenGL! ("`gr_renderdistance`", https://git.srb2.org/Hanicef/SRB2Classic/-/merge_requests/4, @GLideKS)
 
 ## Gameplay / Netplay
 - Skin change at any time
 - Addfilelocal from SRB2K Saturn! (use "`addfilelocal`" command or press R-ALT in the addons menu)
-- Minimum input delay from SRB2Kart Saturn/Ring Racers! (`mindelay`)
+- Minimum input delay from SRB2Kart Saturn/Ring Racers! ("`mindelay`")
 - Improved startup times! (Code from [SRB2Classic](https://codeberg.org/srb2classic/srb2classic))
+- "`cam_centertoggle`" and "`cam2_centertoggle`" are no longer exclusive to Automatic!
+- See private messages as host! (Code from [SRB2Classic](https://codeberg.org/srb2classic/srb2classic))
 
 ## Modding and Debugging
-- `renderhitbox` in multiplayer
+- "`renderhitbox`" in multiplayer
 - Lua HUD interpolation from SRB2K Saturn
 - "`freezelevel`" debug command (Be careful using when clients are connected!)
 - HUD camera struct updates position in first person! (credits [Jiskster](https://git.do.srb2.org/STJr/SRB2/-/merge_requests/2629) & [Hanicef](https://git.do.srb2.org/Hanicef/SRB2Classic/-/commit/681bd160f5be3925a97d798d00e67b32a8c1df71))
 - `v.cachePatch` accepts a second parameter for rotation! (https://git.do.srb2.org/STJr/SRB2/-/merge_requests/2662)
 - Added "`TR`" as an alias to "`TICRATE`" in Lua
+- "`getlogfile`" command (Returns the absolute path of the current log, useful when latest-log.txt is sym-linked to a different log)
 
 ## GIFs
 - Adjustable gif size cap, toggable too! (`gif_maxsize`, "Max GIF Size (MB)")
     - ^ When gif is capped, gif_rolling allows for another gif to immediately start! (`gif_rolling`, "Keep recording when capped")
 - Pause GIFs *WHILE* Recording! (Bound to F2 by default)
+
+## Console
+- `help` now lists commands and variables by origin. Parameters are as follows:
+  | Param      | Desc      |
+  | ------------- | ------------- |
+  | `-v` | Only show variables and/or commands from vanilla SRB2 only.  |
+  | `-c` | Only show variables and/or commands that are in SRB2-edit, and not vanilla. |
+  | `-a` | Only show variables and/or commands created by addons |
+
+- Console variables can no longer be used as an argument for `help`, they now print their info instead of just their current and default value. "`cvarinfo`" lets you hide the flags and origin sections ("Show All" by default).
 
 # Lua Additions
 
@@ -78,7 +92,7 @@ You can compile the source code normally (see "Compiling") and put the binary in
 - `R_RemoveTranslation(string name)` : Removes a custom translation. Can only remove translations made by Lua.
 - `R_TranslationExists(string name)` : Returns true if a custom translation with a given name exists, false if not.
 
-- `io.openlump(string filename, [string mode])` : Similar to `io.openlocal`, but reads a lump inside any WAD/PK3 file loaded. Two new options are supported: `f` to scan addons forwards from start to end, and `m`, to exclude any game-modifying or local addons.
+- `io.openlump(string filename, [string mode])` : Similar to `io.openlocal`, but reads a lump inside any addon loaded. Two new options are supported: `f` to scan addons forward from start to end, and `m` to only search in game-modifying addons.
 
   Example:
   ```lua
@@ -86,10 +100,10 @@ You can compile the source code normally (see "Compiling") and put the binary in
   
   if file
   	local dat = file:read("*a")
-  	print("length: "..dat:len())
+  	print("Length: "..dat:len())
   	file:close()
   else
-  	print("could not read lump")
+  	print("Could not read lump")
   end
   ```
 
@@ -123,6 +137,8 @@ end,"uncappedgame")
 
 ## mobj_t
 - `mobj.pitch/roll` : Now rotates mobjs in 3D space, including models
+- `mobj.resetinterp` : Resets ALL interpolation values. (`P_SetOrigin` only resets positional interpolation values)
+
 
 Example that tilts your character in their 3D direction:
 ```lua

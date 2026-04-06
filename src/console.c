@@ -43,7 +43,7 @@
 #include "hardware/hw_main.h"
 #endif
 
-#define MAXHUDLINES 20
+#define MAXHUDLINES 40
 
 #ifdef HAVE_THREADS
 I_mutex con_mutex;
@@ -1737,6 +1737,8 @@ static void CON_DrawBackpic(void)
 
 	// Cache the patch.
 	con_backpic = W_CachePatchNum(piclump, PU_PATCH);
+	if (con_backpic == NULL)
+		return;
 
 	// Center the backpic, and draw a vertically cropped patch.
 	w = con_backpic->width * vid.dup;

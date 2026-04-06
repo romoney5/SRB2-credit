@@ -8869,18 +8869,14 @@ void P_MovePlayer(player_t *player)
 	if (cv_fovchange.value)
 	{
 		fixed_t speed;
-		const fixed_t runnyspeed = 20*FRACUNIT;
+		fixed_t runnyspeed = player->runspeed - 6*FRACUNIT;
 
 		speed = R_PointToDist2(player->rmomx, player->rmomy, 0, 0);
 
-		if (speed > player->normalspeed-5*FRACUNIT)
-			speed = player->normalspeed-5*FRACUNIT;
+		if (speed > player->normalspeed-2*FRACUNIT)
+			speed = player->normalspeed-2*FRACUNIT;
 
-		if (speed >= runnyspeed)
-			player->fovadd = speed-runnyspeed;
-		else
-			player->fovadd = 0;
-
+		player->fovadd += FixedMul((speed-runnyspeed) - player->fovadd, FRACUNIT/6);
 		if (player->fovadd < 0)
 			player->fovadd = 0;
 	}
@@ -9852,7 +9848,7 @@ consvar_t cv_cam2_rotspeed = CVAR_INIT ("cam2_rotspeed", "10", CV_SAVE|CV_ALLOWL
 consvar_t cv_cam2_turnmultiplier = CVAR_INIT ("cam2_turnmultiplier", "0.75", CV_FLOAT|CV_SAVE|CV_ALLOWLUA, multiplier_cons_t, NULL);
 consvar_t cv_cam2_orbit = CVAR_INIT ("cam2_orbit", "Off", CV_SAVE|CV_ALLOWLUA, CV_OnOff, NULL);
 consvar_t cv_cam2_adjust = CVAR_INIT ("cam2_adjust", "On", CV_SAVE|CV_ALLOWLUA, CV_OnOff, NULL);
-consvar_t cv_earthquake = CVAR_INIT("earthquake", "On", CV_SAVE, CV_OnOff, NULL);
+consvar_t cv_earthquake = CVAR_INIT("earthquake", "On", CV_SAVE|CV_CLIENT, CV_OnOff, NULL);
 
 
 // [standard vs simple][p1 or p2]

@@ -2986,7 +2986,8 @@ static void HWR_DrawDropShadow(mobj_t *thing, fixed_t scale)
 // This is expecting a pointer to an array containing 4 wallVerts for a sprite
 static void HWR_RotateSpritePolyToAim(gl_vissprite_t *spr, FOutVector *wallVerts, const boolean precip)
 {
-	if (cv_glspritebillboarding.value
+	if ((cv_glspritebillboarding.value == 1 || (cv_glspritebillboarding.value == 2 &&
+		(spr->mobj->player || spr->mobj->type == MT_TAILSOVERLAY)))
 		&& spr && spr->mobj && !R_ThingIsPaperSprite(spr->mobj)
 		&& wallVerts)
 	{
@@ -3294,7 +3295,7 @@ static void HWR_SplitSprite(gl_vissprite_t *spr)
 		wallVerts[1].y = endbot;
 
 		// The x and y only need to be adjusted in the case that it's not a papersprite
-		if (cv_glspritebillboarding.value
+		if ((cv_glspritebillboarding.value == 1 || (cv_glspritebillboarding.value == 2 && (spr->mobj->player || spr->mobj->type == MT_TAILSOVERLAY)))
 			&& spr->mobj && !R_ThingIsPaperSprite(spr->mobj))
 		{
 			// Get the x and z of the vertices so billboarding draws correctly
@@ -3360,6 +3361,7 @@ static void HWR_DrawBoundingBox(gl_vissprite_t *vis)
 {
 	FOutVector v[24];
 	FSurfaceInfo Surf = {0};
+	RGBA_t *palette = HWR_GetTexturePalette();
 
 	//
 	// create a cube (side view)
@@ -3399,7 +3401,7 @@ static void HWR_DrawBoundingBox(gl_vissprite_t *vis)
 	v[ 3].y = v[ 4].y = v[ 5].y = v[ 9].y = v[10].y = v[11].y =
 		v[15].y = v[16].y = v[17].y = v[21].y = v[22].y = v[23].y = vis->gzt; // top
 
-	Surf.PolyColor = V_GetColor(R_GetBoundingBoxColor(vis->mobj));
+	Surf.PolyColor = palette[R_GetBoundingBoxColor(vis->mobj)];
 
 	HWR_ProcessPolygon(&Surf, v, 24, (cv_renderhitboxgldepth.value ? 0 : PF_NoDepthTest)|PF_Modulated|PF_NoTexture|PF_WireFrame, SHADER_NONE, false);
 }
@@ -3526,6 +3528,7 @@ static void HWR_DrawSprite(gl_vissprite_t *spr)
 			wallVerts[i].z = rotated[i].y + spr->z1;
 		}
 
+		fixed_t old_zdelta, old_ox,old_oy,old_oz, old_dx,old_dy;
 		if (renderflags & (RF_SLOPESPLAT | RF_OBJECTSLOPESPLAT))
 		{
 			pslope_t *standingslope = spr->mobj->standingslope; // The slope that the object is standing on.
@@ -3536,16 +3539,38 @@ static void HWR_DrawSprite(gl_vissprite_t *spr)
 
 			if (standingslope && (renderflags & RF_OBJECTSLOPESPLAT))
 				splatslope = standingslope;
+			
+			if (splatslope)
+			{
+				old_zdelta = splatslope->zdelta;
+				old_ox = splatslope->o.x;
+				old_oy = splatslope->o.y;
+				old_oz = splatslope->o.z;
+				old_dx = splatslope->d.x;
+				old_dy = splatslope->d.y;
+			}
 		}
 
 		// Set vertical position
 		if (splatslope)
 		{
+			splatslope->zdelta = spr->zdelta;
+			splatslope->o.x = spr->ox;
+			splatslope->o.y = spr->oy;
+			splatslope->o.z = spr->oz;
+			splatslope->d.x = spr->dx;
+			splatslope->d.y = spr->dy;
 			for (i = 0; i < 4; i++)
 			{
 				fixed_t slopez = P_GetSlopeZAt(splatslope, FLOAT_TO_FIXED(wallVerts[i].x), FLOAT_TO_FIXED(wallVerts[i].z));
 				wallVerts[i].y = FIXED_TO_FLOAT(slopez) + zoffset;
 			}
+			splatslope->zdelta = old_zdelta;
+			splatslope->o.x = old_ox;
+			splatslope->o.y = old_oy;
+			splatslope->o.z = old_oz;
+			splatslope->d.x = old_dx;
+			splatslope->d.y = old_dy;
 		}
 		else
 		{
@@ -4500,7 +4525,7 @@ static void HWR_ProjectSprite(mobj_t *thing)
 			if (!md2->found || md2->scale < 0.0f)
 				return;
 		}
-		else if (!cv_glspritebillboarding.value)
+		else if (cv_glspritebillboarding.value == 0)
 			return;
 	}
 
@@ -4907,7 +4932,14 @@ static void HWR_ProjectSprite(mobj_t *thing)
 	vis->bbox = false;
 
 	vis->angle = interp.angle;
+	vis->zdelta = interp.zdelta;
+	vis->ox = interp.ox;
+	vis->oy = interp.oy;
+	vis->oz = interp.oz;
+	vis->dx = interp.dx;
+	vis->dy = interp.dy;
 }
+
 
 // Precipitation projector for hardware mode
 static void HWR_ProjectPrecipitationSprite(precipmobj_t *thing)
@@ -5810,6 +5842,7 @@ static CV_PossibleValue_t glshaders_cons_t[] = {{0, "Off"}, {1, "On"}, {2, "Igno
 static CV_PossibleValue_t glmodelinterpolation_cons_t[] = {{0, "Off"}, {1, "Sometimes"}, {2, "Always"}, {0, NULL}};
 static CV_PossibleValue_t glfakecontrast_cons_t[] = {{0, "Off"}, {1, "On"}, {2, "Smooth"}, {0, NULL}};
 static CV_PossibleValue_t glshearing_cons_t[] = {{0, "Off"}, {1, "On"}, {2, "Third-person"}, {0, NULL}};
+static CV_PossibleValue_t glsprbillboard_cons_t[] = {{0, "Off"}, {1, "On"}, {2, "Players"}, {0, NULL}};
 
 static void CV_glfiltermode_OnChange(void);
 static void CV_glanisotropic_OnChange(void);
@@ -5843,10 +5876,10 @@ consvar_t cv_glcoronasize = CVAR_INIT ("gr_coronasize", "1", CV_SAVE|CV_FLOAT, 0
 consvar_t cv_glmodels = CVAR_INIT ("gr_models", "Off", CV_SAVE, CV_OnOff, NULL);
 consvar_t cv_glmodelinterpolation = CVAR_INIT ("gr_modelinterpolation", "Sometimes", CV_SAVE, glmodelinterpolation_cons_t, NULL);
 consvar_t cv_glmodellighting = CVAR_INIT ("gr_modellighting", "Off", CV_SAVE|CV_CALL, CV_OnOff, CV_glmodellighting_OnChange);
-consvar_t cv_glmodeltranslations = CVAR_INIT ("gr_modeltranslations", "On", CV_SAVE, CV_OnOff, NULL);
+consvar_t cv_glmodeltranslations = CVAR_INIT ("gr_modeltranslations", "On", CV_SAVE|CV_CLIENT, CV_OnOff, NULL);
 
 consvar_t cv_glshearing = CVAR_INIT ("gr_shearing", "Off", CV_SAVE, glshearing_cons_t, NULL);
-consvar_t cv_glspritebillboarding = CVAR_INIT ("gr_spritebillboarding", "Off", CV_SAVE, CV_OnOff, NULL);
+consvar_t cv_glspritebillboarding = CVAR_INIT ("gr_spritebillboarding", "Off", CV_SAVE, glsprbillboard_cons_t, NULL);
 consvar_t cv_glskydome = CVAR_INIT ("gr_skydome", "On", CV_SAVE, CV_OnOff, NULL);
 consvar_t cv_glfakecontrast = CVAR_INIT ("gr_fakecontrast", "Smooth", CV_SAVE, glfakecontrast_cons_t, NULL);
 consvar_t cv_glslopecontrast = CVAR_INIT ("gr_slopecontrast", "Off", CV_SAVE, CV_OnOff, NULL);
@@ -5858,7 +5891,7 @@ consvar_t cv_glsolvetjoin = CVAR_INIT ("gr_solvetjoin", "On", 0, CV_OnOff, NULL)
 
 consvar_t cv_glbatching = CVAR_INIT ("gr_batching", "On", 0, CV_OnOff, NULL);
 
-consvar_t cv_glrenderdistance = CVAR_INIT("gr_renderdistance", "Max", CV_SAVE, glrenderdistance_cons_t, NULL);
+consvar_t cv_glrenderdistance = CVAR_INIT("gr_renderdistance", "Max", CV_SAVE|CV_CLIENT, glrenderdistance_cons_t, NULL);
 
 static CV_PossibleValue_t glpalettedepth_cons_t[] = {{16, "16 bits"}, {24, "24 bits"}, {0, NULL}};
 

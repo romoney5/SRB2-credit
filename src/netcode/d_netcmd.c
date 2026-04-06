@@ -143,6 +143,7 @@ FUNCNORETURN static ATTRNORETURN void Command_Quit_f(void);
 static void Command_Playintro_f(void);
 
 static void Command_Displayplayer_f(void);
+static void Command_GetLogFile_f(void);
 
 static void Command_ExitLevel_f(void);
 static void Command_Showmap_f(void);
@@ -364,8 +365,8 @@ consvar_t cv_pingtimeout = CVAR_INIT ("pingtimeout", "10", CV_SAVE|CV_NETVAR, pi
 static CV_PossibleValue_t showping_cons_t[] = {{0, "Off"}, {1, "Always"}, {2, "Warning"}, {0, NULL}};
 consvar_t cv_showping = CVAR_INIT ("showping", "Warning", CV_SAVE, showping_cons_t, NULL);
 static CV_PossibleValue_t pingmeasurement_cons_t[] = {{0, "Milliseconds"}, {1, "Frames"}, {0, NULL}};
-consvar_t cv_pingmeasurement = CVAR_INIT ("pingmeasurement", "Milliseconds", CV_SAVE, pingmeasurement_cons_t, NULL);
-consvar_t cv_showcsays = CVAR_INIT ("showcsays", "Yes", CV_SAVE, CV_YesNo, NULL);
+consvar_t cv_pingmeasurement = CVAR_INIT ("pingmeasurement", "Milliseconds", CV_SAVE|CV_CLIENT, pingmeasurement_cons_t, NULL);
+consvar_t cv_showcsays = CVAR_INIT ("showcsays", "Yes", CV_SAVE|CV_CLIENT, CV_YesNo, NULL);
 
 // Intermission time Tails 04-19-2002
 static CV_PossibleValue_t inttime_cons_t[] = {{0, "MIN"}, {3600, "MAX"}, {0, NULL}};
@@ -407,8 +408,11 @@ consvar_t cv_freedemocamera = CVAR_INIT("freedemocamera", "Off", CV_SAVE, CV_OnO
 // NOTE: this should be in hw_main.c, but we can't put it there as it breaks dedicated build
 consvar_t cv_glallowshaders = CVAR_INIT ("gr_allowcustomshaders", "On", CV_NETVAR, CV_OnOff, NULL);
 
-consvar_t cv_returnfromconnect = CVAR_INIT ("returnfromconnect", "On", CV_SAVE, CV_OnOff, NULL);
-consvar_t cv_showserverinfo = CVAR_INIT ("showserverinfo", "On", CV_SAVE, CV_OnOff, NULL);
+consvar_t cv_returnfromconnect = CVAR_INIT ("returnfromconnect", "On", CV_SAVE|CV_CLIENT, CV_OnOff, NULL);
+consvar_t cv_showserverinfo = CVAR_INIT ("showserverinfo", "On", CV_SAVE|CV_CLIENT, CV_OnOff, NULL);
+
+static CV_PossibleValue_t cvarinfo_const_t[] = {{0, "Show All"}, {1, "Hide Origin"}, {2, "Hide Flags"}, {3, "Only Show Values"}, {0, NULL}};
+consvar_t cv_cvarinformation = CVAR_INIT ("cvarinfo", "Show All", CV_CLIENT|CV_SAVE, cvarinfo_const_t, NULL);
 
 char timedemo_name[256];
 boolean timedemo_csv;
@@ -517,7 +521,7 @@ void D_RegisterServerCommands(void)
 
 	COM_AddCommand("addfolder", Command_Addfolder, COM_LUA);
 	COM_AddCommand("addfile", Command_Addfile, COM_LUA);
-	COM_AddCommand("addfilelocal", Command_Addfilelocal, COM_LUA);
+	COM_AddCommand("addfilelocal", Command_Addfilelocal, COM_LUA|COM_CLIENT);
 	COM_AddCommand("listwad", Command_ListWADS_f, COM_LUA);
 
 	COM_AddCommand("runsoc", Command_RunSOC, COM_LUA);
@@ -648,6 +652,8 @@ void D_RegisterServerCommands(void)
 	CV_RegisterVar(&cv_showping);
 	CV_RegisterVar(&cv_pingmeasurement);
 	CV_RegisterVar(&cv_showcsays);
+	CV_RegisterVar(&cv_cvarinformation);
+	COM_AddCommand("getlogfile", Command_GetLogFile_f, COM_CLIENT);
 
 	CV_RegisterVar(&cv_allowseenames);
 
@@ -949,7 +955,7 @@ void D_RegisterClientCommands(void)
 	CV_RegisterVar(&cv_ps_samplesize);
 	CV_RegisterVar(&cv_ps_descriptor);
 
-	COM_AddCommand("freezelevel", Command_FreezeLevel_f, COM_LUA);
+	COM_AddCommand("freezelevel", Command_FreezeLevel_f, COM_LUA|COM_CLIENT);
 
 	// ingame object placing
 	COM_AddCommand("objectplace", Command_ObjectPlace_f, COM_LUA);
@@ -3653,7 +3659,7 @@ static void Command_Addfolder(void)
 			}
 
 		// Add file on your client directly if you aren't in a netgame.
-		if (!(netgame || multiplayer))
+		if (!(netgame || multiplayer) || server)
 		{
 			P_AddFolder(fn);
 			AddedFilesAdd(&addedfolders, fn);
@@ -4743,6 +4749,16 @@ static void Got_ExitLevelcmd(UINT8 **cp, INT32 playernum)
 static void Command_Displayplayer_f(void)
 {
 	CONS_Printf(M_GetText("Displayplayer is %d\n"), displayplayer);
+}
+
+// Print the path of the current logfile
+static void Command_GetLogFile_f(void)
+{
+	#ifdef LOGMESSAGES // just in case
+		CONS_Printf("Current logfile is at %s\n", logfilename);
+	#else
+		CONS_Printf("Logging is disabled!\n");
+	#endif
 }
 
 /** Quits a game and returns to the title screen.
