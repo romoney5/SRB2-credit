@@ -104,6 +104,7 @@ add_executable(SRB2SDL2 MACOSX_BUNDLE WIN32
 	lua_hudlib_drawlist.c
 	lua_colorlib.c
 	lua_inputlib.c
+	lua_httplib.c #add httplib thingy
 )
 
 # This updates the modification time for comptime.c at the
@@ -191,9 +192,6 @@ if("${SRB2_CONFIG_USE_GME}")
 endif()
 
 target_compile_definitions(SRB2SDL2 PRIVATE -D_LARGEFILE64_SOURCE)
-
-set(SRB2_HAVE_THREADS ON)
-target_compile_definitions(SRB2SDL2 PRIVATE -DHAVE_THREADS)
 
 if("${SRB2_CONFIG_HWRENDER}")
 	target_compile_definitions(SRB2SDL2 PRIVATE -DHWRENDER)

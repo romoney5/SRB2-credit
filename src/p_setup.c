@@ -3416,35 +3416,6 @@ static inline float P_SegLengthFloat(seg_t *seg)
 }
 #endif
 
-
-/** Updates the light offset
-  *
-  * \param li Seg to update the light offsets of
-  */
- void P_UpdateSegLightOffset(seg_t *li)
- {
-	 const UINT8 contrast = 16;
-	 fixed_t extralight = 0;
- 
-	 extralight = -((fixed_t)contrast*FRACUNIT) +
-		 FixedDiv(AngleFixed(R_PointToAngle2(0, 0,
-		 abs(li->v1->x - li->v2->x),
-		 abs(li->v1->y - li->v2->y))), 90*FRACUNIT) * ((fixed_t)contrast * 2);
- 
-	 // Between -2 and 2 for software, -16 and 16 for hardware
-	 li->lightOffset = FixedFloor((extralight / 8) + (FRACUNIT / 2)) / FRACUNIT;
- #ifdef HWRENDER
-	 li->hwLightOffset = FixedFloor(extralight + (FRACUNIT / 2)) / FRACUNIT;
- #endif
- }
-
-boolean P_ApplyLightOffset(UINT8 baselightlevel)
-{
-	// Don't apply light offsets at full bright or full dark.
-	return (baselightlevel < 255 && baselightlevel > 0);
-}
- 
-
 static void P_InitializeSeg(seg_t *seg)
 {
 	if (seg->linedef)
@@ -3466,8 +3437,6 @@ static void P_InitializeSeg(seg_t *seg)
 	//Hurdler: 04/12/2000: for now, only used in hardware mode
 	seg->lightmaps = NULL; // list of static lightmap for this seg
 #endif
-
-	P_UpdateSegLightOffset(seg);
 
 	seg->polyseg = NULL;
 	seg->dontrenderme = false;
@@ -7921,7 +7890,7 @@ boolean P_LoadLevel(boolean fromnetsave, boolean reloadinggamestate)
 	if (mapheaderinfo[gamemap-1]->forcecharacter[0] != '\0')
 		P_ForceCharacter(mapheaderinfo[gamemap-1]->forcecharacter);
 
-	if (!dedicated)
+	if (!dedicated && !reloadinggamestate)
 	{
 		// chasecam on in first-person gametypes and 2D
 		boolean chase = (!(gametyperules & GTR_FIRSTPERSON)) || (maptol & TOL_2D);
@@ -7963,7 +7932,7 @@ boolean P_LoadLevel(boolean fromnetsave, boolean reloadinggamestate)
 		}
 		G_ClearModeAttackRetryFlag();
 	}
-	else if (rendermode != render_none && G_IsSpecialStage(gamemap))
+	else if (rendermode != render_none && G_IsSpecialStage(gamemap) && !reloadinggamestate)
 	{
 		P_RunSpecialStageWipe();
 		ranspecialwipe = 1;

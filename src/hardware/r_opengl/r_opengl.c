@@ -229,7 +229,6 @@ FUNCPRINTF static void GL_MSG_Error(const char *format, ...)
 /* 1.0 functions */
 /* Miscellaneous */
 #define pglClearColor glClearColor
-//glClear
 #define pglColorMask glColorMask
 #define pglAlphaFunc glAlphaFunc
 #define pglBlendFunc glBlendFunc
@@ -239,9 +238,7 @@ FUNCPRINTF static void GL_MSG_Error(const char *format, ...)
 #define pglEnable glEnable
 #define pglDisable glDisable
 #define pglGetFloatv glGetFloatv
-//glGetIntegerv
-//glGetString
-#define pglHint glHint
+#define pglPolygonMode glPolygonMode
 
 /* Depth Buffer */
 #define pglClearDepth glClearDepth
@@ -285,6 +282,7 @@ FUNCPRINTF static void GL_MSG_Error(const char *format, ...)
 /* Texture mapping */
 #define pglTexEnvi glTexEnvi
 #define pglTexParameteri glTexParameteri
+#define pglTexImage1D glTexImage1D
 #define pglTexImage2D glTexImage2D
 #define pglTexSubImage2D glTexSubImage2D
 
@@ -629,6 +627,8 @@ typedef enum
 	// misc.
 	gluniform_leveltime,
 
+	gluniform_scr_resolution,
+
 	gluniform_max,
 } gluniform_t;
 
@@ -670,6 +670,7 @@ void SetupGLFunc4(void)
 {
 	/* 1.2 funcs */
 	pglTexImage3D = GetGLFunc("glTexImage3D");
+
 	/* 1.3 funcs */
 	pglActiveTexture = GetGLFunc("glActiveTexture");
 	pglMultiTexCoord2f = GetGLFunc("glMultiTexCoord2f");
@@ -1789,6 +1790,8 @@ static void Shader_SetUniforms(FSurfaceInfo *Surface, GLRGBAFloat *poly, GLRGBAF
 
 		UNIFORM_1(shader->uniforms[gluniform_leveltime], shader_leveltime, pglUniform1f);
 
+		UNIFORM_2(shader->uniforms[gluniform_scr_resolution], vid.width, vid.height, pglUniform2f);
+
 		#undef UNIFORM_1
 		#undef UNIFORM_2
 		#undef UNIFORM_3
@@ -1911,6 +1914,8 @@ static boolean Shader_CompileProgram(gl_shader_t *shader, GLint i)
 	shader->uniforms[gluniform_palette_tex] = GETUNI("palette_tex");
 	shader->uniforms[gluniform_palette_lookup_tex] = GETUNI("palette_lookup_tex");
 	shader->uniforms[gluniform_lighttable_tex] = GETUNI("lighttable_tex");
+
+	shader->uniforms[gluniform_scr_resolution] = GETUNI("scr_resolution");
 
 	// misc.
 	shader->uniforms[gluniform_leveltime] = GETUNI("leveltime");

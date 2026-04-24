@@ -225,6 +225,7 @@ static consvar_t cv_fishcake = CVAR_INIT ("fishcake", "Off", CV_CALL|CV_NOSHOWHE
 #endif
 static consvar_t cv_dummyconsvar = CVAR_INIT ("dummyconsvar", "Off", CV_CALL|CV_NOSHOWHELP, CV_OnOff, DummyConsvar_OnChange);
 
+consvar_t cv_restrictmoveskinchange = CVAR_INIT ("restrictmoveskinchange", "Yes", CV_SAVE|CV_CHEAT|CV_ALLOWLUA, CV_YesNo, NULL);
 consvar_t cv_restrictskinchange = CVAR_INIT ("restrictskinchange", "Yes", CV_SAVE|CV_NETVAR|CV_CHEAT|CV_ALLOWLUA, CV_YesNo, NULL);
 consvar_t cv_allowteamchange = CVAR_INIT ("allowteamchange", "Yes", CV_SAVE|CV_NETVAR|CV_ALLOWLUA, CV_YesNo, NULL);
 
@@ -366,7 +367,7 @@ static CV_PossibleValue_t showping_cons_t[] = {{0, "Off"}, {1, "Always"}, {2, "W
 consvar_t cv_showping = CVAR_INIT ("showping", "Warning", CV_SAVE, showping_cons_t, NULL);
 static CV_PossibleValue_t pingmeasurement_cons_t[] = {{0, "Milliseconds"}, {1, "Frames"}, {0, NULL}};
 consvar_t cv_pingmeasurement = CVAR_INIT ("pingmeasurement", "Milliseconds", CV_SAVE|CV_CLIENT, pingmeasurement_cons_t, NULL);
-consvar_t cv_showcsays = CVAR_INIT ("showcsays", "Yes", CV_SAVE|CV_CLIENT, CV_YesNo, NULL);
+consvar_t cv_showcsays = CVAR_INIT ("showcsays", "No", CV_SAVE|CV_CLIENT, CV_YesNo, NULL);
 
 // Intermission time Tails 04-19-2002
 static CV_PossibleValue_t inttime_cons_t[] = {{0, "MIN"}, {3600, "MAX"}, {0, NULL}};
@@ -554,7 +555,7 @@ void D_RegisterServerCommands(void)
 
 	CV_RegisterVar(&cv_glallowshaders);
 
-    // server info
+	// server info
 	CV_RegisterVar(&cv_returnfromconnect);
     CV_RegisterVar(&cv_showserverinfo);
 
@@ -620,6 +621,7 @@ void D_RegisterServerCommands(void)
 	RegisterNetXCmd(XD_RANDOMSEED, Got_RandomSeed);
 
 	CV_RegisterVar(&cv_allowexitlevel);
+	CV_RegisterVar(&cv_restrictmoveskinchange);
 	CV_RegisterVar(&cv_restrictskinchange);
 	CV_RegisterVar(&cv_allowteamchange);
 	CV_RegisterVar(&cv_respawntime);
@@ -940,7 +942,6 @@ void D_RegisterClientCommands(void)
 	CV_RegisterVar(&cv_digmusicvolume);
 	CV_RegisterVar(&cv_midimusicvolume);
 	CV_RegisterVar(&cv_numChannels);
-	CV_RegisterVar(&cv_consoleinterp);
 
 	// screen.c
 	CV_RegisterVar(&cv_fullscreen);
@@ -1534,8 +1535,12 @@ static void Got_NameAndColor(UINT8 **cp, INT32 playernum)
 	INT32 forcedskin = R_GetForcedSkin(playernum);
 	if (forcedskin != -1 && (netgame || multiplayer)) // Server wants everyone to use the same player (or the level is forcing one.)
 		SetPlayerSkinByNum(playernum, forcedskin);
-	else
+	else if (CanChangeSkin(playernum))
+	{
+		if (cv_restrictmoveskinchange.value && P_PlayerMoving(playernum))
+			return;
 		SetPlayerSkinByNum(playernum, skin);
+	}
 }
 
 void SendWeaponPref(void)
@@ -2257,8 +2262,8 @@ static void Command_Suicide(void)
 		return;
 	}
 
-	// Retry is quicker.  Probably should force people to use it.
-	if (!(netgame || multiplayer))
+	// Add file on your client directly if you aren't in a netgame.
+	if (!(netgame || multiplayer) || server)
 	{
 		CONS_Printf(M_GetText("You can't use this in Single Player! Use \"retry\" instead.\n"));
 		return;
@@ -3607,7 +3612,7 @@ static void Command_Addfilelocal(void)
 		if (!isprint(fn[i]) || fn[i] == ';')
 			return;
 
-    int musiconly = W_VerifyNMUSlumps(fn, false);
+	int musiconly = W_VerifyNMUSlumps(fn, false);
     if (!musiconly)
     {
         takis_complexlocaladdons = true;
@@ -3661,7 +3666,7 @@ static void Command_Addfolder(void)
 			}
 
 		// Add file on your client directly if you aren't in a netgame.
-		if (!(netgame || multiplayer) || server)
+		if (!(netgame || multiplayer))
 		{
 			P_AddFolder(fn);
 			AddedFilesAdd(&addedfolders, fn);
