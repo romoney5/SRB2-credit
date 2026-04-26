@@ -919,13 +919,9 @@ void F_IntroTicker(void)
 
 					I_OsPolling();
 					I_UpdateNoBlit();
-#ifdef HAVE_THREADS
 					I_lock_mutex(&m_menu_mutex);
-#endif
 					M_Drawer(); // menu is drawn even on top of wipes
-#ifdef HAVE_THREADS
 					I_unlock_mutex(m_menu_mutex);
-#endif
 					I_FinishUpdate(); // Update the screen with the image Tails 06-19-2001
 
 					if (moviemode) // make sure we save frames for the white hold too
@@ -1597,7 +1593,7 @@ void F_GameEvaluationDrawer(void)
 	if (finalecount >= 5*TICRATE)
 	{
 		INT32 startcoord = 32;
-		V_DrawString(8, 16, V_YELLOWMAP, "Unlocked:");
+		V_DrawString(8, 16, MENUCOLOR, "Unlocked:");
 
 		for (i = 0; i < MAXUNLOCKABLES; i++)
 		{
@@ -1621,7 +1617,7 @@ void F_GameEvaluationDrawer(void)
 			endingtext = va("%s & %s, %s%s", skins[players[consoleplayer].skin]->realname, skins[botskin-1]->realname, rtatext, cuttext);
 		else
 			endingtext = va("%s, %s%s", skins[players[consoleplayer].skin]->realname, rtatext, cuttext);
-		V_DrawCenteredString(BASEVIDWIDTH/2, 182, V_SNAPTOBOTTOM|(ultimatemode ? V_REDMAP : V_YELLOWMAP), endingtext);
+		V_DrawCenteredString(BASEVIDWIDTH/2, 182, V_SNAPTOBOTTOM|(ultimatemode ? MENUREDCOLOR : MENUCOLOR), endingtext);
 	}
 }
 
@@ -2420,14 +2416,12 @@ void F_StartTitleScreen(void)
 
 	if (gamestate != GS_TITLESCREEN && gamestate != GS_WAITINGPLAYERS)
 	{
-		ttuser_count =\
-		 ttloaded[0] = ttloaded[1] = ttloaded[2] = ttloaded[3] = ttloaded[4] = ttloaded[5] =\
-		 testttscale = activettscale =\
-		 sonic_blink = sonic_blink_twice = sonic_idle_start = sonic_idle_end =\
-		 tails_blink = tails_blink_twice = tails_idle_start = tails_idle_end =\
-		 knux_blink  = knux_blink_twice  = knux_idle_start  = knux_idle_end  = 0;
+		ttuser_count = 0; // note: you cannot mix bool with int when setting these values, lines which set booleans use true/false here
+		ttloaded[0] = ttloaded[1] = ttloaded[2] = ttloaded[3] = ttloaded[4] = ttloaded[5] = false;
+		testttscale = activettscale = sonic_idle_start = tails_idle_start = knux_idle_start = sonic_idle_end = tails_idle_end = knux_idle_end = 0;
+		sonic_blink = sonic_blink_twice = tails_blink = tails_blink_twice = knux_blink  = knux_blink_twice = false;
 
-		sonic_blinked_already = tails_blinked_already = knux_blinked_already = 1; // don't blink on the first idle cycle
+		sonic_blinked_already = tails_blinked_already = knux_blinked_already = true; // don't blink on the first idle cycle
 
 		if (curttmode == TTMODE_ALACROIX)
 			finalecount = -3; // hack so that frames don't advance during the entry wipe
@@ -4593,7 +4587,7 @@ void F_TextPromptDrawer(void)
 
 	// Draw chevron
 	if (promptblockcontrols && !timetonext)
-		V_DrawString(textr-8, chevrony + (skullAnimCounter/5), (V_SNAPTOBOTTOM|V_YELLOWMAP), "\x1B"); // down arrow
+		V_DrawString(textr-8, chevrony + (skullAnimCounter/5), (V_SNAPTOBOTTOM|MENUCOLOR), "\x1B"); // down arrow
 }
 
 #define nocontrolallowed(j) {\

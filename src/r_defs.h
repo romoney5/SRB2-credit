@@ -354,12 +354,6 @@ typedef struct pslope_s
 	boolean moved;
 
 	UINT8 flags; // Slope options
-
-	// Light offsets (see seg_t)
-	SINT8 lightOffset;
-#ifdef HWRENDER	
-	INT16 hwLightOffset;	
-#endif
 } pslope_t;
 
 typedef enum
@@ -762,12 +756,6 @@ typedef struct seg_s
 	polyobj_t *polyseg;
 	boolean dontrenderme;
 	boolean glseg;
-
-	// Fake contrast calculated on level load
-	SINT8 lightOffset;
-#ifdef HWRENDER		
-	INT16 hwLightOffset;		
-#endif
 } seg_t;
 
 //

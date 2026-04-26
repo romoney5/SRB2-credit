@@ -74,6 +74,7 @@ INT32 windowedModes[MAXWINMODES][2] =
 	{1600, 900}, // 1.66
 	{1536, 864}, // 1.66,4.80
 	{1366, 768}, // 1.66
+	{1360, 768}, // 1.66
 	{1440, 900}, // 1.60,4.50
 	{1280,1024}, // 1.33?
 	{1280, 960}, // 1.33,4.00
@@ -234,6 +235,7 @@ void SCR_Startup(void)
 	CV_RegisterVar(&cv_compactinfo);
 	CV_RegisterVar(&cv_constextsize);
 	CV_RegisterVar(&cv_menucaps);
+	CV_RegisterVar(&cv_menucolor);
 
 	V_SetPalette(0);
 }
@@ -653,7 +655,7 @@ void SCR_DisplayTicRate(void)
 		width = V_StringWidth(drawnstr, V_NOSCALESTART);
 
 		V_DrawString(vid.width - ((7 * 8 * vid.dup) + V_StringWidth("FPS: ", V_NOSCALESTART)), h,
-			V_YELLOWMAP|V_NOSCALESTART|V_USERHUDTRANS, "FPS:");
+			MENUCOLOR|V_NOSCALESTART|V_USERHUDTRANS, "FPS:");
 		V_DrawString(vid.width - width, h,
 			fpscntcolor |V_NOSCALESTART|V_USERHUDTRANS, drawnstr);
 	}
@@ -681,7 +683,7 @@ void SCR_DisplayTicRate(void)
 		INT32 width = V_StringWidth(drawnstr, V_NOSCALESTART);
 
 		V_DrawString(vid.width - ((7 * 8 * vid.dup) + V_StringWidth("TPS: ", V_NOSCALESTART)), h + (vstep*vid.dup),
-			V_YELLOWMAP|V_NOSCALESTART|V_USERHUDTRANS, "TPS:");
+			MENUCOLOR|V_NOSCALESTART|V_USERHUDTRANS, "TPS:");
 		V_DrawString(vid.width - width, h + (vstep*vid.dup),
 			ticcntcolor|V_NOSCALESTART|V_USERHUDTRANS, drawnstr);
 	}

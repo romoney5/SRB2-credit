@@ -15,6 +15,7 @@
 #include "console.h"
 #include "g_game.h"
 #include "r_local.h"
+#include "r_main.h"
 #include "st_stuff.h"
 #include "w_wad.h"
 #include "z_zone.h"
@@ -1331,7 +1332,7 @@ static void R_SplitSprite(vissprite_t *sprite)
 		newsprite->cut |= SC_TOP;
 		if (!(sector->lightlist[i].caster->fofflags & FOF_NOSHADE))
 		{
-			INT32 lightnum = (*sector->lightlist[i].lightlevel >> LIGHTSEGSHIFT);
+			INT32 lightnum = max((*sector->lightlist[i].lightlevel >> LIGHTSEGSHIFT), cv_secbright.value);
 
 			if (lightnum < 0)
 				spritelights = scalelight[0];
@@ -2352,7 +2353,7 @@ static void R_ProjectSprite(mobj_t *thing)
 	{
 		light = P_GetSectorLightNumAt(thing->subsector->sector, interp.x, interp.y, splat ? gz : gzt);
 
-		INT32 lightnum = (*thing->subsector->sector->lightlist[light].lightlevel >> LIGHTSEGSHIFT);
+		INT32 lightnum = max((*thing->subsector->sector->lightlist[light].lightlevel >> LIGHTSEGSHIFT), cv_secbright.value);
 		if (lightnum < 0)
 			spritelights = scalelight[0];
 		else if (lightnum >= LIGHTLEVELS)
@@ -2482,7 +2483,7 @@ static void R_ProjectSprite(mobj_t *thing)
 	else
 		vis->transmap = NULL;
 
-	if (R_ThingIsFullBright(oldthing) || oldthing->flags2 & MF2_SHADOW || thing->flags2 & MF2_SHADOW || cv_fullbrite_hack.value)
+	if (R_ThingIsFullBright(oldthing) || oldthing->flags2 & MF2_SHADOW || thing->flags2 & MF2_SHADOW)
 		vis->cut |= SC_FULLBRIGHT;
 	else if (R_ThingIsSemiBright(oldthing))
 		vis->cut |= SC_SEMIBRIGHT;
@@ -2702,13 +2703,16 @@ static void R_ProjectPrecipitationSprite(precipmobj_t *thing)
 
 weatherthink:
 	// okay... this is a hack, but weather isn't networked, so it should be ok
-	if (!(thing->precipflags & PCF_THUNK))
+	if (thing->lastupdatetime < gametic)
 	{
+		R_ResetPrecipitationMobjInterpolationState(thing);
+
 		if (thing->precipflags & PCF_RAIN)
 			P_RainThinker(thing);
 		else
 			P_SnowThinker(thing);
-		thing->precipflags |= PCF_THUNK;
+
+		thing->lastupdatetime = gametic;
 	}
 }
 
@@ -2739,7 +2743,7 @@ void R_AddSprites(sector_t *sec, INT32 lightlevel)
 	{
 		if (sec->heightsec == -1) lightlevel = sec->lightlevel;
 
-		lightnum = (lightlevel >> LIGHTSEGSHIFT);
+		lightnum = max((lightlevel >> LIGHTSEGSHIFT), cv_secbright.value);
 
 		if (lightnum < 0)
 			spritelights = scalelight[0];
