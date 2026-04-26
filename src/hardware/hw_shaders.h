@@ -264,7 +264,7 @@
 #define GLSL_WATER_FRAGMENT_SHADER \
 	GLSL_FLOOR_FUDGES \
 	"const float freq = 0.025;\n" \
-	"const float amp = 0.025;\n" \
+	"const float amp = 0.075;\n" \
 	"const float speed = 2.0;\n" \
 	"const float pi = 3.14159;\n" \
 	"#ifdef SRB2_PALETTE_RENDERING\n" \
