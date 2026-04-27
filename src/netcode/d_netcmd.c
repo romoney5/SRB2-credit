@@ -3875,7 +3875,6 @@ static void Command_Unloadaddons(void)
 	LUA_HookBool(false, HOOK(GameQuit));
 	D_QuitNetGame();
 	CL_Reset();
-	//D_StartTitle();
 
 	F_StartIntro();
 }
