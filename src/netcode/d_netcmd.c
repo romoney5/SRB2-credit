@@ -491,8 +491,8 @@ void D_RegisterServerCommands(void)
 	RegisterNetXCmd(XD_ADDFOLDER, Got_Addfoldercmd);
 	RegisterNetXCmd(XD_REQADDFILE, Got_RequestAddfilecmd);
 	RegisterNetXCmd(XD_REQADDFOLDER, Got_RequestAddfoldercmd);
-	RegisterNetXCmd(XD_DELFILE, Got_Delfilecmd);
-	RegisterNetXCmd(XD_UNLOADADDONS, Got_Unloadaddonscmd);
+	/*RegisterNetXCmd(XD_DELFILE, Got_Delfilecmd);
+	RegisterNetXCmd(XD_UNLOADADDONS, Got_Unloadaddonscmd);*/
 	RegisterNetXCmd(XD_PAUSE, Got_Pause);
 	RegisterNetXCmd(XD_SUICIDE, Got_Suicide);
 	RegisterNetXCmd(XD_RUNSOC, Got_RunSOCcmd);
@@ -3769,11 +3769,11 @@ static void Command_Delfile(void)
 	INT32 i;
 	UINT16 found = UINT16_MAX;
 
-	if (netgame && !(server || IsPlayerAdmin(consoleplayer)))
+	/*if (netgame && !(server || IsPlayerAdmin(consoleplayer)))
 	{
 		CONS_Printf(M_GetText("Only the server or a remote admin can use this.\n"));
 		return;
-	}
+	}*/
 
 	if (numwadfiles <= mainwads)
 	{
@@ -3783,7 +3783,7 @@ static void Command_Delfile(void)
 
 	if (COM_Argc() != 2)
 	{
-		CONS_Printf(M_GetText("delfile <wadfile.wad>: delete wad file\n"));
+		CONS_Printf(M_GetText("delfile <filename.pk3/wad/lua/soc>: Unload add-on\n"));
 		return;
 	}
 	else
@@ -3845,25 +3845,37 @@ static void Command_Delfile(void)
 		return;
 	}
 
-	WRITESTRINGN(buf_p, p, 240);
+	// romoney5: this is a local feature at the moment
+	if (netgame)
+	{
+		CONS_Printf(M_GetText("This addon can only be unloaded in single player.\n"));
+		return;
+	}
+
+	/*WRITESTRINGN(buf_p, p, 240);
 	WRITEMEM(buf_p, wadfiles[found]->md5sum, 16);
-	SendNetXCmd(XD_DELFILE, buf, buf_p - buf);
+	SendNetXCmd(XD_DELFILE, buf, buf_p - buf);*/
 }
 
 static void Command_Unloadaddons(void)
 {
-	if (netgame)
+	/*if (netgame)
 	{
 		if (!(server || (IsPlayerAdmin(consoleplayer))))
 			CONS_Printf(M_GetText("Only the server or a remote admin can use this.\n"));
 		else
 			SendNetXCmd(XD_UNLOADADDONS, NULL, 0);
 		return;
-	}
+	}*/
 
 	D_RestartGame(true);
 
 	M_CopyGameData(serverGamedata, clientGamedata);
+
+	LUA_HookBool(false, HOOK(GameQuit));
+	D_QuitNetGame();
+	CL_Reset();
+	//D_StartTitle();
 
 	F_StartIntro();
 }
