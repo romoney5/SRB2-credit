@@ -2327,7 +2327,7 @@ boolean G_Responder(event_t *ev)
 
 //
 // G_LuaResponder
-// Let Lua handle key events.
+// Let Lua cook.
 //
 boolean G_LuaResponder(event_t *ev)
 {
@@ -2341,6 +2341,11 @@ boolean G_LuaResponder(event_t *ev)
 	else if (ev->type == ev_keyup)
 	{
 		cancelled = LUA_HookKey(ev, HOOK(KeyUp));
+		LUA_InvalidateUserdata(ev);
+	}
+	else if (ev->type == ev_mouse)
+	{
+		cancelled = LUA_HookKey(ev, HOOK(KeyDown));
 		LUA_InvalidateUserdata(ev);
 	}
 

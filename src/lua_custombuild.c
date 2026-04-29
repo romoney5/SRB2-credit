@@ -10,6 +10,7 @@
 /// \file  lua_custombuild.c
 /// \brief currently only used for lua scripts to detect this build
 
+#include "blua/lua.h"
 #include "doomdef.h"
 #include "fastcmp.h"
 #include "dehacked.h"
@@ -42,6 +43,13 @@ INT32 Takis_PushGlobals(lua_State *L, const char *word)
 			lua_pushnil(L);
 		else if (lua_lumpname[0])
 			lua_pushstring(L, lua_lumpname);
+		return 1;
+    } else if (fastcmp(word, "takis_luamenu")) {
+#ifdef LUAMENU
+		lua_pushboolean(L, true);
+#else
+		lua_pushboolean(L, false);
+#endif
 		return 1;
 	}
     return 0;
