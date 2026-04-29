@@ -1340,6 +1340,8 @@ boolean TryRunTics(tic_t realtics)
 					break;
 			}
 
+		LUA_HOOK(MenuThinker);
+
 		return true;
 	}
 	else

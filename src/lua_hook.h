@@ -75,6 +75,7 @@ automatically.
 	X (AddonLoaded),\
 	X (KeyDown),\
 	X (KeyUp),\
+	X (MenuThinker),/* called every frame, no exceptions */\
 
 #define STRING_HOOK_LIST(X) \
 	X (BotAI),/* B_BuildTailsTiccmd by skin name */\
@@ -90,6 +91,7 @@ automatically.
 	X (continue),\
 	X (playersetup),\
 	X (uncappedgame),\
+	X (menu),\
 
 /*
 I chose to access the hook enums through a macro as well. This could provide

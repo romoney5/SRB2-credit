@@ -1651,7 +1651,8 @@ void LUA_SetHudHook(int hook, huddrawlist_h list)
 	switch (hook)
 	{
 		case HUD_HOOK(game):
-		case HUD_HOOK(uncappedgame): {
+		case HUD_HOOK(uncappedgame):
+		case HUD_HOOK(menu): {
 			camera_t *cam = (splitscreen && stplyr ==
 					&players[secondarydisplayplayer])
 				? &camera2 : &camera;

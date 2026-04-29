@@ -613,7 +613,7 @@ static int lib_cvAddValue(lua_State *L)
 {
 	consvar_t *cvar = *(consvar_t **)luaL_checkudata(L, 1, META_CVAR);
 
-	if (!(cvar->flags & CV_ALLOWLUA))
+	if (!(cvar->flags & CV_ALLOWLUA) && !lua_optboolean(L, 3))
 		return luaL_error(L, "Variable %s cannot be set from Lua.", cvar->name);
 
 	CV_AddValue(cvar, (INT32)luaL_checknumber(L, 2));
