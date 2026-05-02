@@ -40,7 +40,7 @@ INT32 GKS_PushGlobals(lua_State *L, const char *word)
 		else if (lua_lumpname[0])
 			lua_pushstring(L, lua_lumpname);
 		return 1;
-    } else if (fastcmp(word, "takis_luamenu")) {
+    } else if (fastcmp(word, "gks_luamenu")) {
 #ifdef LUAMENU
 		lua_pushboolean(L, true);
 #else
