@@ -876,10 +876,13 @@ static void AbortConnection(void)
 	D_QuitNetGame();
 	CL_Reset();
 	D_StartTitle();
+
+#ifndef LUAMENU
 	if (attemptingrejoin)
 		M_RejoinMenu(-1);
 	else if (cv_returnfromconnect.value)
 		M_ConnectMenu(-1);
+#endif // LUAMENU
 
 	// Will be reset by caller. Signals refusal.
 	cl_mode = CL_ABORTED;

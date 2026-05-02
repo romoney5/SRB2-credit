@@ -549,9 +549,15 @@ static boolean ShouldIgnoreMouse(void)
 {
 	if (cv_alwaysgrabmouse.value)
 		return false;
+	if (con_destlines) // console overrides menu
+		return true;
 	if (menuactive)
+#ifndef LUAMENU
 		return !M_MouseNeeded();
-	if (paused || con_destlines || chat_on)
+#else
+		return false;
+#endif
+	if (paused || chat_on)
 		return true;
 	if (gamestate != GS_LEVEL && gamestate != GS_INTERMISSION &&
 			gamestate != GS_CONTINUING && gamestate != GS_CUTSCENE)

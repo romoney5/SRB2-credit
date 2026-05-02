@@ -100,3 +100,4 @@ lua_inputlib.c
 lua_colorlib.c
 lua_custombuild.c
 lua_httplib.c
+lua_servlib.c

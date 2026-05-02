@@ -190,6 +190,7 @@ static boolean addons_forcelocal = false;
 
 // Lua
 static huddrawlist_h luahuddrawlist_playersetup;
+static huddrawlist_h luahuddrawlist_menu;
 
 //
 // PROTOTYPES
@@ -2155,7 +2156,7 @@ menu_t OP_PlaystyleDef = {
 static void M_UpdateItemOn(void)
 {
 	I_SetTextInputMode((currentMenu->menuitems[itemOn].status & IT_CVARTYPE) == IT_CV_STRING ||
-		(currentMenu->menuitems[itemOn].status & IT_TYPE) == IT_KEYHANDLER);
+		(currentMenu->menuitems[itemOn].status & IT_TYPE) == IT_KEYHANDLER); // romoney5 TODO: expose to lua
 }
 
 static void M_VideoOptions(INT32 choice)
@@ -3447,6 +3448,10 @@ boolean M_Responder(event_t *ev)
 		return false;
 	}
 
+#ifdef LUAMENU
+	return false;
+#endif
+
 	routine = currentMenu->menuitems[itemOn].itemaction;
 
 	// Handle menuitems which need a specific key handling
@@ -3663,6 +3668,7 @@ void M_Drawer(void)
 	if (currentMenu == &MessageDef)
 		menuactive = true;
 
+#ifndef LUAMENU
 	if (menuactive)
 	{
 		// now that's more readable with a faded background (yeah like Quake...)
@@ -3692,6 +3698,14 @@ void M_Drawer(void)
 			}
 		}
 	}
+#endif
+
+	{
+		LUA_HUD_ClearDrawList(luahuddrawlist_menu);
+		LUA_HUDHOOK(menu, luahuddrawlist_menu);
+		lt_timefrac -= FRACUNIT;
+	}
+	LUA_HUD_DrawList(luahuddrawlist_menu);
 
 	// focus lost notification goes on top of everything, even the former everything
 	if (window_notinfocus && cv_showfocuslost.value)
@@ -3707,8 +3721,9 @@ void M_Drawer(void)
 //
 // M_StartControlPanel
 //
-void M_StartControlPanel(void)
+void M_StartControlPanel(void) // romoney5 TODO: manual
 {
+#ifndef LUAMENU
 	// time attack HACK
 	if (modeattacking && demoplayback)
 	{
@@ -3838,6 +3853,7 @@ void M_StartControlPanel(void)
 	}
 
 	CON_ToggleOff(); // move away console
+#endif
 }
 
 void M_EndModeAttackRun(void)
@@ -4049,6 +4065,8 @@ void M_Init(void)
 	}
 
 	CV_RegisterVar(&cv_serversort);
+
+	luahuddrawlist_menu = LUA_HUD_CreateDrawList();
 }
 
 static void M_InitCharacterDescription(INT32 i)
@@ -6163,6 +6181,7 @@ static INT32 M_GetFirstLevelInList(INT32 gt)
 static void M_DrawMessageMenu(void);
 
 // Because this is just a hack-ish 'menu', I'm not putting this with the others
+// romoney5: ..is exactly why i'm doing this
 static menuitem_t MessageMenu[] =
 {
 	// TO HACK
@@ -6186,6 +6205,7 @@ void M_StartMessage(const char *string, void *routine, menumessagetype_t itemtyp
 {
 	static char *message;
 	Z_Free(message);
+	// romoney5 TODO: lua hook for m_startmessage
 	message = V_WordWrap(0,0,V_ALLOWLOWERCASE,string);
 	DEBFILE(message);
 
