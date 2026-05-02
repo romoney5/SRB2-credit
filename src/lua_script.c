@@ -65,6 +65,7 @@ static lua_CFunction liblist[] = {
 	LUA_ColorLib, // general color functions
 	LUA_InputLib, // inputs
 	LUA_HTTPLib, // http lib
+	LUA_ServLib, // internal server stuff
 	NULL
 };
 
@@ -218,6 +219,9 @@ int LUA_PushGlobals(lua_State *L, const char *word)
 		return 1;
 	} else if (fastcmp(word,"menuactive")) {
 		lua_pushboolean(L, menuactive);
+		return 1;
+	} else if (fastcmp(word,"servernode")) {
+		lua_pushinteger(L, servernode);
 		return 1;
 	} else if (fastcmp(word,"paused")) {
 		lua_pushboolean(L, paused);
@@ -459,6 +463,8 @@ int LUA_CheckGlobals(lua_State *L, const char *word)
 {
 	if (fastcmp(word, "menuactive"))
 		menuactive = luaL_checkboolean(L, 2);
+	else if (fastcmp(word, "servernode"))
+		servernode = (SINT8)luaL_checkinteger(L, 2);
 	else if (fastcmp(word, "redscore"))
 		redscore = (UINT32)luaL_checkinteger(L, 2);
 	else if (fastcmp(word, "bluescore"))

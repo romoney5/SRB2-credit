@@ -6175,6 +6175,7 @@ static INT32 M_GetFirstLevelInList(INT32 gt)
 static void M_DrawMessageMenu(void);
 
 // Because this is just a hack-ish 'menu', I'm not putting this with the others
+// romoney5: ..is exactly why i'm doing this
 static menuitem_t MessageMenu[] =
 {
 	// TO HACK
@@ -6198,6 +6199,7 @@ void M_StartMessage(const char *string, void *routine, menumessagetype_t itemtyp
 {
 	static char *message;
 	Z_Free(message);
+	// romoney5 TODO: lua hook for m_startmessage
 	message = V_WordWrap(0,0,V_ALLOWLOWERCASE,string);
 	DEBFILE(message);
 
