@@ -220,9 +220,6 @@ int LUA_PushGlobals(lua_State *L, const char *word)
 	} else if (fastcmp(word,"menuactive")) {
 		lua_pushboolean(L, menuactive);
 		return 1;
-	} else if (fastcmp(word,"servernode")) {
-		lua_pushinteger(L, servernode);
-		return 1;
 	} else if (fastcmp(word,"paused")) {
 		lua_pushboolean(L, paused);
 		return 1;
@@ -461,11 +458,10 @@ int LUA_PushGlobals(lua_State *L, const char *word)
 // See the above.
 int LUA_CheckGlobals(lua_State *L, const char *word)
 {
-	if (fastcmp(word, "menuactive"))
-		menuactive = luaL_checkboolean(L, 2);
-	else if (fastcmp(word, "servernode"))
-		servernode = (SINT8)luaL_checkinteger(L, 2);
-	else if (fastcmp(word, "redscore"))
+	if (GKS_CheckGlobals(L, word))
+		return 1;
+
+	if (fastcmp(word, "redscore"))
 		redscore = (UINT32)luaL_checkinteger(L, 2);
 	else if (fastcmp(word, "bluescore"))
 		bluescore = (UINT32)luaL_checkinteger(L, 2);

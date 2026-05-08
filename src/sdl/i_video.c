@@ -90,6 +90,7 @@
 #include "hwsym_sdl.h"
 #include "ogl_sdl.h"
 #endif
+#include "../lua_custombuild.h"
 
 // maximum number of windowed modes (see windowedModes[][])
 #define MAXWINMODES (22)
@@ -395,11 +396,10 @@ static boolean ShouldIgnoreMouse(void)
 	if (con_destlines) // console overrides menu
 		return true;
 	if (menuactive)
-#ifndef LUAMENU
-		return !M_MouseNeeded();
-#else
-		return false;
-#endif
+		if (gks_luamenu)
+			return !M_MouseNeeded();
+		else
+			return false;
 	if (paused || chat_on)
 		return true;
 	if (gamestate != GS_LEVEL && gamestate != GS_INTERMISSION &&
