@@ -124,10 +124,6 @@ FILE *fopenfile(const char*, const char*);
 #endif
 #endif
 
-#ifndef LUAMENU
-#define LUAMENU
-#endif
-
 // Uncheck this to compile debugging code
 //#define RANGECHECK
 //#ifndef PARANOIA
