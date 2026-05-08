@@ -38,6 +38,7 @@
 #if defined (__GNUC__) || defined (__unix__)
 #include <unistd.h>
 #endif
+#include "../lua_custombuild.h"
 
 cl_mode_t cl_mode = CL_SEARCHING;
 
@@ -877,12 +878,13 @@ static void AbortConnection(void)
 	CL_Reset();
 	D_StartTitle();
 
-#ifndef LUAMENU
-	if (attemptingrejoin)
-		M_RejoinMenu(-1);
-	else if (cv_returnfromconnect.value)
-		M_ConnectMenu(-1);
-#endif // LUAMENU
+	if (!gks_luamenu)
+	{
+		if (attemptingrejoin)
+			M_RejoinMenu(-1);
+		else if (cv_returnfromconnect.value)
+			M_ConnectMenu(-1);
+	}
 
 	// Will be reset by caller. Signals refusal.
 	cl_mode = CL_ABORTED;

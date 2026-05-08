@@ -80,6 +80,7 @@
 #if SDL_VERSION_ATLEAST(2,0,0)
 #include "sdl/sdlmain.h" // JOYSTICK_HOTPLUG
 #endif
+#include "lua_custombuild.h"
 #endif
 
 #if defined (__GNUC__) && (__GNUC__ >= 4)
@@ -3448,9 +3449,8 @@ boolean M_Responder(event_t *ev)
 		return false;
 	}
 
-#ifdef LUAMENU
-	return false;
-#endif
+	if (gks_luamenu)
+		return false;
 
 	routine = currentMenu->menuitems[itemOn].itemaction;
 
@@ -3668,8 +3668,7 @@ void M_Drawer(void)
 	if (currentMenu == &MessageDef)
 		menuactive = true;
 
-#ifndef LUAMENU
-	if (menuactive)
+	if (menuactive && !gks_luamenu)
 	{
 		// now that's more readable with a faded background (yeah like Quake...)
 		if (!wipe && (curfadevalue || (gamestate != GS_TITLESCREEN && gamestate != GS_TIMEATTACK)))
@@ -3698,7 +3697,6 @@ void M_Drawer(void)
 			}
 		}
 	}
-#endif
 
 	{
 		LUA_HUD_ClearDrawList(luahuddrawlist_menu);
@@ -3723,7 +3721,9 @@ void M_Drawer(void)
 //
 void M_StartControlPanel(void) // romoney5 TODO: manual
 {
-#ifndef LUAMENU
+	if (gks_luamenu)
+		return;
+
 	// time attack HACK
 	if (modeattacking && demoplayback)
 	{
@@ -3853,7 +3853,6 @@ void M_StartControlPanel(void) // romoney5 TODO: manual
 	}
 
 	CON_ToggleOff(); // move away console
-#endif
 }
 
 void M_EndModeAttackRun(void)

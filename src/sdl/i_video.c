@@ -91,6 +91,7 @@
 #include "hwsym_sdl.h"
 #include "ogl_sdl.h"
 #endif
+#include "../lua_custombuild.h"
 
 rendermode_t rendermode = render_soft;
 rendermode_t chosenrendermode = render_none; // set by command line arguments
@@ -552,11 +553,10 @@ static boolean ShouldIgnoreMouse(void)
 	if (con_destlines) // console overrides menu
 		return true;
 	if (menuactive)
-#ifndef LUAMENU
-		return !M_MouseNeeded();
-#else
-		return false;
-#endif
+		if (gks_luamenu)
+			return !M_MouseNeeded();
+		else
+			return false;
 	if (paused || chat_on)
 		return true;
 	if (gamestate != GS_LEVEL && gamestate != GS_INTERMISSION &&

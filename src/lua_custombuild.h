@@ -15,7 +15,9 @@
 #include "lua_script.h"
 
 extern boolean gks_complexlocaladdons;
+extern boolean gks_luamenu;
 
 INT32 GKS_PushGlobals(lua_State *L, const char *word);
+INT32 GKS_CheckGlobals(lua_State* L, const char* word);
 
 #endif // __GKS_LUA__
