@@ -554,9 +554,9 @@ static boolean ShouldIgnoreMouse(void)
 		return true;
 	if (menuactive)
 		if (gks_luamenu)
-			return !M_MouseNeeded();
-		else
 			return false;
+		else
+			return !M_MouseNeeded();
 	if (paused || chat_on)
 		return true;
 	if (gamestate != GS_LEVEL && gamestate != GS_INTERMISSION &&
