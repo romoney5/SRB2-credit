@@ -9851,8 +9851,10 @@ consvar_t cv_cam2_adjust = CVAR_INIT ("cam2_adjust", "On", CV_SAVE|CV_ALLOWLUA, 
 consvar_t cv_earthquake = CVAR_INIT("earthquake", "On", CV_SAVE|CV_CLIENT, CV_OnOff, NULL);
 
 // romoney5: noclip camera
-consvar_t cv_cam_noclip = CVAR_INIT ("cam_noclip", "Off", CV_SAVE|CV_ALLOWLUA, CV_OnOff, NULL);
-consvar_t cv_cam2_noclip = CVAR_INIT ("cam2_noclip", "Off", CV_SAVE|CV_ALLOWLUA, CV_OnOff, NULL);
+static CV_PossibleValue_t clipping_cons_t[] = { {0, "Off"}, {1, "Vanilla"}, {2, "Exact"}, {0, NULL} };
+
+consvar_t cv_cam_clipping = CVAR_INIT ("cam_clipping", "Vanilla", CV_SAVE|CV_ALLOWLUA|CV_CLIENT, clipping_cons_t, NULL);
+consvar_t cv_cam2_clipping = CVAR_INIT ("cam2_clipping", "Vanilla", CV_SAVE|CV_ALLOWLUA|CV_CLIENT, clipping_cons_t, NULL);
 
 // romoney5: exact camera aiming
 consvar_t cv_cam_exact = CVAR_INIT ("cam_exact", "Off", CV_SAVE|CV_ALLOWLUA, CV_OnOff, NULL);
@@ -9960,6 +9962,7 @@ boolean P_MoveChaseCamera(player_t *player, camera_t *thiscam, boolean resetcall
 	fixed_t x, y, z, dist, distxy, distz, checkdist, viewpointx, viewpointy, camspeed, camdist, camheight, pviewheight, slopez = 0;
 	INT32 camrotate;
 	boolean camstill, cameranoclip, camorbit, cameraexact;
+	INT32 camclipping;
 	mobj_t *mo, *sign = NULL;
 	subsector_t *newsubsec;
 	fixed_t f1, f2;
@@ -10098,6 +10101,7 @@ boolean P_MoveChaseCamera(player_t *player, camera_t *thiscam, boolean resetcall
 		camheight = FixedMul(cv_cam_height.value, mo->scale);
 
 		cameraexact = cv_cam_exact.value;
+		camclipping = cv_cam_clipping.value;
 	}
 	else // Camera 2
 	{
@@ -10109,6 +10113,7 @@ boolean P_MoveChaseCamera(player_t *player, camera_t *thiscam, boolean resetcall
 		camheight = FixedMul(cv_cam2_height.value, mo->scale);
 
 		cameraexact = cv_cam2_exact.value;
+		camclipping = cv_cam2_clipping.value;
 	}
 
 	if (!cameraexact && P_CameraThinker(player, thiscam, resetcalled))
@@ -10695,6 +10700,14 @@ boolean P_MoveChaseCamera(player_t *player, camera_t *thiscam, boolean resetcall
 
 	if (!camstill && !resetcalled && !paused && cameraexact)
 		thiscam->angle = R_PointToAngle2(thiscam->x, thiscam->y, viewpointx, viewpointy);
+
+	if (camclipping == 2)
+	{
+		INT32 newx = thiscam->x, newy = thiscam->y;
+		thiscam->x = mo->x;
+		thiscam->y = mo->y;
+		P_TryCameraMove(newx, newy, thiscam, true);
+	}
 
 	return (x == thiscam->x && y == thiscam->y && z == thiscam->z && angle == thiscam->aiming);
 
