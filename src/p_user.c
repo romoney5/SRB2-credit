@@ -2086,6 +2086,8 @@ mobj_t *P_SpawnGhostMobj(mobj_t *mobj)
 	ghost->spriteyscale = mobj->spriteyscale;
 	ghost->spritexoffset = mobj->spritexoffset;
 	ghost->spriteyoffset = mobj->spriteyoffset;
+	ghost->spritexpivot = mobj->spritexpivot;
+	ghost->spriteypivot = mobj->spriteypivot;
 
 	ghost->fuse = ghost->info->damage;
 	ghost->skin = mobj->skin;
@@ -7417,7 +7419,7 @@ static void P_NiGHTSMovement(player_t *player)
 		else
 			player->mo->momz = 0;
 
-#if 0//def ROTSPRITE
+#if 0
 		if (!(player->charflags & SF_NONIGHTSROTATION) && player->mo->momz)
 		{
 			if (player->mo->state != &states[S_PLAY_NIGHTS_DRILL])

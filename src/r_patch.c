@@ -135,7 +135,6 @@ static void Patch_FreeData(patch_t *patch)
 			Z_Free(patch->flats[i]);
 	}
 
-#ifdef ROTSPRITE
 	if (patch->rotated)
 	{
 		rotsprite_t *rotsprite = patch->rotated;
@@ -149,7 +148,6 @@ static void Patch_FreeData(patch_t *patch)
 		Z_Free(rotsprite->patches);
 		Z_Free(rotsprite);
 	}
-#endif
 
 	if (patch->pixels)
 		Z_Free(patch->pixels);

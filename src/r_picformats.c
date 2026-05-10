@@ -804,6 +804,7 @@ boolean Picture_IsFlatFormat(pictureformat_t format)
 }
 
 /** Returns true if the lump is a valid Doom patch.
+  * Taken from PrBoom (which took this from ZDoom)
   *
   * \param patch Input patch.
   * \param picture Input patch size.
@@ -909,15 +910,11 @@ boolean Picture_IsLumpPNG(const UINT8 *d, size_t s)
 	// Check for PNG file signature using memcmp
 	// As it may be faster on CPUs with slow unaligned memory access
 	// Ref: http://www.libpng.org/pub/png/spec/1.2/PNG-Rationale.html#R.PNG-file-signature
-	return (memcmp(&d[0], "\x89\x50\x4e\x47\x0d\x0a\x1a\x0a", PNG_HEADER_SIZE) == 0);
+	return (memcmp(d, "\x89\x50\x4e\x47\x0d\x0a\x1a\x0a", PNG_HEADER_SIZE) == 0);
 }
 
 #ifndef NO_PNG_LUMPS
 #ifdef HAVE_PNG
-
-/*#if PNG_LIBPNG_VER_DLLNUM < 14
-typedef PNG_CONST png_byte *png_const_bytep;
-#endif*/
 typedef struct
 {
 	const UINT8 *buffer;

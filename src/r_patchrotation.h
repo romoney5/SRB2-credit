@@ -12,10 +12,11 @@
 #include "r_patch.h"
 #include "r_picformats.h"
 
-#ifdef ROTSPRITE
 rotsprite_t *RotatedPatch_Create(INT32 numangles);
-void RotatedPatch_DoRotation(rotsprite_t *rotsprite, patch_t *patch, INT32 angle, INT32 xpivot, INT32 ypivot, boolean flip);
+void RotatedPatch_DoRotation(rotsprite_t *rotsprite, patch_t *patch, angle_t angle, INT32 xpivot, INT32 ypivot, boolean flip);
+void RotatedPatch_CalculateDimensions(
+	fixed_t width, fixed_t height, angle_t angle,
+	fixed_t *newwidth, fixed_t *newheight);
 
 extern fixed_t rollcosang[ROTANGLES];
 extern fixed_t rollsinang[ROTANGLES];
-#endif

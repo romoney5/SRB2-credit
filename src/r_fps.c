@@ -324,6 +324,8 @@ void R_InterpolateMobjState(mobj_t *mobj, fixed_t frac, interpmobjstate_t *out)
 		out->spriteyscale = mobj->spriteyscale;
 		out->spritexoffset = mobj->spritexoffset;
 		out->spriteyoffset = mobj->spriteyoffset;
+		out->spritexpivot = mobj->spritexpivot;
+		out->spriteypivot = mobj->spriteypivot;
 		out->flipped = P_MobjFlip(mobj) == -1;
 		if (mobj->floorspriteslope)
 		{
@@ -370,6 +372,10 @@ void R_InterpolateMobjState(mobj_t *mobj, fixed_t frac, interpmobjstate_t *out)
 	// It seems existing mods visually break more often than not if it is interpolated.
 	out->spritexoffset = mobj->spritexoffset;
 	out->spriteyoffset = mobj->spriteyoffset;
+
+	// Damn..........
+	out->spritexpivot = R_LerpFixed(mobj->old_spritexpivot, mobj->spritexpivot, frac);
+	out->spriteypivot = R_LerpFixed(mobj->old_spriteypivot, mobj->spriteypivot, frac);
 
 	out->subsector = R_PointInSubsector(out->x, out->y);
 
@@ -440,6 +446,8 @@ void R_InterpolatePrecipMobjState(precipmobj_t *mobj, fixed_t frac, interpmobjst
 	out->spriteyscale = R_LerpFixed(mobj->old_spriteyscale, mobj->spriteyscale, frac);
 	out->spritexoffset = R_LerpFixed(mobj->old_spritexoffset, mobj->spritexoffset, frac);
 	out->spriteyoffset = R_LerpFixed(mobj->old_spriteyoffset, mobj->spriteyoffset, frac);
+	out->spritexpivot = R_LerpFixed(mobj->old_spritexpivot, mobj->spritexpivot, frac);
+	out->spriteypivot = R_LerpFixed(mobj->old_spriteypivot, mobj->spriteypivot, frac);
 
 	out->subsector = R_PointInSubsector(out->x, out->y);
 
@@ -928,6 +936,8 @@ void R_ResetMobjInterpolationState(mobj_t *mobj)
 	mobj->old_spriteyscale = mobj->spriteyscale;
 	mobj->old_spritexoffset = mobj->spritexoffset;
 	mobj->old_spriteyoffset = mobj->spriteyoffset;
+	mobj->old_spritexpivot = mobj->spritexpivot;
+	mobj->old_spriteypivot = mobj->spriteypivot;
 
 	if (mobj->player)
 	{
@@ -988,4 +998,6 @@ void R_ResetPrecipitationMobjInterpolationState(precipmobj_t *mobj)
 	mobj->old_spriteyscale = mobj->spriteyscale;
 	mobj->old_spritexoffset = mobj->spritexoffset;
 	mobj->old_spriteyoffset = mobj->spriteyoffset;
+	mobj->old_spritexpivot = mobj->spritexpivot;
+	mobj->old_spriteypivot = mobj->spriteypivot;
 }

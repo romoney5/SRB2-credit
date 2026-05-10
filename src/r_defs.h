@@ -862,13 +862,11 @@ typedef struct drawseg_s
 	vertex_t leftpos, rightpos; // Used for rendering FOF walls with slopes
 } drawseg_t;
 
-#ifdef ROTSPRITE
 typedef struct
 {
 	INT32 angles;
 	void **patches;
 } rotsprite_t;
-#endif
 
 // Patches.
 // A patch holds one or more columns.
@@ -887,9 +885,7 @@ typedef struct
 	void *hardware; // OpenGL patch, allocated whenever necessary
 	void *flats[4]; // The patch as flats
 
-#ifdef ROTSPRITE
 	rotsprite_t *rotated; // Rotated patches
-#endif
 } patch_t;
 
 #if defined(_MSC_VER)
@@ -944,6 +940,11 @@ typedef enum
 	RF_ALWAYSONTOP		= 0x00010000,  // Sprite is drawn on top of level geometry
 	RF_HIDEINSKYBOX		= 0x00020000,  // do not render in skybox
 	RF_NOMODEL          = 0x00040000,  // do not draw a model for this mobj in opengl, use a sprite instead
+
+	// romoney5: is this placed properly?
+	RF_PIVOTROTATION    = 0x00080000, // Sprite uses the object's rotation pivot
+	RF_PIVOTATOFFSETS   = 0x00100000, // Sprite uses its offsets as the rotation pivot
+	RF_OLDROTATION      = 0x00200000, // Uses old sprite rotation (Software)
 } renderflags_t;
 
 typedef enum
@@ -986,9 +987,8 @@ typedef struct
 	// Flip bits (1 = flip) to use for view angles 0-7/15.
 	UINT16 flip;
 
-#ifdef ROTSPRITE
+	// romoney5: there's a change from *rotated[2][16] to *rotated[16]
 	rotsprite_t *rotated[16]; // Rotated patches
-#endif
 } spriteframe_t;
 
 #define MAXFRAMENUM 256

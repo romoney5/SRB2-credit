@@ -24,6 +24,14 @@
 #include "../w_wad.h"
 #include "../p_setup.h" // levelfadecol
 
+#define DIVLINE_VERTEX_DIFF 0.45f
+
+typedef struct
+{
+	float x, y;
+	float dx, dy;
+} FDivLine;
+
 // --------------------------------------------------------------------------
 // This is global data for planes rendering
 // --------------------------------------------------------------------------
@@ -34,12 +42,6 @@ extrasubsector_t *extrasubsectors = NULL;
 #define NEWSUBSECTORS 50
 static size_t totsubsectors;
 size_t addsubsector;
-
-typedef struct
-{
-	float x, y;
-	float dx, dy;
-} fdivline_t;
 
 // ==========================================================================
 //                                    FLOOR & CEILING CONVEX POLYS GENERATION
@@ -164,7 +166,7 @@ static void HWR_FreePoly(poly_t *poly)
 // with the polygon segment
 //
 static float bspfrac;
-static polyvertex_t *fracdivline(fdivline_t *bsp, polyvertex_t *v1,
+static polyvertex_t *fracdivline(FDivLine *bsp, polyvertex_t *v1,
 	polyvertex_t *v2)
 {
 	static polyvertex_t pt;
@@ -216,32 +218,11 @@ static polyvertex_t *fracdivline(fdivline_t *bsp, polyvertex_t *v1,
 // point. Note: hardcoded value, 1.0f could be anything else.
 static boolean SameVertice (polyvertex_t *p1, polyvertex_t *p2)
 {
-#if 0
-	float diff;
-	diff = p2->x - p1->x;
-	if (diff < -1.5f || diff > 1.5f)
-		return false;
-	diff = p2->y - p1->y;
-	if (diff < -1.5f || diff > 1.5f)
-		return false;
-#elif 0
-	if (p1->x != p2->x)
-		return false;
-	if (p1->y != p2->y)
-		return false;
-#elif 0
-	if (fabsf( p2->x - p1->x ) > 1.0E-36f )
-		return false;
-	if (fabsf( p2->y - p1->y ) > 1.0E-36f )
-		return false;
-#else
-#define  DIVLINE_VERTEX_DIFF   0.45f
 	float ep = DIVLINE_VERTEX_DIFF;
 	if (fabsf( p2->x - p1->x ) > ep )
 		return false;
 	if (fabsf( p2->y - p1->y ) > ep )
 		return false;
-#endif
 	// p1 and p2 are considered the same vertex
 	return true;
 }
@@ -252,7 +233,7 @@ static boolean SameVertice (polyvertex_t *p1, polyvertex_t *p2)
 //   frontpoly : polygon on right side of bsp line
 //   backpoly  : polygon on left side
 //
-static void SplitPoly (fdivline_t *bsp,         //splitting parametric line
+static void SplitPoly (FDivLine *bsp,           //splitting parametric line
                        poly_t *poly,            //the convex poly we split
                        poly_t **frontpoly,      //return one poly here
                        poly_t **backpoly)       //return the other here
@@ -435,7 +416,7 @@ static poly_t *CutOutSubsecPoly(seg_t *lseg, INT32 count, poly_t *poly)
 		p1 = {0, 0, 0}, p2 = {0, 0, 0};
 	float fracs = 0.0f;
 
-	fdivline_t cutseg; // x, y, dx, dy as start of node_t struct
+	FDivLine cutseg; // x, y, dx, dy as start of node_t struct
 
 	poly_t *temppoly;
 
@@ -566,7 +547,7 @@ static inline void HWR_SubsecPoly(INT32 num, poly_t *poly)
 
 // the bsp divline have not enouth presition
 // search for the segs source of this divline
-static inline void SearchDivline(node_t *bsp, fdivline_t *divline)
+static inline void SearchDivline(node_t *bsp, FDivLine *divline)
 {
 	divline->x = FIXED_TO_FLOAT(bsp->x);
 	divline->y = FIXED_TO_FLOAT(bsp->y);
@@ -609,7 +590,7 @@ static void WalkBSPNode(INT32 bspnum, poly_t *poly, UINT16 *leafnode, fixed_t *b
 {
 	node_t *bsp;
 	poly_t *backpoly, *frontpoly;
-	fdivline_t fdivline;
+	FDivLine fdivline;
 	polyvertex_t *pt;
 	INT32 i;
 

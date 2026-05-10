@@ -71,9 +71,11 @@ typedef struct {
 	fixed_t spriteyscale;
 	fixed_t spritexoffset;
 	fixed_t spriteyoffset;
+	fixed_t spritexpivot;
+	fixed_t spriteypivot;
 	boolean flipped;
 	fixed_t zdelta;
-	fixed_t ox, oy, oz, dx, dy; // ugh (fnf)
+	fixed_t ox, oy, oz, dx, dy; // ugh
 } interpmobjstate_t;
 
 // Level interpolators

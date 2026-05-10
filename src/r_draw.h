@@ -43,6 +43,18 @@ extern INT32 dc_numlights, dc_maxlights;
 
 extern INT32 dc_texheight, dc_postlength;
 
+typedef struct
+{
+	INT32 patch_width, patch_height;
+	fixed_t patch_center_x, patch_center_y;
+	fixed_t midpoint_x, midpoint_y;
+	fixed_t precalc_cos, precalc_sin;
+	fixed_t column;
+	UINT16 *source;
+} dc_rotation_t;
+
+extern dc_rotation_t dc_rotation;
+
 // -----------------------
 // SPAN DRAWING CODE STUFF
 // -----------------------
@@ -169,6 +181,16 @@ void R_DrawTranslatedColumn_8(void);
 void R_DrawTranslatedTranslucentColumn_8(void);
 void R_DrawFogColumn_8(void);
 void R_DrawColumnShadowed_8(void);
+
+void R_DrawRotatedColumn_8(void);
+void R_DrawRotatedColumn_Mapped_8(void);
+void R_DrawRotatedColumn_Trans_8(void);
+void R_DrawRotatedColumn_MappedTrans_8(void);
+
+void R_DrawRotatedColumn_Old_8(void);
+void R_DrawRotatedColumn_OldMapped_8(void);
+void R_DrawRotatedColumn_OldTrans_8(void);
+void R_DrawRotatedColumn_OldMappedTrans_8(void);
 
 void R_DrawSpan_8(void);
 void R_DrawTranslucentSpan_8(void);

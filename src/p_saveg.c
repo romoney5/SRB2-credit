@@ -2040,6 +2040,9 @@ typedef enum
 	MD2_DONTDRAWFORVIEWMOBJ = 1<<25,
 	MD2_TRANSLATION         = 1<<26,
 	MD2_ALPHA               = 1<<27
+	// romoney5: this is a local feature right now
+	/*MD2_SPRITEXPIVOT        = 1<<26,
+	MD2_SPRITEYPIVOT        = 1<<27,*/
 } mobj_diff2_t;
 
 typedef enum
@@ -2266,6 +2269,11 @@ static void SaveMobjThinker(save_t *save_p, const thinker_t *th, const UINT8 typ
 		diff2 |= MD2_SPRITEXOFFSET;
 	if (mobj->spriteyoffset)
 		diff2 |= MD2_SPRITEYOFFSET;
+	// romoney5: this is a local feature right now
+	/*if (mobj->spritexpivot)
+		diff2 |= MD2_SPRITEXPIVOT;
+	if (mobj->spriteypivot)
+		diff2 |= MD2_SPRITEYPIVOT;*/
 	if (mobj->floorspriteslope)
 	{
 		pslope_t *slope = mobj->floorspriteslope;
@@ -2440,6 +2448,11 @@ static void SaveMobjThinker(save_t *save_p, const thinker_t *th, const UINT8 typ
 		P_WriteFixed(save_p, mobj->spritexoffset);
 	if (diff2 & MD2_SPRITEYOFFSET)
 		P_WriteFixed(save_p, mobj->spriteyoffset);
+	// romoney5: this is a local feature right now
+	/*if (diff2 & MD2_SPRITEXPIVOT)
+		P_WriteFixed(save_p, mobj->spritexpivot);
+	if (diff2 & MD2_SPRITEYPIVOT)
+		P_WriteFixed(save_p, mobj->spriteypivot);*/
 	if (diff2 & MD2_FLOORSPRITESLOPE)
 	{
 		pslope_t *slope = mobj->floorspriteslope;
@@ -3503,6 +3516,11 @@ static thinker_t* LoadMobjThinker(save_t *save_p, actionf_p1 thinker)
 		mobj->spritexoffset = P_ReadFixed(save_p);
 	if (diff2 & MD2_SPRITEYOFFSET)
 		mobj->spriteyoffset = P_ReadFixed(save_p);
+	// romoney5: this is a local feature right now
+	/*if (diff2 & MD2_SPRITEXPIVOT)
+		mobj->spritexpivot = P_ReadFixed(save_p);
+	if (diff2 & MD2_SPRITEYPIVOT)
+		mobj->spriteypivot = P_ReadFixed(save_p);*/
 	if (diff2 & MD2_FLOORSPRITESLOPE)
 	{
 		pslope_t *slope = (pslope_t *)P_CreateFloorSpriteSlope(mobj);
