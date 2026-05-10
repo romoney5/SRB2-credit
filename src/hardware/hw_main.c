@@ -4470,9 +4470,7 @@ static void HWR_ProjectSprite(mobj_t *thing)
 	float gz, gzt;
 	spritedef_t *sprdef;
 	spriteframe_t *sprframe;
-#ifdef ROTSPRITE
 	spriteinfo_t *sprinfo;
-#endif
 	md2_t *md2;
 	size_t lumpoff;
 	unsigned rot;
@@ -4492,9 +4490,9 @@ static void HWR_ProjectSprite(mobj_t *thing)
 
 	fixed_t spr_width, spr_height;
 	fixed_t spr_offset, spr_topoffset;
-#ifdef ROTSPRITE
+
+#ifdef OLDROTATION
 	patch_t *rotsprite = NULL;
-	INT32 rollangle = 0;
 	angle_t spriterotangle = 0;
 #endif
 
@@ -4601,9 +4599,7 @@ static void HWR_ProjectSprite(mobj_t *thing)
 	else
 	{
 		sprdef = &sprites[thing->sprite];
-#ifdef ROTSPRITE
 		sprinfo = &spriteinfo[thing->sprite];
-#endif
 
 		if (rot >= sprdef->numframes)
 		{
@@ -4689,7 +4685,7 @@ static void HWR_ProjectSprite(mobj_t *thing)
 	spr_offset = spritecachedinfo[lumpoff].offset;
 	spr_topoffset = spritecachedinfo[lumpoff].topoffset;
 
-#ifdef ROTSPRITE
+#ifdef OLDROTATION
 	spriterotangle = R_SpriteRotationAngle(&interp);
 
 	if (spriterotangle != 0
@@ -4719,6 +4715,8 @@ static void HWR_ProjectSprite(mobj_t *thing)
 			flip = 0;
 		}
 	}
+#else
+	(void)sprinfo;
 #endif
 
 	if (thing->renderflags & RF_ABSOLUTEOFFSETS)
@@ -4927,7 +4925,7 @@ static void HWR_ProjectSprite(mobj_t *thing)
 
 	vis->rotated = false;
 
-#ifdef ROTSPRITE
+#ifdef OLDROTATION
 	if (rotsprite)
 	{
 		vis->gpatch = (patch_t *)rotsprite;

@@ -51,6 +51,8 @@ INT32 dc_x = 0, dc_yl = 0, dc_yh = 0;
 fixed_t dc_iscale, dc_texturemid;
 UINT8 *dc_source;
 
+dc_rotation_t dc_rotation;
+
 // -----------------------
 // translucency stuff here
 // -----------------------

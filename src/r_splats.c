@@ -395,6 +395,8 @@ static void R_RasterizeFloorSplat(floorsplat_t *pSplat, vector2_t *verts, visspr
 			angle_t angle = (pSplat->angle >> ANGLETOFINESHIFT);
 			offsetx = FixedMul(a, FINECOSINE(angle)) - FixedMul(b, FINESINE(angle));
 			offsety = -FixedMul(a, FINESINE(angle)) - FixedMul(b, FINECOSINE(angle));
+
+			memset(cachedheight, 0, sizeof(cachedheight));
 		}
 		else
 		{
