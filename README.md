@@ -40,6 +40,10 @@ You can compile the source code normally (see "Compiling") and put the binary in
 
 ## Visual
 - Toggable mobj pitch/roll functional (3d rotation for models on slopes, like DRRR). Option located in Video Settings -> Level -> "Pitch/Roll Rotation"
+- New camera options!
+  - "`cam_clipping`": 0 = noclip, 1 = vanilla, 2 = Roblox-style clip
+  - "`cam_exact`": off = vanilla, on = precise camera movement
+  - Combine `cam_clipping 2`, `cam_exact on`, and `cam_speed 1` for a Roblox-like camera!
 - Ring-Racers-styled screen quakes! ("`rr_quakes`" in console)
 - Toggleable Screenshake effects! ("`earthquake`", ported from SRB2Classic by @archiNiko)
 - Better "Fake Contrast"! (https://git.do.srb2.org/STJr/SRB2/-/merge_requests/2680, @GLideKS)

@@ -117,6 +117,9 @@ extern consvar_t cv_cam2_speed, cv_cam2_rotate, cv_cam2_rotspeed, cv_cam2_turnmu
 
 extern consvar_t cv_earthquake;
 
+extern consvar_t cv_cam_clipping, cv_cam2_clipping;
+extern consvar_t cv_cam_exact, cv_cam2_exact;
+
 extern consvar_t cv_cam_savedist[2][2], cv_cam_saveheight[2][2];
 void CV_UpdateCamDist(void);
 void CV_UpdateCam2Dist(void);
@@ -422,6 +425,8 @@ void P_SetThingPosition(mobj_t *thing);
 void P_SetUnderlayPosition(mobj_t *thing);
 
 boolean P_CheckPosition(mobj_t *thing, fixed_t x, fixed_t y);
+boolean P_TryCameraMove(fixed_t x, fixed_t y, camera_t *thiscam); // romoney5: why is this defined twice?
+boolean P_IsCameraNoclip(camera_t *thiscam);
 boolean P_CheckCameraPosition(fixed_t x, fixed_t y, camera_t *thiscam);
 boolean P_CheckMove(mobj_t *thing, fixed_t x, fixed_t y, boolean allowdropoff);
 boolean P_TryMove(mobj_t *thing, fixed_t x, fixed_t y, boolean allowdropoff);
