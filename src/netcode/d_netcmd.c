@@ -2262,8 +2262,8 @@ static void Command_Suicide(void)
 		return;
 	}
 
-	// Add file on your client directly if you aren't in a netgame.
-	if (!(netgame || multiplayer) || server)
+	// Retry is quicker.  Probably should force people to use it.
+	if (!(netgame || multiplayer))
 	{
 		CONS_Printf(M_GetText("You can't use this in Single Player! Use \"retry\" instead.\n"));
 		return;
