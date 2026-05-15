@@ -154,6 +154,10 @@ static SDL_Texture  *texture;
 static SDL_bool      havefocus = SDL_TRUE;
 static const char *fallback_resolution_name = "Fallback";
 
+// cursor position
+static INT32 mouse_x = 0;
+static INT32 mouse_y = 0;
+
 // windowed video modes from which to choose from.
 static INT32 windowedModes[MAXWINMODES][2] =
 {
@@ -750,6 +754,9 @@ static void Impl_HandleMouseMotionEvent(SDL_MouseMotionEvent evt)
 
 	if (USE_MOUSEINPUT)
 	{
+		mouse_x = evt.x;
+		mouse_y = evt.y;
+
 		if ((SDL_GetMouseFocus() != window && SDL_GetKeyboardFocus() != window) || (!ShouldGrabMouse() && !firstmove))
 		{
 			SDLdoUngrabMouse();
@@ -2002,7 +2009,10 @@ void I_ShutdownGraphics(void)
 
 void I_GetCursorPosition(INT32 *x, INT32 *y)
 {
-	SDL_GetMouseState(x, y);
+	// using SDL_GetMouseState can report the wrong position in fullscreen mode,
+	// use events instead
+	*x = mouse_x;
+	*y = mouse_y;
 }
 
 UINT32 I_GetRefreshRate(void)
