@@ -8,7 +8,7 @@
 // See the 'LICENSE' file for more details.
 //-----------------------------------------------------------------------------
 /// \file  lua_custombuild.c
-/// \brief Currently only used for lua scripts to detect this build specifically
+/// \brief Global variables specific to this build
 
 #include "blua/lua.h"
 #include "doomdef.h"

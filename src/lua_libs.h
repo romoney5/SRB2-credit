@@ -98,6 +98,8 @@ extern boolean ignoregameinputs;
 
 #define META_SERVERELEM "SERVERELEM_T*"
 #define META_SERVERINFO_PAK "SERVERINFO_PAK*"
+#define META_PLRINFO_PAK "PLRINFO_PAK*"
+//#define META_DOOMDATA "DOOMDATA_T*"
 
 boolean luaL_checkboolean(lua_State *L, int narg);
 

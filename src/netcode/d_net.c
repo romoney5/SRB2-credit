@@ -31,6 +31,7 @@
 #include "../z_zone.h"
 #include "i_tcp.h"
 #include "../d_main.h" // srb2home
+#include "../lua_custombuild.h"
 
 //
 // NETWORKING
@@ -781,7 +782,7 @@ boolean HSendPacket(INT32 node, boolean reliable, UINT8 acknum, size_t packetlen
 		return true;
 	}
 
-	if (!netgame)
+	if (!netgame && !gks_luamenu)
 		I_Error("Tried to transmit to another node");
 
 	// do this before GetFreeAcknum because this function backups
@@ -863,7 +864,7 @@ boolean HGetPacket(void)
 		return true;
 	}
 
-	if (!netgame)
+	if (!netgame && !gks_luamenu)
 		return false;
 
 	while(true)
