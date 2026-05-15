@@ -244,7 +244,7 @@ static int lib_getServerelem(lua_State* L)
 {
 	UINT32 i;
 
-	// find skin by number
+	// find server by number
 	if (lua_type(L, 2) == LUA_TNUMBER)
 	{
 		i = luaL_checkinteger(L, 2);
@@ -264,6 +264,267 @@ static int lib_numServerlist(lua_State* L)
 	lua_pushinteger(L, serverlistcount);
 	return 1;
 }
+
+
+enum plrinfo_pak {
+	plrinfo_pak_valid = 0,
+	plrinfo_pak_num,
+	plrinfo_pak_name,
+	plrinfo_pak_address,
+	plrinfo_pak_team,
+	plrinfo_pak_skin,
+	plrinfo_pak_data,
+	plrinfo_pak_score,
+	plrinfo_pak_timeinserver,
+};
+
+static const char* const plrinfo_pak_opt[] = {
+	"valid",
+	"num",
+	"name",
+	"address",
+	"team",
+	"skin",
+	"data",
+	"score",
+	"timeinserver",
+	NULL };
+
+static int plrinfo_pak_fields_ref = LUA_NOREF;
+
+static int plrinfo_pak_get(lua_State* L)
+{
+	plrinfo_pak* plr = *((plrinfo_pak**)luaL_checkudata(L, 1, META_PLRINFO_PAK));
+	enum plrinfo_pak field = Lua_optoption(L, 2, -1, plrinfo_pak_fields_ref);
+
+	if (!plr)
+	{
+		if (field == plrinfo_pak_valid)
+		{
+			lua_pushboolean(L, false);
+			return 1;
+		}
+		return LUA_ErrInvalid(L, "plrinfo_pak");
+	}
+
+
+	/*
+	typedef struct
+	{
+		UINT8 num;
+		char name[MAXPLAYERNAME+1];
+		UINT8 address[4]; // sending another string would run us up against MAXPACKETLENGTH
+		UINT8 team;
+		UINT8 skin;
+		UINT8 data; // Color is first four bits, hasflag, isit and issuper have one bit each, the last is unused.
+		UINT32 score;
+		UINT16 timeinserver; // In seconds.
+	} ATTRPACK plrinfo_pak;
+	*/
+
+	switch (field)
+	{
+	case plrinfo_pak_valid:
+		lua_pushboolean(L, true);
+		break;
+	case plrinfo_pak_name:
+		lua_pushstring(L, plr->name);
+		break;
+	case plrinfo_pak_address:
+		lua_pushlightuserdata(L, plr->address);
+		break;
+	case plrinfo_pak_team:
+		lua_pushinteger(L, plr->team);
+		break;
+	case plrinfo_pak_skin:
+		lua_pushinteger(L, plr->skin);
+		break;
+	case plrinfo_pak_data:
+		lua_pushinteger(L, plr->data);
+		break;
+	case plrinfo_pak_score:
+		lua_pushinteger(L, plr->score);
+		break;
+	case plrinfo_pak_timeinserver:
+		lua_pushinteger(L, plr->timeinserver);
+		break;
+	}
+
+	return 1;
+}
+
+static int plrinfo_pak_set(lua_State* L)
+{
+	return luaL_error(L, LUA_QL("serverelem_t") " struct cannot be edited by Lua.");
+}
+
+static int lib_getPlrinfo(lua_State* L)
+{
+	INT32 i;
+
+	// find player by number
+	if (lua_type(L, 2) == LUA_TNUMBER)
+	{
+		i = luaL_checkinteger(L, 2);
+		if (i < 0 || i >= MAXPLAYERS)
+			return luaL_error(L, "playerinfo[] index %d out of range (0 - %d)", i, MAXPLAYERS - 1);
+		if (playerinfo[i].num >= 255)
+			return 0;
+		LUA_PushUserdata(L, &playerinfo[i], META_PLRINFO_PAK);
+		return 1;
+	}
+
+	return 0;
+}
+
+static int lib_numPlayerinfo(lua_State* L)
+{
+	lua_pushinteger(L, MAXPLAYERS - 1);
+	return 1;
+}
+
+
+
+/*enum doomdata {
+	doomdata_valid = 0,
+	doomdata_packettype,
+
+	doomdata_clientpak,
+	doomdata_client2pak,
+	doomdata_serverpak,
+	doomdata_servercfg,
+	doomdata_textcmd,
+	doomdata_filetxpak,
+	doomdata_fileack,
+	doomdata_filereceived,
+	doomdata_clientcfg,
+	doomdata_md5sum,
+	doomdata_serverinfo,
+	doomdata_serverrefuse,
+	doomdata_askinfo,
+	doomdata_msaskinfo,
+	doomdata_playerinfo,
+	doomdata_playerconfig,
+	doomdata_filesneedednum,
+	doomdata_filesneededcfg,
+	doomdata_pingtable,
+};
+
+static const char* const doomdata_opt[] = {
+	"valid",
+	"packettype",
+
+	"clientpak",
+	"client2pak",
+	"serverpak",
+	"servercfg",
+	"textcmd",
+	"filetxpak",
+	"fileack",
+	"filereceived",
+	"clientcfg",
+	"md5sum",
+	"serverinfo",
+	"serverrefuse",
+	"askinfo",
+	"msaskinfo",
+	"playerinfo",
+	"playerconfig",
+	"filesneedednum",
+	"filesneededcfg",
+	"pingtable",
+	NULL };
+
+static int doomdata_fields_ref = LUA_NOREF;
+
+static int doomdata_get(lua_State* L)
+{
+	doomdata_t* dat = *((doomdata_t**)luaL_checkudata(L, 1, META_DOOMDATA));
+	enum doomdata field = Lua_optoption(L, 2, -1, doomdata_fields_ref);
+
+	if (!dat)
+	{
+		if (field == doomdata_valid)
+		{
+			lua_pushboolean(L, false);
+			return 1;
+		}
+		return LUA_ErrInvalid(L, "doomdata_t");
+	}
+
+
+	/a*
+	typedef struct
+	{
+		UINT32 checksum;
+		UINT8 ack; // If not zero the node asks for acknowledgement, the receiver must resend the ack
+		UINT8 ackreturn; // The return of the ack number
+
+		UINT8 packettype;
+		UINT8 reserved; // Padding
+		union
+		{
+			clientcmd_pak clientpak;
+			client2cmd_pak client2pak;
+			servertics_pak serverpak;
+			serverconfig_pak servercfg;
+			UINT8 textcmd[MAXTEXTCMD+1];
+			filetx_pak filetxpak;
+			fileack_pak fileack;
+			UINT8 filereceived;
+			clientconfig_pak clientcfg;
+			UINT8 md5sum[16];
+			serverinfo_pak serverinfo;
+			serverrefuse_pak serverrefuse;
+			askinfo_pak askinfo;
+			msaskinfo_pak msaskinfo;
+			plrinfo_pak playerinfo[MAXPLAYERS];
+			plrconfig_pak playerconfig[MAXPLAYERS];
+			INT32 filesneedednum;
+			filesneededconfig_pak filesneededcfg;
+			UINT32 pingtable[MAXPLAYERS+1];
+		} u; // This is needed to pack diff packet types data together
+	} ATTRPACK doomdata_t;
+	*a/
+
+	switch (field)
+	{
+	case doomdata_valid:
+		lua_pushboolean(L, true);
+		break;
+	case doomdata_packettype:
+		lua_pushstring(L, dat->packettype);
+		break;
+
+	}
+
+	return 1;
+}
+
+static int doomdata_set(lua_State* L)
+{
+	return luaL_error(L, LUA_QL("serverelem_t") " struct cannot be edited by Lua.");
+}
+
+static int lib_getNetbuffer(lua_State* L)
+{
+	INT32 i;
+
+	// find player by number
+	if (lua_type(L, 2) == LUA_TNUMBER)
+	{
+		i = luaL_checkinteger(L, 2);
+		if (i < 0 || i >= MAXPLAYERS)
+			return luaL_error(L, "playerinfo[] index %d out of range (0 - %d)", i, MAXPLAYERS - 1);
+		if (playerinfo[i].num >= 255)
+			return 0;
+		LUA_PushUserdata(L, &playerinfo[i], META_PLRINFO_PAK);
+		return 1;
+	}
+
+	return 0;
+}
+*/
 
 
 // this is my file, i get to use whatever naming scheme i want
@@ -380,11 +641,17 @@ int LUA_ServLib(lua_State* L)
 {
 	LUA_RegisterUserdataMetatable(L, META_SERVERELEM, serverelem_get, serverelem_set, NULL);
 	LUA_RegisterUserdataMetatable(L, META_SERVERINFO_PAK, serverinfo_pak_get, serverinfo_pak_set, NULL);
+	LUA_RegisterUserdataMetatable(L, META_PLRINFO_PAK, plrinfo_pak_get, plrinfo_pak_set, NULL);
 
 	serverelem_fields_ref = Lua_CreateFieldTable(L, serverelem_opt);
 	serverinfo_pak_fields_ref = Lua_CreateFieldTable(L, serverinfo_pak_opt);
+	plrinfo_pak_fields_ref = Lua_CreateFieldTable(L, plrinfo_pak_opt);
 
 	LUA_RegisterGlobalUserdata(L, "serverlist", lib_getServerelem, NULL, lib_numServerlist);
+
+	LUA_RegisterGlobalUserdata(L, "playerinfo", lib_getPlrinfo, NULL, lib_numPlayerinfo);
+
+	//LUA_RegisterGlobalUserdata(L, "netbuffer", lib_getNetbuffer, NULL, NULL);
 
 	// Set global functions
 	lua_pushvalue(L, LUA_GLOBALSINDEX);
