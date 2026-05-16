@@ -1361,7 +1361,7 @@ static menuitem_t OP_VideoOptionsMenu[] =
 	{IT_HEADER, NULL, "Server Connection", NULL, 110},
 	{IT_STRING | IT_CVAR, NULL, "Show Server Info",			&cv_showserverinfo,		116},
 	{IT_STRING | IT_CVAR, NULL, "Return to MS on Cancel",	&cv_returnfromconnect,	121},
-	{IT_STRING | IT_CVAR, NULL, "Show Addon Info",			&cv_showserverinfo,		126},
+	{IT_STRING | IT_CVAR, NULL, "Show Addon Info",			&cv_showaddoninfo,		126},
 
 	{IT_HEADER, NULL, "Console", NULL, 135},
 	{IT_STRING | IT_CVAR, NULL, "Background color",          &cons_backcolor,      141},

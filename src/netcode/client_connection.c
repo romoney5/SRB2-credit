@@ -120,7 +120,7 @@ static void DrawFileProgress(fileneeded_t *file, int y)
 
 static void CL_DrawAddonTypes(void)
 {
-	if (!cv_showsrvaddont.value)
+	if (!cv_showaddoninfo.value)
 		return;
 
 	INT32 y = 0;

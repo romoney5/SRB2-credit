@@ -35,7 +35,7 @@ You can compile the source code normally (see "Compiling") and put the binary in
 - "Quit Game" and "Abort" options are red colored.
 - The Background of the addons menu now are translucent.
 - Perfstats blue text uses sky color instead.
-- When joining, show the amount of and types of addons loaded by the server (Code from [SRB2Kart Saturn](https://github.com/Indev450/SRB2Kart-Saturn/pull/224))
+- When joining, show the amount of and types of addons loaded by the server! ("`showaddoninfo`", Code from [SRB2Kart Saturn](https://github.com/Indev450/SRB2Kart-Saturn/pull/224))
 
 ## Visual
 - Toggable mobj pitch/roll functional (3d rotation for models on slopes, like DRRR). Option located in Video Settings -> Level -> "Pitch/Roll Rotation"
