@@ -347,7 +347,7 @@ menu_t OP_SoundOptionsDef;
 menu_t OP_SoundAdvancedDef;
 
 //Misc
-menu_t OP_DataOptionsDef, OP_ScreenshotOptionsDef, OP_EraseDataDef;
+menu_t OP_ClientOptionsDef, OP_DataOptionsDef, OP_ScreenshotOptionsDef, OP_EraseDataDef;
 menu_t OP_ServerOptionsDef;
 menu_t OP_MonitorToggleDef;
 static void M_ScreenshotOptions(INT32 choice);
@@ -1063,8 +1063,9 @@ static menuitem_t OP_MainMenu[] =
 	{IT_SUBMENU | IT_STRING, NULL, "Sound Options...",     &OP_SoundOptionsDef, 60},
 
 	{IT_CALL    | IT_STRING, NULL, "Server Options...",    M_ServerOptions,     80},
+	{IT_SUBMENU | IT_STRING, NULL, "Network Options...",   &OP_ClientOptionsDef,90},
 
-	{IT_SUBMENU | IT_STRING, NULL, "Data Options...",      &OP_DataOptionsDef, 100},
+	{IT_SUBMENU | IT_STRING, NULL, "Data Options...",      &OP_DataOptionsDef, 110},
 };
 
 static menuitem_t OP_P1ControlsMenu[] =
@@ -1358,42 +1359,37 @@ static menuitem_t OP_VideoOptionsMenu[] =
 	{IT_STRING | IT_CVAR, NULL, "Menu Background Color",         &cv_menubgcolor,         96},
 	{IT_STRING | IT_CVAR, NULL, "Menu Text Color",         &cv_menucolor,         101},
 
-	{IT_HEADER, NULL, "Server Connection", NULL, 110},
-	{IT_STRING | IT_CVAR, NULL, "Show Server Info",			&cv_showserverinfo,		116},
-	{IT_STRING | IT_CVAR, NULL, "Return to MS on Cancel",	&cv_returnfromconnect,	121},
-	{IT_STRING | IT_CVAR, NULL, "Show Addon Info",			&cv_showaddoninfo,		126},
+	{IT_HEADER, NULL, "Console", NULL, 110},
+	{IT_STRING | IT_CVAR, NULL, "Background color",          &cons_backcolor,      116},
+	{IT_STRING | IT_CVAR, NULL, "Text Size",                 &cv_constextsize,    121},
 
-	{IT_HEADER, NULL, "Console", NULL, 135},
-	{IT_STRING | IT_CVAR, NULL, "Background color",          &cons_backcolor,      141},
-	{IT_STRING | IT_CVAR, NULL, "Text Size",                 &cv_constextsize,    146},
+	{IT_HEADER, NULL, "Chat", NULL, 130},
+	{IT_STRING | IT_CVAR, NULL, "Chat Mode",            		 	 &cv_consolechat,  136},
+	{IT_STRING | IT_CVAR | IT_CV_SLIDER, NULL, "Chat Box Width",    &cv_chatwidth,     141},
+	{IT_STRING | IT_CVAR | IT_CV_SLIDER, NULL, "Chat Box Height",   &cv_chatheight,    146},
+	{IT_STRING | IT_CVAR, NULL, "Message Fadeout Time",              &cv_chattime,    151},
+	{IT_STRING | IT_CVAR, NULL, "Chat Notifications",           	 &cv_chatnotifications,  156},
+	{IT_STRING | IT_CVAR, NULL, "Spam Protection",           		 &cv_chatspamprotection,  161},
+	{IT_STRING | IT_CVAR, NULL, "Chat background tint",           	 &cv_chatbacktint,  166},
 
-	{IT_HEADER, NULL, "Chat", NULL, 155},
-	{IT_STRING | IT_CVAR, NULL, "Chat Mode",            		 	 &cv_consolechat,  161},
-	{IT_STRING | IT_CVAR | IT_CV_SLIDER, NULL, "Chat Box Width",    &cv_chatwidth,     166},
-	{IT_STRING | IT_CVAR | IT_CV_SLIDER, NULL, "Chat Box Height",   &cv_chatheight,    171},
-	{IT_STRING | IT_CVAR, NULL, "Message Fadeout Time",              &cv_chattime,    176},
-	{IT_STRING | IT_CVAR, NULL, "Chat Notifications",           	 &cv_chatnotifications,  181},
-	{IT_STRING | IT_CVAR, NULL, "Spam Protection",           		 &cv_chatspamprotection,  186},
-	{IT_STRING | IT_CVAR, NULL, "Chat background tint",           	 &cv_chatbacktint,  191},
+	{IT_HEADER, NULL, "Level", NULL, 175},
+	{IT_STRING | IT_CVAR, NULL, "Draw Distance",             &cv_drawdist,        181},
+	{IT_STRING | IT_CVAR, NULL, "Weather Draw Dist.",        &cv_drawdist_precip, 186},
+	{IT_STRING | IT_CVAR, NULL, "NiGHTS Hoop Draw Dist.",    &cv_drawdist_nights, 191},
+	{IT_STRING | IT_CVAR, NULL, "Pitch/Roll Rotation",    	 &cv_pitchroll_rotation, 196},
+	{IT_STRING | IT_CVAR, NULL, "Ring Racers Screen Quakes", &cv_ringracers_quakes, 201},
+    {IT_STRING | IT_CVAR, NULL, "Screenshake Effects", &cv_earthquake, 206},
 
-	{IT_HEADER, NULL, "Level", NULL, 200},
-	{IT_STRING | IT_CVAR, NULL, "Draw Distance",             &cv_drawdist,        206},
-	{IT_STRING | IT_CVAR, NULL, "Weather Draw Dist.",        &cv_drawdist_precip, 211},
-	{IT_STRING | IT_CVAR, NULL, "NiGHTS Hoop Draw Dist.",    &cv_drawdist_nights, 216},
-	{IT_STRING | IT_CVAR, NULL, "Pitch/Roll Rotation",    	 &cv_pitchroll_rotation, 221},
-	{IT_STRING | IT_CVAR, NULL, "Ring Racers Screen Quakes", &cv_ringracers_quakes, 226},
-    {IT_STRING | IT_CVAR, NULL, "Screenshake Effects", &cv_earthquake, 231},
-
-	{IT_HEADER, NULL, "Diagnostic", NULL, 240},
-	{IT_STRING | IT_CVAR, NULL, "Show FPS",                  &cv_ticrate,         246},
-	{IT_STRING | IT_CVAR, NULL, "Clear Before Redraw",       &cv_homremoval,      251},
-	{IT_STRING | IT_CVAR, NULL, "Show \"FOCUS LOST\"",       &cv_showfocuslost,   256},
-	{IT_STRING | IT_CVAR, NULL, "Show Movie Info",           &cv_moviemodeinfo,   261},
+	{IT_HEADER, NULL, "Diagnostic", NULL, 215},
+	{IT_STRING | IT_CVAR, NULL, "Show FPS",                  &cv_ticrate,         221},
+	{IT_STRING | IT_CVAR, NULL, "Clear Before Redraw",       &cv_homremoval,      226},
+	{IT_STRING | IT_CVAR, NULL, "Show \"FOCUS LOST\"",       &cv_showfocuslost,   231},
+	{IT_STRING | IT_CVAR, NULL, "Show Movie Info",           &cv_moviemodeinfo,   236},
 
 #ifdef HWRENDER
-	{IT_HEADER, NULL, "Renderer", NULL, 270},
-	{IT_CALL | IT_STRING, NULL, "OpenGL Options...",         M_OpenGLOptionsMenu, 276},
-	{IT_STRING | IT_CVAR, NULL, "FPS Cap",                   &cv_fpscap,          281},
+	{IT_HEADER, NULL, "Renderer", NULL, 245},
+	{IT_CALL | IT_STRING, NULL, "OpenGL Options...",         M_OpenGLOptionsMenu, 251},
+	{IT_STRING | IT_CVAR, NULL, "FPS Cap",                   &cv_fpscap,          256},
 #endif
 };
 
@@ -1539,6 +1535,26 @@ static menuitem_t OP_SoundAdvancedMenu[] =
 
 #undef OPENMPT_MENUOFFSET
 #undef MIXERX_MENUOFFSET
+
+static menuitem_t OP_ClientOptionsMenu[] =
+{
+	{IT_HEADER, 						 NULL, "General", 			NULL,					  0},
+	{IT_STRING | IT_CVAR,				 NULL, "Minimum Delay",       &cv_mindelay,          12},
+	{IT_STRING | IT_CVAR,				 NULL, "Gentlemen's Delay",       &cv_gentlemens,	 22},
+	{IT_STRING | IT_CVAR,				 NULL, "Connection Timeout",       &cv_nettimeout,   32},
+	{IT_STRING | IT_CVAR,				 NULL, "Network Buffer",       &cv_netticbuffer,	 42},
+
+	{IT_HEADER, 						 NULL, "Server Browser", 			NULL,			 60},
+	{IT_STRING | IT_CVAR,				 NULL, "Timeout",		&cv_masterserver_timeout,    72},
+
+	{IT_HEADER, 						 NULL, "Server Browser",	NULL,					 90},
+	{IT_STRING | IT_CVAR, 				 NULL, "Show Server Info",	&cv_showserverinfo,   	 102},
+	{IT_STRING | IT_CVAR, 				 NULL, "Return to Server Browser",	&cv_returnfromconnect, 112},
+	{IT_STRING | IT_CVAR, 				 NULL, "Show Addon Info",	&cv_showaddoninfo,		 122},
+
+	{IT_HEADER, 						NULL, "Diagnostic", 		NULL,					 140},
+	{IT_STRING | IT_CVAR, NULL, "Network Statistics",			&cv_netstat,				 152},
+};
 
 static menuitem_t OP_DataOptionsMenu[] =
 {
@@ -2263,6 +2279,10 @@ menu_t OP_OpenGLLightingDef = DEFAULTMENUSTYLE(
 	"M_VIDEO", OP_OpenGLLightingMenu, &OP_OpenGLOptionsDef, 60, 40);
 #endif // ALAM_LIGHTING
 #endif // HWRENDER
+
+menu_t OP_ClientOptionsDef = DEFAULTMENUSTYLE(
+	MTREE2(MN_OP_MAIN, MN_OP_CLIENT),
+	"M_DATA", OP_ClientOptionsMenu, &OP_MainDef, 30, 30);
 
 menu_t OP_DataOptionsDef = DEFAULTMENUSTYLE(
 	MTREE2(MN_OP_MAIN, MN_OP_DATA),
