@@ -118,6 +118,67 @@ static void DrawFileProgress(fileneeded_t *file, int y)
 	V_DrawRightAlignedString(BASEVIDWIDTH/2+128, y, V_20TRANS|V_MONOSPACE, va("%3.1fK/s ", ((double)getbps)/1024));
 }
 
+static void CL_DrawAddonTypes(void)
+{
+	if (!cv_showsrvaddont.value)
+		return;
+
+	INT32 y = 0;
+
+	INT32 addontypes_downloaded[NUMADDONTYPES] = {0};
+
+	for (INT32 i = 0; i < fileneedednum; ++i)
+	{
+		switch (fileneeded[i].status)
+		{
+			case FS_FOUND:
+			case FS_OPEN:
+				addontypes_downloaded[fileneeded[i].type]++;
+			break;
+
+			default:
+			break;
+		}
+	}
+
+	for (addontype_t type = 0; type < NUMADDONTYPES; ++type)
+	{
+		if (addontypes[type] == 0)
+			continue;
+
+		INT32 flags = V_SNAPTOTOP|V_SNAPTOLEFT|MENUCAPS;
+
+		if (addontypes[type] == addontypes_downloaded[type])
+			flags |= V_GREENMAP; // archiNiko: probably shouldn't be effected by MENUCOLOR?
+		else
+			flags |= MENUREDCOLOR;
+
+		const char *typestr = "Misc";
+
+		switch (type)
+		{
+			case ADDON_SCRIPT:
+				typestr = "Script";
+			break;
+
+			case ADDON_MAP:
+				typestr = "Map";
+			break;
+
+			case ADDON_CHARACTER:
+				typestr = "Character";
+			break;
+
+			default:
+			break;
+		}
+
+		V_DrawSmallString(4, 4 + y, flags, va("%s addons", typestr));
+		V_DrawRightAlignedSmallString(100, 4 + y, flags, va("%d/%d", addontypes_downloaded[type], addontypes[type]));
+		y += 6;
+	}
+}
+
 static void DrawOverallProgress(int y)
 {
 	UINT32 totalsize = filedownload.totalsize;
@@ -143,6 +204,7 @@ static void DrawOverallProgress(int y)
 
 	V_DrawString(BASEVIDWIDTH/2-128, y, V_20TRANS|V_ALLOWLOWERCASE, progress_str);
 	V_DrawRightAlignedString(BASEVIDWIDTH/2+128, y, V_20TRANS|V_ALLOWLOWERCASE, va("%2u/%2u Files ", downloadedfiles+1, totalfiles));
+	CL_DrawAddonTypes();
 }
 
 //
@@ -245,6 +307,8 @@ static void CL_DrawConnectionStatus(void)
 			V_DrawFill(BASEVIDWIDTH/2-128, BASEVIDHEIGHT-16, totalfileslength, 8, 96);
 			V_DrawCenteredString(BASEVIDWIDTH/2, BASEVIDHEIGHT-16, V_20TRANS|V_MONOSPACE|V_ALLOWLOWERCASE,
 				va(" %2u/%2u files",loadcompletednum,fileneedednum));
+
+			CL_DrawAddonTypes();
 		}
 		else if (cl_mode == CL_VIEWSERVER)
 		{
@@ -492,6 +556,8 @@ static void CL_DrawConnectionStatus(void)
 			V_DrawFill(BASEVIDWIDTH/2-128, BASEVIDHEIGHT-16, totalfileslength, 8, 96);
 			V_DrawCenteredString(BASEVIDWIDTH/2, BASEVIDHEIGHT-16, V_20TRANS|V_MONOSPACE|V_ALLOWLOWERCASE,
 				va(" %2u/%2u files",checkcompletednum,fileneedednum));
+
+			CL_DrawAddonTypes();
         }
 		else if (filedownload.current != -1)
 		{
@@ -1293,6 +1359,7 @@ static boolean CL_ServerConnectionSearchTicker(tic_t *asksent)
 			}
 
 			cl_mode = cv_showserverinfo.value ? CL_VIEWSERVER : CL_CHECKFILES;
+			CL_CheckAddonTypes();
 			ChangeServMusic(servmus_1, true,false);
 		}
 		else
@@ -1375,6 +1442,7 @@ static boolean CL_ServerConnectionTicker(const char *tmpsave, tic_t *oldtic, tic
 			if (cl_lastcheckedfilecount == UINT16_MAX) // All files retrieved
 			{
 				cl_mode = cv_showserverinfo.value ? CL_VIEWSERVER : CL_CHECKFILES;
+				CL_CheckAddonTypes();
 				ChangeServMusic(servmus_1, true,false);
 			}
 			else if (fileneedednum != cl_lastcheckedfilecount || I_GetTime() >= *asksent)
