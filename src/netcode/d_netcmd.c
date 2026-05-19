@@ -230,7 +230,7 @@ static consvar_t cv_fishcake = CVAR_INIT ("fishcake", "Off", CV_CALL|CV_NOSHOWHE
 #endif
 static consvar_t cv_dummyconsvar = CVAR_INIT ("dummyconsvar", "Off", CV_CALL|CV_NOSHOWHELP, CV_OnOff, DummyConsvar_OnChange);
 
-consvar_t cv_restrictmoveskinchange = CVAR_INIT ("restrictmoveskinchange", "Yes", CV_SAVE|CV_CHEAT|CV_ALLOWLUA, CV_YesNo, NULL);
+consvar_t cv_restrictmoveskinchange = CVAR_INIT ("restrictmoveskinchange", "No", CV_SAVE|CV_CHEAT|CV_ALLOWLUA, CV_YesNo, NULL);
 consvar_t cv_restrictskinchange = CVAR_INIT ("restrictskinchange", "Yes", CV_SAVE|CV_NETVAR|CV_CHEAT|CV_ALLOWLUA, CV_YesNo, NULL);
 consvar_t cv_allowteamchange = CVAR_INIT ("allowteamchange", "Yes", CV_SAVE|CV_NETVAR|CV_ALLOWLUA, CV_YesNo, NULL);
 
@@ -416,6 +416,7 @@ consvar_t cv_glallowshaders = CVAR_INIT ("gr_allowcustomshaders", "On", CV_NETVA
 
 consvar_t cv_returnfromconnect = CVAR_INIT ("returnfromconnect", "On", CV_SAVE|CV_CLIENT, CV_OnOff, NULL);
 consvar_t cv_showserverinfo = CVAR_INIT ("showserverinfo", "On", CV_SAVE|CV_CLIENT, CV_OnOff, NULL);
+consvar_t cv_showaddoninfo = CVAR_INIT ("showaddoninfo", "On", CV_SAVE|CV_CLIENT, CV_OnOff, NULL);
 
 static CV_PossibleValue_t cvarinfo_const_t[] = {{0, "Show All"}, {1, "Hide Origin"}, {2, "Hide Flags"}, {3, "Only Show Values"}, {0, NULL}};
 consvar_t cv_cvarinformation = CVAR_INIT ("cvarinfo", "Show All", CV_CLIENT|CV_SAVE, cvarinfo_const_t, NULL);
@@ -569,6 +570,7 @@ void D_RegisterServerCommands(void)
 	// server info
 	CV_RegisterVar(&cv_returnfromconnect);
     CV_RegisterVar(&cv_showserverinfo);
+    CV_RegisterVar(&cv_showaddoninfo);
 
 	// p_mobj.c
 	CV_RegisterVar(&cv_itemrespawntime);
@@ -2274,8 +2276,8 @@ static void Command_Suicide(void)
 		return;
 	}
 
-	// Add file on your client directly if you aren't in a netgame.
-	if (!(netgame || multiplayer) || server)
+	// Retry is quicker.  Probably should force people to use it.
+	if (!(netgame || multiplayer))
 	{
 		CONS_Printf(M_GetText("You can't use this in Single Player! Use \"retry\" instead.\n"));
 		return;

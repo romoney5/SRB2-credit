@@ -141,6 +141,10 @@ static UINT32 refresh_rate;
 
 static boolean video_init = false;
 
+// cursor position
+static INT32 mouse_x = 0;
+static INT32 mouse_y = 0;
+
 static SDL_bool Impl_CreateWindow(SDL_bool fullscreen);
 
 static void Impl_VideoSetupSurfaces(int width, int height);
@@ -861,6 +865,9 @@ static void Impl_HandleMouseMotionEvent(SDL_MouseMotionEvent evt)
 
 	if (USE_MOUSEINPUT)
 	{
+		mouse_x = evt.x;
+		mouse_y = evt.y;
+
 		if ((SDL_GetMouseFocus() != window && SDL_GetKeyboardFocus() != window) || (!ShouldGrabMouse() && !firstmove))
 		{
 			SDLdoUngrabMouse();
@@ -1945,7 +1952,10 @@ void I_ShutdownGraphics(void)
 
 void I_GetCursorPosition(INT32 *x, INT32 *y)
 {
-	SDL_GetMouseState(x, y);
+	// using SDL_GetMouseState can report the wrong position in fullscreen mode,
+	// use events instead
+	*x = mouse_x;
+	*y = mouse_y;
 }
 
 UINT32 I_GetRefreshRate(void)

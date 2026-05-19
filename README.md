@@ -7,8 +7,6 @@
 
 See [SRB2 Wiki/Source code compiling](http://wiki.srb2.org/wiki/Source_code_compiling)
 
-If you get compilation errors referring to booleans and/or pointers, try reverting [this commit](https://github.com/luigi-budd/SRB2-edit/commit/8b70f986a65a735030e611c0bcf36161b4cdd505) and/or [this commit](https://github.com/luigi-budd/SRB2-edit/commit/2160051f055eed0fa1cdf0f4034534f60dfe2c0a) and [this commit](https://github.com/luigi-budd/SRB2-edit/commit/0cb43b90763d58386bf97ab6fcf732636cb5d48e) (or [this one](https://github.com/luigi-budd/SRB2-edit/commit/6acca940af796845b64ec6a3db74451735c9c023))
-
 # Installation:
 
 You can compile the source code normally (see "Compiling") and put the binary in your SRB2 directory. No additional assets required, it works right out the box!
@@ -37,9 +35,14 @@ You can compile the source code normally (see "Compiling") and put the binary in
 - "Quit Game" and "Abort" options are red colored.
 - The Background of the addons menu now are translucent.
 - Perfstats blue text uses sky color instead.
+- When joining, show the amount of and types of addons loaded by the server! ("`showaddoninfo`", Code from [SRB2Kart Saturn](https://github.com/Indev450/SRB2Kart-Saturn/pull/224))
 
 ## Visual
 - Toggable mobj pitch/roll functional (3d rotation for models on slopes, like DRRR). Option located in Video Settings -> Level -> "Pitch/Roll Rotation"
+- New camera options!
+  - "`cam_clipping`": 0 = noclip, 1 = vanilla, 2 = Roblox-style clip
+  - "`cam_exact`": off = vanilla, on = precise camera movement
+  - Combine `cam_clipping 2`, `cam_exact on`, and `cam_speed 1` for a Roblox-like camera!
 - Ring-Racers-styled screen quakes! ("`rr_quakes`" in console)
 - Toggleable Screenshake effects! ("`earthquake`", ported from SRB2Classic by @archiNiko)
 - Better "Fake Contrast"! (https://git.do.srb2.org/STJr/SRB2/-/merge_requests/2680, @GLideKS)
