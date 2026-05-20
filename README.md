@@ -70,7 +70,6 @@ You can compile the source code normally (see "Compiling") and put the binary in
 - "`freezelevel`" debug command (Be careful using when clients are connected!)
 - HUD camera struct updates position in first person! (credits [Jiskster](https://git.do.srb2.org/STJr/SRB2/-/merge_requests/2629) & [Hanicef](https://git.do.srb2.org/Hanicef/SRB2Classic/-/commit/681bd160f5be3925a97d798d00e67b32a8c1df71))
 - `v.cachePatch` accepts a second parameter for rotation! (https://git.do.srb2.org/STJr/SRB2/-/merge_requests/2662)
-- Added "`TR`" as an alias to "`TICRATE`" in Lua
 - "`getlogfile`" command (Prints the absolute path of the current log, useful when latest-log.txt is sym-linked to a different log)
 
 ## GIFs
