@@ -582,7 +582,7 @@ static int CVarSetFunction
 ){
 	consvar_t *cvar = *(consvar_t **)luaL_checkudata(L, 1, META_CVAR);
 
-	if (!(cvar->flags & CV_ALLOWLUA))
+	if (!(cvar->flags & CV_ALLOWLUA) && !lua_optboolean(L, 3))
 		return luaL_error(L, "Variable '%s' cannot be set from Lua.", cvar->name);
 
 	switch (lua_type(L, 2))
