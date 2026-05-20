@@ -230,7 +230,6 @@ static consvar_t cv_fishcake = CVAR_INIT ("fishcake", "Off", CV_CALL|CV_NOSHOWHE
 #endif
 static consvar_t cv_dummyconsvar = CVAR_INIT ("dummyconsvar", "Off", CV_CALL|CV_NOSHOWHELP, CV_OnOff, DummyConsvar_OnChange);
 
-consvar_t cv_restrictmoveskinchange = CVAR_INIT ("restrictmoveskinchange", "No", CV_SAVE|CV_CHEAT|CV_ALLOWLUA, CV_YesNo, NULL);
 consvar_t cv_restrictskinchange = CVAR_INIT ("restrictskinchange", "Yes", CV_SAVE|CV_NETVAR|CV_CHEAT|CV_ALLOWLUA, CV_YesNo, NULL);
 consvar_t cv_allowteamchange = CVAR_INIT ("allowteamchange", "Yes", CV_SAVE|CV_NETVAR|CV_ALLOWLUA, CV_YesNo, NULL);
 
@@ -634,7 +633,6 @@ void D_RegisterServerCommands(void)
 	RegisterNetXCmd(XD_RANDOMSEED, Got_RandomSeed);
 
 	CV_RegisterVar(&cv_allowexitlevel);
-	CV_RegisterVar(&cv_restrictmoveskinchange);
 	CV_RegisterVar(&cv_restrictskinchange);
 	CV_RegisterVar(&cv_allowteamchange);
 	CV_RegisterVar(&cv_respawntime);
@@ -1549,12 +1547,8 @@ static void Got_NameAndColor(UINT8 **cp, INT32 playernum)
 	INT32 forcedskin = R_GetForcedSkin(playernum);
 	if (forcedskin != -1 && (netgame || multiplayer)) // Server wants everyone to use the same player (or the level is forcing one.)
 		SetPlayerSkinByNum(playernum, forcedskin);
-	else if (CanChangeSkin(playernum))
-	{
-		if (cv_restrictmoveskinchange.value && P_PlayerMoving(playernum))
-			return;
+	else
 		SetPlayerSkinByNum(playernum, skin);
-	}
 }
 
 void SendWeaponPref(void)
