@@ -2052,10 +2052,12 @@ static void PreparePolygon(FSurfaceInfo *pSurf, FOutVector *pOutVerts, FBITFIELD
 				scalef += (pz > buf[i][j]+0.00005f) ? 0 : 1;
 
 		// quick test for screen border (not 100% correct, but looks ok)
-		if (px < 4) scalef -= (GLfloat)(8*(4-px));
+		/*if (px < 4) scalef -= (GLfloat)(8*(4-px));
 		if (py < viewport[1]+4) scalef -= (GLfloat)(8*(viewport[1]+4-py));
 		if (px > viewport[2]-4) scalef -= (GLfloat)(8*(4-(viewport[2]-px)));
-		if (py > viewport[1]+viewport[3]-4) scalef -= (GLfloat)(8*(4-(viewport[1]+viewport[3]-py)));
+		if (py > viewport[1]+viewport[3]-4) scalef -= (GLfloat)(8*(4-(viewport[1]+viewport[3]-py)));*/
+
+		//scalef = 64.0f;
 
 		scalef /= 64;
 		//GL_DBG_Printf("Scale factor: %f\n", scalef);

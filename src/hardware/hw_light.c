@@ -1018,21 +1018,21 @@ void HWR_DrawCoronas(void)
 		//if (cz <= 255*8+250)
 			//continue;
 		Surf.PolyColor.rgba = p_lspr->corona_color;
-		if (cz > 250.0f)
-			Surf.PolyColor.s.alpha = (UINT8)(0xff-(UINT8)(((int)cz-250)/8));
+		if (cz2 > 250.0f)
+			Surf.PolyColor.s.alpha = (UINT8)(0xff-(UINT8)(((int)cz2-250)/8));
 		else
 			Surf.PolyColor.s.alpha = 0xff;
 
 		switch (p_lspr->type)
 		{
 			case LIGHT_SPR:
-				size  = p_lspr->corona_radius  * ((cz+120.0f)/950.0f); // d'ou vienne ces constante ?
+				size  = p_lspr->corona_radius  * ((cz2+120.0f)/950.0f); // d'ou vienne ces constante ?
 				break;
 			case ROCKET_SPR:
 				Surf.PolyColor.s.alpha = (UINT8)((M_RandomByte()>>1)&0xff);
 				// FALLTHROUGH
 			case CORONA_SPR:
-				size  = p_lspr->corona_radius  * ((cz+60.0f)/100.0f); // d'ou vienne ces constante ?
+				size  = p_lspr->corona_radius  * ((cz2+60.0f)/100.0f); // d'ou vienne ces constante ?
 				break;
 			default:
 				I_Error("HWR_DoCoronasLighting: unknow light type %d",p_lspr->type);
@@ -1042,7 +1042,7 @@ void HWR_DrawCoronas(void)
 			size = p_lspr->corona_radius;
 		size = (float)(FIXED_TO_FLOAT(cv_glcoronasize.value<<1)*size);
 
-		size = (float)FIXED_TO_FLOAT(cv_glcoronasize.value<<1);
+		//size = (float)FIXED_TO_FLOAT(cv_glcoronasize.value<<1);
 
 		// put light little forward the sprite so there is no
 		// z-buffer problem (coplanar polygons)
@@ -1071,7 +1071,7 @@ void HWR_DrawCoronas(void)
 #endif
 
 // --------------------------------------------------------------------------
-// Remove all the dynamic lights at eatch frame
+// Remove all the dynamic lights at each frame
 // --------------------------------------------------------------------------
 void HWR_ResetLights(void)
 {
