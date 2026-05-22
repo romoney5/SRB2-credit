@@ -1222,7 +1222,7 @@ static void IdentifyVersion(addfilelist_t *startupwadfiles)
 	D_AddFile(startupwadfiles, va(pandf,srb2waddir, "characters.pk3"));
 
 	// add the corona files please. we very much need them
-	D_AddFile(&startupwadfiles, va(pandf,srb2waddir, "coronagraphics.wad"));
+	D_AddFile(startupwadfiles, va(pandf,srb2waddir, "coronagraphics.wad"));
 
 #ifdef USE_PATCH_DTA
 	// Add our crappy patches to fix our bugs
