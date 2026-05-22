@@ -613,6 +613,9 @@ void HWR_DrawPic(INT32 x, INT32 y, lumpnum_t lumpnum)
 	// make pic ready in hardware cache
 	patch = HWR_GetPic(lumpnum);
 
+	if (!patch)
+		return;
+
 //  3--2
 //  | /|
 //  |/ |
