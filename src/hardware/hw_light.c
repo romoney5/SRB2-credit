@@ -989,7 +989,7 @@ void HWR_DrawCoronas(void)
 	if (!cv_glcoronas.value || dynlights->nb <= 0 || coronalumpnum == LUMPERROR)
 		return; 
 
-	// HWR_GetPic(coronalumpnum);  /// \todo use different coronas // romoney5 TODO
+	HWR_GetPic(coronalumpnum);  /// \todo use different coronas
 	for (j = 0;j < dynlights->nb;j++)
 	{
 		FOutVector      light[4];
