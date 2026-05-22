@@ -1097,6 +1097,9 @@ patch_t *HWR_GetPic(lumpnum_t lumpnum)
 	patch_t *patch = HWR_GetCachedGLPatch(lumpnum);
 	GLPatch_t *grPatch = (GLPatch_t *)(patch->hardware);
 
+	if (!grPatch)
+		return NULL;
+
 	if (!grPatch->mipmap->downloaded && !grPatch->mipmap->data)
 	{
 		pic_t *pic;
