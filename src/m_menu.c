@@ -9973,7 +9973,7 @@ void M_DrawTimeAttackMenu(void)
 	curbgxspeed = 0;
 	curbgyspeed = 18;
 
-	M_ChangeMenuMusic("_recat", true); // Eww, but needed for when user hits escape during demo playback
+	// M_ChangeMenuMusic("_recat", true); // Eww, but needed for when user hits escape during demo playback
 
 	if (curbgcolor >= 0)
 		V_DrawFill(0, 0, BASEVIDWIDTH, BASEVIDHEIGHT, curbgcolor);
@@ -10262,7 +10262,7 @@ void M_DrawNightsAttackMenu(void)
 
 	M_SetMenuCurBackground("NTSATKBG");
 
-	M_ChangeMenuMusic("_nitat", true); // Eww, but needed for when user hits escape during demo playback
+	// M_ChangeMenuMusic("_nitat", true); // Eww, but needed for when user hits escape during demo playback
 
 	M_DrawNightsAttackBackground();
 	if (curfadevalue)
@@ -10964,7 +10964,7 @@ void M_DrawMarathon(void)
 	curbgxspeed = 0;
 	curbgyspeed = 18;
 
-	M_ChangeMenuMusic("spec8", true); // Eww, but needed for when user hits escape during demo playback
+	// M_ChangeMenuMusic("spec8", true); // Eww, but needed for when user hits escape during demo playback
 
 	V_DrawFill(-diffx, -diffy, diffx+(BASEVIDWIDTH-190)/2, yspan, 158);
 	V_DrawFill((BASEVIDWIDTH-190)/2, -diffy, 190, yspan, 31);
