@@ -1225,7 +1225,7 @@ static void V_BlitScaledPic(INT32 rx1, INT32 ry1, INT32 scrn, pic_t * pic)
 					*dest++ = *src;
 				src++;
 			}
-			dest += vid.width - vid.dup * width;
+			dest += (UINT8)(vid.width - vid.dup * width);
 		}
 	}
 }
