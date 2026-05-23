@@ -2022,7 +2022,7 @@ static void PreparePolygon(FSurfaceInfo *pSurf, FOutVector *pOutVerts, FBITFIELD
 		GLfloat     buf[8][8];
 		GLfloat    cx, cy, cz;
 		GLfloat    px = 0.0f, py = 0.0f, pz = -1.0f;
-		GLfloat     scalef = 0.0f;
+		GLfloat     scalef = 64.0f;
 
 		GLubyte c[4];
 
@@ -2033,23 +2033,23 @@ static void PreparePolygon(FSurfaceInfo *pSurf, FOutVector *pOutVerts, FBITFIELD
 		cz = pOutVerts[0].z;
 
 		// I dont know if this is slow or not
-		GLProject(cx, cy, cz, &px, &py, &pz);
+		// GLProject(cx, cy, cz, &px, &py, &pz);
 		//GL_DBG_Printf("Projection: (%f, %f, %f)\n", px, py, pz);
 
-		if ((pz <  0.0l) ||
-			(px < -8.0l) ||
-			(py < viewport[1]-8.0l) ||
-			(px > viewport[2]+8.0l) ||
-			(py > viewport[1]+viewport[3]+8.0l))
-			return;
+		// if ((pz <  0.0l) ||
+		// 	(px < -8.0l) ||
+		// 	(py < viewport[1]-8.0l) ||
+		// 	(px > viewport[2]+8.0l) ||
+		// 	(py > viewport[1]+viewport[3]+8.0l))
+		// 	return;
 
 		// the damned slow glReadPixels functions :(
-		pglReadPixels((INT32)px-4, (INT32)py, 8, 8, GL_DEPTH_COMPONENT, GL_FLOAT, buf);
+		// pglReadPixels((INT32)px-4, (INT32)py, 8, 8, GL_DEPTH_COMPONENT, GL_FLOAT, buf);
 		//GL_DBG_Printf("DepthBuffer: %f %f\n", buf[0][0], buf[3][3]);
 
-		for (i = 0; i < 8; i++)
-			for (j = 0; j < 8; j++)
-				scalef += (pz > buf[i][j]+0.00005f) ? 0 : 1;
+		// for (i = 0; i < 8; i++)
+		// 	for (j = 0; j < 8; j++)
+		// 		scalef += (pz > buf[i][j]+0.00005f) ? 0 : 1;
 
 		// quick test for screen border (not 100% correct, but looks ok)
 		/*if (px < 4) scalef -= (GLfloat)(8*(4-px));
@@ -2059,11 +2059,11 @@ static void PreparePolygon(FSurfaceInfo *pSurf, FOutVector *pOutVerts, FBITFIELD
 
 		//scalef = 64.0f;
 
-		scalef /= 64;
+		// scalef /= 64;
 		//GL_DBG_Printf("Scale factor: %f\n", scalef);
 
-		if (scalef < 0.05f)
-			return;
+		// if (scalef < 0.05f)
+		// 	return;
 
 		// GLubyte c[4];
 		c[0] = pSurf->PolyColor.s.red;
