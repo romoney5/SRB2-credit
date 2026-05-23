@@ -1097,9 +1097,6 @@ patch_t *HWR_GetPic(lumpnum_t lumpnum)
 	patch_t *patch = HWR_GetCachedGLPatch(lumpnum);
 	GLPatch_t *grPatch = (GLPatch_t *)(patch->hardware);
 
-	if (!grPatch)
-		return NULL;
-
 	if (!grPatch->mipmap->downloaded && !grPatch->mipmap->data)
 	{
 		pic_t *pic;
@@ -1152,12 +1149,22 @@ patch_t *HWR_GetPic(lumpnum_t lumpnum)
 patch_t *HWR_GetCachedGLPatchPwad(UINT16 wadnum, UINT16 lumpnum)
 {
 	lumpcache_t *lumpcache = wadfiles[wadnum]->patchcache;
+
 	if (!lumpcache[lumpnum])
 	{
 		void *ptr = Patch_Create(0, 0);
 		Z_SetUser(ptr, &lumpcache[lumpnum]);
 		Patch_AllocateHardwarePatch(ptr);
 	}
+	else
+	{
+		// romoney5: how is this working?
+		patch_t *patch = (patch_t *)(lumpcache[lumpnum]);
+
+		if (!patch->hardware)
+			Patch_AllocateHardwarePatch(patch);
+	}
+
 	return (patch_t *)(lumpcache[lumpnum]);
 }
 
