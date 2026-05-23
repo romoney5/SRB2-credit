@@ -1123,9 +1123,14 @@ void HWR_DL_AddLight(gl_vissprite_t *spr, patch_t *patch)
 	// if ((p_lspr->type != LIGHT_SPR) || cv_glstaticlighting.value)
 	// 	return;
 
-	LIGHT_POS(dynlights->nb).x = FIXED_TO_FLOAT(spr->mobj->x);
-	LIGHT_POS(dynlights->nb).y = FIXED_TO_FLOAT(spr->mobj->z)+FIXED_TO_FLOAT(spr->mobj->height>>1)+p_lspr->light_yoffset;
-	LIGHT_POS(dynlights->nb).z = FIXED_TO_FLOAT(spr->mobj->y);
+	// romoney5: uncap corona position
+	fixed_t x = R_InterpolateFixed(spr->mobj->old_x, spr->mobj->x);
+	fixed_t y = R_InterpolateFixed(spr->mobj->old_y, spr->mobj->y);
+	fixed_t z = R_InterpolateFixed(spr->mobj->old_z, spr->mobj->z);
+
+	LIGHT_POS(dynlights->nb).x = FIXED_TO_FLOAT(x);
+	LIGHT_POS(dynlights->nb).y = FIXED_TO_FLOAT(z)+FIXED_TO_FLOAT(spr->mobj->height>>1)+p_lspr->light_yoffset;
+	LIGHT_POS(dynlights->nb).z = FIXED_TO_FLOAT(y);
 
 	P_SetTarget(&dynlights->mo[dynlights->nb], spr->mobj);
 
