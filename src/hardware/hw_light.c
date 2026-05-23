@@ -767,9 +767,9 @@ light_t *t_lspr[NUMSPRITES] =
 static void HWR_SetLight(void);
 
 // --------------------------------------------------------------------------
-// calcul la projection d'un point sur une droite (determin� par deux
-// points) et ensuite calcul la distance (au carr� de ce point au point
-// project�sur cette droite
+// calculate the projection of a point onto a line (defined by two points)
+// and then calculate the distance (from the square of that point
+// to the point projected onto that line)
 // --------------------------------------------------------------------------
 static float HWR_DistP2D(FOutVector *p1, FOutVector *p2, FVector *p3, FVector *inter)
 {
@@ -786,7 +786,7 @@ static float HWR_DistP2D(FOutVector *p1, FOutVector *p2, FVector *p3, FVector *i
 	else
 	{
 		register float local, pente;
-		// Wat een mooie formula! Hurdler's math;-)
+		// What a great formula! Hurdler's math;-)
 		pente = (p1->z-p2->z) / (p1->x-p2->x);
 		local = p1->z - p1->x*pente;
 		inter->x = (p3->z - local + p3->x/pente) * (pente/(pente*pente+1));
@@ -830,8 +830,8 @@ static boolean SphereTouchBBox3D(FOutVector *p1, FOutVector *p2, FVector *p3, fl
 //          (It's still available on the CVS for educational purpose: Revision 1.8)
 
 // --------------------------------------------------------------------------
-// calcul du dynamic lighting sur les murs
-// lVerts contient les coords du mur sans le mlook (up/down)
+// calculation of dynamic lighting on walls
+// lVerts contains the wall coordinates without the mlook (up/down)
 // --------------------------------------------------------------------------
 void HWR_WallLighting(FOutVector *wlVerts)
 {
@@ -912,8 +912,8 @@ void HWR_WallLighting(FOutVector *wlVerts)
 }
 
 // --------------------------------------------------------------------------
-// calcul du dynamic lighting sur le sol
-// clVerts contient les coords du sol avec le mlook (up/down)
+// calculation of dynamic lighting on the ground
+// clVerts contains the ground coordinates along with the mlook (up/down)
 // --------------------------------------------------------------------------
 void HWR_PlaneLighting(FOutVector *clVerts, int nrClipVerts)
 {
@@ -1015,7 +1015,7 @@ void HWR_DrawCoronas(void)
 
 		//transform(&cx,&cy,&cz);
 
-		// more realistique corona !
+		// more realistic corona !
 		//if (cz <= 255*8+250)
 			//continue;
 		Surf.PolyColor.rgba = p_lspr->corona_color;
@@ -1027,16 +1027,16 @@ void HWR_DrawCoronas(void)
 		switch (p_lspr->type)
 		{
 			case LIGHT_SPR:
-				size  = p_lspr->corona_radius  * ((cz2+120.0f)/950.0f); // d'ou vienne ces constante ?
+				size  = p_lspr->corona_radius  * ((cz2+120.0f)/950.0f); // where do these constants come from?
 				break;
 			case ROCKET_SPR:
 				Surf.PolyColor.s.alpha = (UINT8)((M_RandomByte()>>1)&0xff);
 				// FALLTHROUGH
 			case CORONA_SPR:
-				size  = p_lspr->corona_radius  * ((cz2+60.0f)/100.0f); // d'ou vienne ces constante ?
+				size  = p_lspr->corona_radius  * ((cz2+60.0f)/100.0f); // where do these constants come from?
 				break;
 			default:
-				I_Error("HWR_DoCoronasLighting: unknow light type %d",p_lspr->type);
+				I_Error("HWR_DrawCoronas: unknown light type %d",p_lspr->type);
 				continue;
 		}
 		if (size > p_lspr->corona_radius)
@@ -1203,12 +1203,12 @@ static inline void HWR_BuildWallLightmaps(FVector *p1, FVector *p2, int lighnum,
 {
 	lightmap_t *lp;
 
-	// (...) calcul presit de la projection et de la distance
+	// (...) precise calculation of projection and distance
 
 //	if (dist_p2d >= DL_SQRRADIUS(lightnum))
 //		return;
 
-	// (...) attention faire le backfase cull histoir de faire mieux que Q3 !
+	// (...) be careful to do the backfase just to do better than Q3!
 
 	(void)lighnum;
 	(void)p1;
@@ -1217,7 +1217,7 @@ static inline void HWR_BuildWallLightmaps(FVector *p1, FVector *p2, int lighnum,
 	lp->next = line->lightmaps;
 	line->lightmaps = lp;
 
-	// (...) encore des b�calcul bien lourd et on stock tout sa dans la lightmap
+	// (...) more heavy-duty calculations, and we store all of that in the lightmap
 }
 
 #ifdef STATICLIGHT
@@ -1382,22 +1382,23 @@ void HWR_CreateStaticLightmaps(int bspnum)
 /**
  \todo
 
-  - Les coronas ne sont pas g�er avec le nouveau systeme, seul le dynamic lighting l'est
-  - calculer l'offset des coronas au chargement du level et non faire la moyenne
-	au moment de l'afficher
-	 BP: euh non en fait il faux encoder la position de la light dans le sprite
-		 car c'est pas focement au mileux de plus il peut en y avoir plusieur (chandelier)
-  - changer la comparaison pour l'affichage des coronas (+ un epsilon)
-	BP: non non j'ai trouver mieux :) : lord du AddSprite tu rajoute aussi la coronas
-		dans la sprite list ! avec un z de epsilon (attention au ZCLIP_PLANE) et donc on
-		l'affiche en dernier histoir qu'il puisse etre cacher par d'autre sprite :)
-		Bon fait metre pas mal de code special dans hwr_project sprite mais sa vaux le
-		coup
-  - gerer dynamic et static : retenir le nombre de lightstatic et clearer toute les
-		light > lightstatic (les dynamique) et les lightmap correspondant dans les segs
-		puit refaire une passe avec le code si dessus mais rien que pour les dynamiques
-		(tres petite modification)
-  - finalement virer le hack splitscreen, il n'est plus necessaire !
+  - Coronas are not supported by the new system, only dynamic lighting is
+  - calculate the corona offset when the level loads, rather than averaging it
+    when it is displayed
+	 BP: actually no you have to specify the light's position within the sprite
+         because it's not necessarily in the center, and there might be more
+         than one (like a chandelier)
+  - change the comparison for displaying coronas (+ an epsilon)
+	BP: no no I found a better way :) : in the AddSprite function, you also add the coronas
+        to the sprite list! With a Z value of epsilon (watch out for ZCLIP_PLANE), so it
+        is displayed last so that it can be hidden by other sprites :)
+		Okay, so you have to put quite a bit of special code in the hwr_project sprite, but it's worth
+        it
+  - manage dynamic and static lights : keep track of the number of lightstatic lights and clear all
+        lights > lightstatic (the dynamic ones) and the corresponding lightmaps in the segments
+        then run the code above again, but only for the dynamic lights
+        (very minor change)
+  - finally remove the splitscreen hack, it's no longer needed!
 */
 #endif
 #endif // HWRENDER
