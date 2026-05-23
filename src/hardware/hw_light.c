@@ -1043,27 +1043,31 @@ void HWR_DrawCoronas(void)
 			size = p_lspr->corona_radius;
 		size = (float)(FIXED_TO_FLOAT(cv_glcoronasize.value<<1)*size);
 
-		//size = (float)FIXED_TO_FLOAT(cv_glcoronasize.value<<1);
+		size = (float)FIXED_TO_FLOAT(cv_glcoronasize.value<<1);
 
 		// put light little forward the sprite so there is no
 		// z-buffer problem (coplanar polygons)
 		// BP: use PF_Decal do not help :(
 		cz = cz - 2.0f;
 
-		light[0].x = cx-size;  light[0].z = cz;
-		light[0].y = cy-size*1.33f;
+		// romoney5: apparently srb2's z is opengl's y
+		float rightsin = FIXED_TO_FLOAT(FINESINE((viewangle + ANGLE_90)>>ANGLETOFINESHIFT));
+		float rightcos = FIXED_TO_FLOAT(FINECOSINE((viewangle + ANGLE_90)>>ANGLETOFINESHIFT));
+		light[0].x = light[3].x = cx-size * rightcos;
+		light[1].x = light[2].x = cx+size * rightcos;
+
+		light[0].y = light[1].y = cy-size*1.33f;
+		light[2].y = light[3].y = cy+size*1.33f;
+
+		light[0].z = light[3].z = cz-size * rightsin;
+		light[1].z = light[2].z = cz+size * rightsin;
+
 		light[0].s = 0.0f;   light[0].t = 0.0f;
 
-		light[1].x = cx+size;  light[1].z = cz;
-		light[1].y = cy-size*1.33f;
 		light[1].s = 1.0f;   light[1].t = 0.0f;
 
-		light[2].x = cx+size;  light[2].z = cz;
-		light[2].y = cy+size*1.33f;
 		light[2].s = 1.0f;   light[2].t = 1.0f;
 
-		light[3].x = cx-size;  light[3].z = cz;
-		light[3].y = cy+size*1.33f;
 		light[3].s = 0.0f;   light[3].t = 1.0f;
 
 		HWR_ProcessPolygon(&Surf, light, 4,  PF_Additive | PF_Modulated | PF_ColorMapped | PF_Corona | PF_Decal, SHADER_SPRITE, false);
