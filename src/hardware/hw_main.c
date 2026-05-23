@@ -3463,12 +3463,6 @@ static void HWR_DrawSprite(gl_vissprite_t *spr)
 	if (!spr->mobj->subsector)
 		return;
 
-	if (spr->mobj->subsector->sector->numlights && !splat)
-	{
-		HWR_SplitSprite(spr);
-		return;
-	}
-
 	// cache sprite graphics
 	//12/12/99: Hurdler:
 	//          OK, I don't change anything for MD2 support because I want to be
@@ -3482,6 +3476,12 @@ static void HWR_DrawSprite(gl_vissprite_t *spr)
 	 (spr->mobj->player && spr->mobj->player->powers[pw_super])))
 		HWR_DL_AddLight(spr, gpatch);
 #endif
+
+	if (spr->mobj->subsector->sector->numlights && !splat)
+	{
+		HWR_SplitSprite(spr);
+		return;
+	}
 
 	// create the sprite billboard
 	//
