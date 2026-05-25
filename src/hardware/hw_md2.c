@@ -488,20 +488,43 @@ static void md2_loadBlendTexture(md2_t *model)
 // Don't spam the console, or the OS with fopen requests!
 static boolean nomd2s = false;
 
+// romoney5: am i doing this right?
+static void FreeModel(md2_t *model)
+{
+	if (model->model)
+		UnloadModel(model->model);
+
+	if (model->grpatch)
+		Patch_Free(model->grpatch);
+
+	if (model->blendgrpatch)
+		Patch_Free(model->blendgrpatch);
+
+	model->scale = -1.0f;
+	model->model = NULL;
+	model->grpatch = NULL;
+	model->notexturefile = false;
+	model->blendgrpatch = NULL;
+	model->noblendfile = false;
+	model->found = false;
+	model->error = false;
+}
+
 void HWR_InitModels(void)
 {
 	size_t i;
 
 	for (i = 0; i < NUMSPRITES; i++)
 	{
-		md2_models[i].scale = -1.0f;
-		md2_models[i].model = NULL;
-		md2_models[i].grpatch = NULL;
-		md2_models[i].notexturefile = false;
-		md2_models[i].noblendfile = false;
-		md2_models[i].found = false;
-		md2_models[i].error = false;
+		FreeModel(&md2_models[i]);
 	}
+
+	for (i = 0; i < md2_numplayermodels; i++)
+	{
+		FreeModel(&md2_playermodels[i]);
+	}
+
+	nomd2s = false;
 
 	if (numsprites && numskins)
 		HWR_LoadModels();

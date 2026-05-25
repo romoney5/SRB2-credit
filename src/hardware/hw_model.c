@@ -78,6 +78,9 @@ void UnloadModel(model_t *model)
 
 				if (mesh->frames[j].colors)
 					Z_Free(mesh->frames[j].colors);
+
+				if (mesh->frames[j].polyNormals)
+					Z_Free(mesh->frames[j].polyNormals);
 			}
 
 			Z_Free(mesh->frames);
@@ -106,6 +109,9 @@ void UnloadModel(model_t *model)
 		if (mesh->uvs)
 			Z_Free(mesh->uvs);
 
+		// if (mesh->originaluvs)
+		// 	Z_Free(mesh->originaluvs);
+
 		if (mesh->lightuvs)
 			Z_Free(mesh->lightuvs);
 	}
@@ -118,6 +124,12 @@ void UnloadModel(model_t *model)
 
 	if (model->materials)
 		Z_Free(model->materials);
+
+	if (model->spr2frames)
+		Z_Free(model->spr2frames);
+
+	if (model->superspr2frames)
+		Z_Free(model->superspr2frames);
 
 	DeleteVBOs(model);
 	Z_Free(model);
@@ -379,106 +391,6 @@ void LoadModelSprite2(model_t *model)
 		Z_Free(model->superspr2frames);
 	model->spr2frames = spr2frames;
 	model->superspr2frames = superspr2frames;
-}
-
-//
-// GenerateVertexNormals
-//
-// Creates a new normal for a vertex using the average of all of the polygons it belongs to.
-//
-void GenerateVertexNormals(model_t *model)
-{
-	int i;
-	for (i = 0; i < model->numMeshes; i++)
-	{
-		int j;
-
-		mesh_t *mesh = &model->meshes[i];
-
-		if (!mesh->frames)
-			continue;
-
-		for (j = 0; j < mesh->numFrames; j++)
-		{
-			mdlframe_t *frame = &mesh->frames[j];
-			int memTag = PU_STATIC;
-			float *newNormals = (float*)Z_Malloc(sizeof(float)*3*mesh->numTriangles*3, memTag, 0);
-			int k;
-			float *vertPtr = frame->vertices;
-			float *oldNormals;
-
-			M_Memcpy(newNormals, frame->normals, sizeof(float)*3*mesh->numTriangles*3);
-
-/*			if (!systemSucks)
-			{
-				memTag = Z_GetTag(frame->tangents);
-				float *newTangents = (float*)Z_Malloc(sizeof(float)*3*mesh->numTriangles*3, memTag);
-				M_Memcpy(newTangents, frame->tangents, sizeof(float)*3*mesh->numTriangles*3);
-			}*/
-
-			for (k = 0; k < mesh->numVertices; k++)
-			{
-				float x, y, z;
-				int vCount = 0;
-				vector_t normal;
-				int l;
-				float *testPtr = frame->vertices;
-
-				x = *vertPtr++;
-				y = *vertPtr++;
-				z = *vertPtr++;
-
-				normal.x = normal.y = normal.z = 0;
-
-				for (l = 0; l < mesh->numVertices; l++)
-				{
-					float testX, testY, testZ;
-					testX = *testPtr++;
-					testY = *testPtr++;
-					testZ = *testPtr++;
-
-					if (fabsf(x - testX) > FLT_EPSILON
-						|| fabsf(y - testY) > FLT_EPSILON
-						|| fabsf(z - testZ) > FLT_EPSILON)
-						continue;
-
-					// Found a vertex match! Add it...
-					normal.x += frame->normals[3 * l + 0];
-					normal.y += frame->normals[3 * l + 1];
-					normal.z += frame->normals[3 * l + 2];
-					vCount++;
-				}
-
-				if (vCount > 1)
-				{
-//					Vector::Normalize(&normal);
-					newNormals[3 * k + 0] = (float)normal.x;
-					newNormals[3 * k + 1] = (float)normal.y;
-					newNormals[3 * k + 2] = (float)normal.z;
-
-/*					if (!systemSucks)
-					{
-						Vector::vector_t tangent;
-						Vector::Tangent(&normal, &tangent);
-						newTangents[3 * k + 0] = tangent.x;
-						newTangents[3 * k + 1] = tangent.y;
-						newTangents[3 * k + 2] = tangent.z;
-					}*/
-				}
-			}
-
-			oldNormals = frame->normals;
-			frame->normals = newNormals;
-			Z_Free(oldNormals);
-
-/*			if (!systemSucks)
-			{
-				float *oldTangents = frame->tangents;
-				frame->tangents = newTangents;
-				Z_Free(oldTangents);
-			}*/
-		}
-	}
 }
 
 typedef struct materiallist_s

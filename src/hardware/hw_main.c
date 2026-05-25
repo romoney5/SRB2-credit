@@ -5960,9 +5960,23 @@ static void CV_gllightdithering_OnChange(void)
 	}
 }
 
-//added by Hurdler: console varibale that are saved
+
+static void Command_GL_ReloadMdl(void)
+{
+	if (rendermode != render_opengl) {
+		CONS_Printf("You need to be in OpenGL to use this command.\n");
+		return;
+	}
+
+	CONS_Printf("Reloading models...\n");
+	HWR_InitModels();
+}
+
+//added by Hurdler: console variables that are saved
 void HWR_AddCommands(void)
 {
+	COM_AddCommand("reloadmodels", Command_GL_ReloadMdl, COM_LUA|COM_CLIENT);
+
 #ifdef ALAM_LIGHTING
 	CV_RegisterVar(&cv_glstaticlighting);
 	CV_RegisterVar(&cv_gldynamiclighting);

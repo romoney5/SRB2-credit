@@ -63,6 +63,7 @@ typedef struct mesh_s
 	// this one retains the originals
 	// note: this member has been added with the assumption that models are never freed.
 	// (UnloadModel is called by nobody at the time of writing.)
+	// romoney5: WRONG!!!!!!!!!!!!!!!!!!
 	float *originaluvs;
 	float *lightuvs;
 
@@ -124,7 +125,6 @@ void UnloadModel(model_t *model);
 void Optimize(model_t *model);
 void LoadModelInterpolationSettings(model_t *model);
 void LoadModelSprite2(model_t *model);
-void GenerateVertexNormals(model_t *model);
 void GeneratePolygonNormals(model_t *model, int ztag);
 void CreateVBOTiny(mesh_t *mesh, tinyframe_t *frame);
 void CreateVBO(mesh_t *mesh, mdlframe_t *frame);
