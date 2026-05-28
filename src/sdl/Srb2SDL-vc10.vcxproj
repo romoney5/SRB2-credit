@@ -532,6 +532,7 @@
     <ClCompile Include="..\lua_colorlib.c" />
     <ClCompile Include="..\lua_custombuild.c" />
     <ClCompile Include="..\lua_httplib.c" />
+    <ClCompile Include="..\lua_servlib.c" />
     <ClCompile Include="..\r_bbox.c" />
     <ClCompile Include="..\u_list.c" />
     <ClCompile Include="..\hu_stuff.c" />

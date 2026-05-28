@@ -1131,6 +1131,9 @@
     <ClCompile Include="..\lua_httplib.c">
       <Filter>LUA</Filter>
     </ClCompile>
+    <ClCompile Include="..\lua_servlib.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Srb2SDL.ico">
