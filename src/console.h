@@ -35,8 +35,7 @@ extern boolean con_refresh;
 // 0 means console if off, or moving out
 extern INT32 con_destlines;
 
-// console text scale factor
-extern UINT32 con_scalefactor;
+extern UINT32 con_scalefactor; // console text scale factor
 
 extern consvar_t cons_backcolor;
 

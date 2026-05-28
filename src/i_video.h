@@ -56,9 +56,33 @@ void I_ShutdownGraphics(void);
 */
 void I_SetPalette(RGBA_t *palette);
 
-/**	\brief Changes the current resolution
+/**	\brief return the number of video modes
 */
-void VID_SetSize(INT32 width, INT32 height);
+INT32 VID_NumModes(void);
+
+/**	\brief	The VID_GetModeForSize function
+
+	\param	w	width
+	\param	h	height
+
+	\return	vidmode closest to w : h
+*/
+INT32 VID_GetModeForSize(INT32 w, INT32 h);
+
+
+/**	\brief	The VID_SetMode function
+
+	Set the video mode right now,
+	the video mode change is delayed until the start of the next refresh
+	by setting the setmodeneeded to a value >0
+	setup a video mode, this is to be called from the menu
+
+
+	\param	modenum	video mode to set to
+
+	\return	current video mode
+*/
+INT32 VID_SetMode(INT32 modenum);
 
 /**	\brief Checks the render state
 	\return	true if the renderer changed
@@ -73,17 +97,15 @@ void VID_StartupOpenGL(void);
 */
 void VID_CheckGLLoaded(rendermode_t oldrender);
 
-/**	\brief Returns true if the window is maximized, and false if not
-*/
-boolean VID_IsMaximized(void);
+/**	\brief	The VID_GetModeName function
 
-/**	\brief Restores the window
-*/
-void VID_RestoreWindow(void);
+	\param	modenum	video mode number
 
-/**	\brief Gets the current display's size; returns true if it succeeded, and false if not
+	\return	name of video mode
 */
-boolean VID_GetNativeResolution(INT32 *width, INT32 *height);
+const char *VID_GetModeName(INT32 modenum);
+
+void VID_PrepareModeList(void);
 
 /**	\brief can video system do fullscreen
 */

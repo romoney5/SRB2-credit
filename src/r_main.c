@@ -91,7 +91,7 @@ INT32 viewangletox[FINEANGLES/2];
 // The xtoviewangleangle[] table maps a screen pixel
 // to the lowest viewangle that maps back to x ranges
 // from clipangle to -clipangle.
-angle_t *xtoviewangle;
+angle_t xtoviewangle[MAXVIDWIDTH+1];
 
 lighttable_t *scalelight[LIGHTLEVELS][MAXLIGHTSCALE];
 lighttable_t *scalelightfixed[MAXLIGHTSCALE];
@@ -175,7 +175,6 @@ consvar_t cv_drawdist = CVAR_INIT ("drawdist", "Infinite", CV_SAVE, drawdist_con
 consvar_t cv_drawdist_nights = CVAR_INIT ("drawdist_nights", "2048", CV_SAVE, drawdist_cons_t, NULL);
 consvar_t cv_drawdist_precip = CVAR_INIT ("drawdist_precip", "1024", CV_SAVE, drawdist_precip_cons_t, NULL);
 consvar_t cv_fov = CVAR_INIT ("fov", "90", CV_SAVE|CV_FLOAT|CV_CALL, fov_cons_t, Fov_OnChange);
-consvar_t cv_fovadjust = CVAR_INIT ("fovadjust", "On", CV_SAVE|CV_CALL, CV_OnOff, Fov_OnChange);
 consvar_t cv_fovchange = CVAR_INIT ("fovchange", "Off", CV_SAVE, CV_OnOff, NULL);
 consvar_t cv_maxportals = CVAR_INIT ("maxportals", "2", CV_SAVE, maxportals_cons_t, NULL);
 consvar_t cv_pitchroll_rotation = CVAR_INIT ("pitchroll-tation", "Off", CV_SAVE|CV_CLIENT, CV_OnOff, NULL);
@@ -592,10 +591,7 @@ static struct {
 	INT32 scrmapsize;
 
 	INT32 x1; // clip rendering horizontally for efficiency
-	INT16 *ceilingclip, *floorclip;
-#ifdef WOUGHMP_WOUGHMP
-	float *fisheyemap;
-#endif
+	INT16 ceilingclip[MAXVIDWIDTH], floorclip[MAXVIDWIDTH];
 
 	boolean use;
 } viewmorph = {
@@ -609,10 +605,7 @@ static struct {
 	0,
 
 	0,
-	NULL, NULL,
-#ifdef WOUGHMP_WOUGHMP
-	NULL,
-#endif
+	{0}, {0},
 
 	false
 };
@@ -624,6 +617,9 @@ void R_CheckViewMorph(void)
 	fixed_t temp;
 	INT32 end, vx, vy, pos, usedpos;
 	INT32 usedx, usedy, halfwidth = vid.width/2, halfheight = vid.height/2;
+#ifdef WOUGHMP_WOUGHMP
+	float fisheyemap[MAXVIDWIDTH/2 + 1];
+#endif
 
 	angle_t rollangle = viewroll;
 #ifdef WOUGHMP_WOUGHMP
@@ -666,13 +662,10 @@ void R_CheckViewMorph(void)
 
 	if (viewmorph.scrmapsize != vid.width*vid.height)
 	{
+		if (viewmorph.scrmap)
+			free(viewmorph.scrmap);
+		viewmorph.scrmap = malloc(vid.width*vid.height * sizeof(INT32));
 		viewmorph.scrmapsize = vid.width*vid.height;
-		viewmorph.scrmap = realloc(viewmorph.scrmap, vid.width*vid.height * sizeof(INT32));
-		viewmorph.ceilingclip = realloc(viewmorph.ceilingclip, vid.width * sizeof(INT16));
-		viewmorph.floorclip = realloc(viewmorph.floorclip, vid.width * sizeof(INT16));
-#ifdef WOUGHMP_WOUGHMP
-		viewmorph.fisheyemap = realloc(viewmorph.fisheyemap, (vid.width/2 + 1) * sizeof(float));
-#endif
 	}
 
 	temp = FINECOSINE(rollangle);
@@ -913,34 +906,26 @@ void R_ExecuteSetViewSize(void)
 	// status bar overlay
 	st_overlay = cv_showhud.value;
 
-	viewwidth = vid.width;
+	scaledviewwidth = vid.width;
 	viewheight = vid.height;
 
 	if (splitscreen)
 		viewheight >>= 1;
+
+	viewwidth = scaledviewwidth;
 
 	centerx = viewwidth/2;
 	centery = viewheight/2;
 	centerxfrac = centerx<<FRACBITS;
 	centeryfrac = centery<<FRACBITS;
 
-	if (splitscreen == 1) // Splitscreen FOV should be adjusted to maintain expected vertical view
-		fovtan = 17*fovtan/10;
+	R_SetFov(cv_fov.value);
 
-	// Adjust field of view to the aspect ratio
-	if (cv_fovadjust.value)
-		fovtan = R_AdjustFOV(fovtan);
-
-	projection = projectiony = FixedDiv(centerxfrac, fovtan);
-
-	R_InitViewBuffer(viewwidth, viewheight);
+	R_InitViewBuffer(scaledviewwidth, viewheight);
 
 	// thing clipping
 	for (i = 0; i < viewwidth; i++)
-	{
-		negonearray[i] = -1;
 		screenheightarray[i] = (INT16)viewheight;
-	}
 
 	memset(scalelight, 0xFF, sizeof(scalelight));
 
@@ -1023,25 +1008,6 @@ void R_Init(void)
 	R_InitDrawNodes();
 
 	framecount = 0;
-}
-
-fixed_t R_GetFOV(void)
-{
-	return cv_fov.value;
-}
-
-fixed_t R_AdjustFOV(fixed_t ftan)
-{
-	fixed_t aspect = FixedDiv(vid.width, vid.height);
-	fixed_t baseaspect = FixedDiv(FRACUNIT, FixedDiv(BASEVIDWIDTH, BASEVIDHEIGHT));
-
-	// (vid.width / vid.height) * (1.0 / (BASEVIDWIDTH / BASEVIDHEIGHT))
-	fixed_t resmul = FixedMul(aspect, baseaspect);
-
-	if (resmul > FRACUNIT)
-		return FixedMul(ftan, resmul);
-
-	return ftan;
 }
 
 //
@@ -1725,9 +1691,7 @@ void R_RegisterEngineStuff(void)
 	CV_RegisterVar(&cv_drawdist);
 	CV_RegisterVar(&cv_drawdist_nights);
 	CV_RegisterVar(&cv_drawdist_precip);
-	CV_RegisterVar(&cv_fovadjust);
 	CV_RegisterVar(&cv_fovchange);
-
 	CV_RegisterVar(&cv_fov);
 	CV_RegisterVar(&cv_pitchroll_rotation);
 	CV_RegisterVar(&cv_pitchroll_easing);

@@ -833,6 +833,7 @@ void R_DrawTiltedSpan_8(void)
 
 	dest = &topleft[ds_y*vid.width + ds_x1];
 	source = ds_source;
+	//colormap = ds_colormap;
 
 #if 0	// The "perfect" reference version of this routine. Pretty slow.
 		// Use it only to see how things are supposed to look.
@@ -954,6 +955,7 @@ void R_DrawTiltedTranslucentSpan_8(void)
 
 	dest = &topleft[ds_y*vid.width + ds_x1];
 	source = ds_source;
+	//colormap = ds_colormap;
 
 #if 0	// The "perfect" reference version of this routine. Pretty slow.
 		// Use it only to see how things are supposed to look.
@@ -1076,6 +1078,7 @@ void R_DrawTiltedWaterSpan_8(void)
 	dest = &topleft[ds_y*vid.width + ds_x1];
 	dsrc = screens[1] + (ds_y+ds_bgofs)*vid.width + ds_x1;
 	source = ds_source;
+	//colormap = ds_colormap;
 
 #if 0	// The "perfect" reference version of this routine. Pretty slow.
 		// Use it only to see how things are supposed to look.
@@ -1195,6 +1198,7 @@ void R_DrawTiltedSplat_8(void)
 
 	dest = &topleft[ds_y*vid.width + ds_x1];
 	source = ds_source;
+	//colormap = ds_colormap;
 
 #if 0	// The "perfect" reference version of this routine. Pretty slow.
 		// Use it only to see how things are supposed to look.
