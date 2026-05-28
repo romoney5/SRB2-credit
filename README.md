@@ -40,7 +40,7 @@ You can compile the source code normally (see "Compiling") and put the binary in
 ## Visual
 - Smooth/affine sprite rotation! (Code from [BlanKart](https://codeberg.org/NepDisk/blankart/pulls/223))
   - "`affinerotation`": off = vanilla rotation, on = smooth rotation
-  - "`affinemosaic`": off = regular smooth rotation, on = aliased rotation
+  - "`affinemosaic`": off = regular smooth rotation, on = aliased rotation (Software only)
   - "`affineprescale`": off = rotate then scale, on = scale then rotate
   - "`fakerollangle`": off = regular smooth rotation, on = rotation in increments
 - Toggable mobj pitch/roll functional (3d rotation for models on slopes, like DRRR). Option located in Video Settings -> Level -> "Pitch/Roll Rotation"
