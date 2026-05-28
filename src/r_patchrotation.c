@@ -44,7 +44,105 @@ angle_t R_SpriteRotationAngle(interpmobjstate_t *interp)
 		return (rollOrPitch + R_ModelRotationAngle(interp));
 	}
 	else
+<<<<<<< HEAD
 		return R_ModelRotationAngle(interp);
+=======
+	{
+		// Regular Mobjs don't air tilt.
+		viewingAngle = mobj->angle;
+	}
+
+	pitchMul = -FINESINE(viewingAngle >> ANGLETOFINESHIFT);
+	rollMul = FINECOSINE(viewingAngle >> ANGLETOFINESHIFT);
+
+	if (!cv_sloperoll.value || (mobj->player && (mobj->player->pogospring > 0)))
+	{
+		sloperoll = 0;
+		slopepitch = 0;
+	}
+
+	rollOrPitch = FixedMul(interp->pitch + sloperoll, pitchMul) + FixedMul(interp->roll + slopepitch, rollMul);
+
+	return rollOrPitch;
+}
+
+static angle_t R_PlayerSpriteRotation(player_t *player, player_t *viewPlayer, boolean fliptilt)
+{
+	angle_t viewingAngle = R_PointToAnglePlayer(viewPlayer, player->mo->x, player->mo->y);
+	angle_t angleDelta = (viewingAngle - player->mo->angle);
+
+	INT32 nulltilt = (K_NullDriftTiltEnabled()) ? player->nulldrifttilt : 0;
+	INT32 aiztilt = (cv_sliptidetilt.value) ? player->aizdrifttilt : 0;
+
+	boolean nullBeforeSlip = (abs(aiztilt) < abs(nulltilt));
+	INT32 liftsign = ((nullBeforeSlip) ? intsign(nulltilt) : intsign(aiztilt));
+
+	// Sliptide tilt: Nulldrifts take priority if and ONLY if they're the larger value compared to sliptides.
+	angle_t sliptideLift = max(abs(aiztilt), abs(nulltilt)) * liftsign;
+
+	if (fliptilt)
+	{
+		// Vertical flip affine hack: invert the angle so it still looks right.
+		sliptideLift *= -1;
+	}
+
+	angle_t rollAngle = 0;
+
+	if (sliptideLift)
+	{
+		/* (from side) tilt downward if turning
+		   toward camera, upward if away. */
+		rollAngle +=
+			FixedMul(sliptideLift, FINESINE(AbsAngle(angleDelta) >> ANGLETOFINESHIFT)) +
+			FixedMul(sliptideLift, FINECOSINE(angleDelta >> ANGLETOFINESHIFT));
+	}
+
+	if (player->pogospring)
+	{
+		rollAngle = 0;
+	}
+
+	return rollAngle;
+}
+
+// Hacky boolean to check if we're the rainbow S-Monitor overlay
+boolean R_IsOverlayingSMonitorPlayer(mobj_t* mobj)
+{
+	return ((mobj->type == MT_OVERLAY) &&
+			(mobj->target) && (mobj->extravalue2) && (mobj->target->player) &&
+			(mobj->target->player->smonitortimer));
+}
+
+angle_t R_ModelRotationAngle(mobj_t *mobj, player_t *viewPlayer, boolean fliptilt)
+{
+	angle_t rollAngle = mobj->rollangle;
+
+	if (mobj->player)
+	{
+		rollAngle += R_PlayerSpriteRotation(mobj->player, viewPlayer, fliptilt);
+	}
+	else if (R_IsOverlayingSMonitorPlayer(mobj))
+	{
+		rollAngle += R_PlayerSpriteRotation(mobj->target->player, viewPlayer, fliptilt);
+	}
+
+	return rollAngle;
+}
+
+angle_t R_SpriteRotationAngle(mobj_t *mobj, player_t *viewPlayer, interpmobjstate_t *interp, boolean fliptilt)
+{
+	angle_t rollOrPitch;
+	
+	if (R_IsOverlayingSMonitorPlayer(mobj))
+	{
+		rollOrPitch = R_GetPitchRollAngle(mobj->target, viewPlayer, interp);
+	}
+	else
+	{
+		rollOrPitch = R_GetPitchRollAngle(mobj, viewPlayer, interp);
+	}
+	return (rollOrPitch + R_ModelRotationAngle(mobj, viewPlayer, fliptilt));
+>>>>>>> 6e99c9b5cd (Merge pull request '[FEAT] Affine sprite rendering' (#223) from softwarehell into next)
 }
 
 INT32 R_GetRollAngle(angle_t rollangle)
@@ -58,6 +156,121 @@ INT32 R_GetRollAngle(angle_t rollangle)
 	return ra;
 }
 
+<<<<<<< HEAD
+=======
+#define VISROTMUL (ANG1 * ROTANGDIFF)
+
+// Simulates "rollangle" angling
+angle_t R_ConvToRollAngle(angle_t ang)
+{
+	return (cv_fakerollangle.value) ? (R_GetRollAngle(ang) * VISROTMUL) : ang;
+}
+
+vector2_t* R_RotateSpriteOffsetsByPitchRoll(
+	mobj_t* mobj,
+	boolean vflip,
+	boolean hflip,
+	boolean affine,
+	interpmobjstate_t *interp,
+	vector2_t* out,
+	vector2_t* rolloffs)
+{
+	fixed_t rotcos, rotsin, finx, finy;
+	vector2_t xvec, yvec;
+
+	// input offsets
+	fixed_t xoffs, yoffs, xpiv, ypiv;
+
+	// final offsets
+	INT16 visx, visy, visz;
+	INT16 vxpiv, vypiv;
+
+	// visual rotation
+	angle_t visrollang;
+
+	// camera angle
+	angle_t viewingAngle = R_PointToAngle(mobj->x, mobj->y);
+
+	// rotate ourselves entirely by the sprite's own rotation angle
+	angle_t visrot = R_SpriteRotationAngle(mobj, NULL, interp, false);
+
+	if (vflip)
+	{
+		// Invert the angle for vertically flipped sprites.
+		visrot = InvAngle(visrot);
+	}
+
+	// xoffs = (-cos(xoff) + sin(yoff))
+	xoffs =
+		FixedMul(mobj->bakeyoff, -FINECOSINE(mobj->angle >> ANGLETOFINESHIFT)) +
+		FixedMul(mobj->bakexoff, FINESINE(mobj->angle >> ANGLETOFINESHIFT));
+	xpiv =
+		FixedMul(mobj->bakeypiv, -FINECOSINE(mobj->angle >> ANGLETOFINESHIFT)) +
+		FixedMul(mobj->bakexpiv, FINESINE(mobj->angle >> ANGLETOFINESHIFT));
+
+	// yoffs = (-sin(yoff) + cos(xoff))
+	yoffs =
+		FixedMul(mobj->bakeyoff, -FINESINE(mobj->angle >> ANGLETOFINESHIFT)) +
+		FixedMul(mobj->bakexoff, FINECOSINE(mobj->angle >> ANGLETOFINESHIFT));
+	ypiv =
+		FixedMul(mobj->bakeypiv, -FINESINE(mobj->angle >> ANGLETOFINESHIFT)) +
+		FixedMul(mobj->bakexpiv, FINECOSINE(mobj->angle >> ANGLETOFINESHIFT));
+
+	visrollang = (R_GetRollAngle(visrot) * VISROTMUL) * (hflip ? -1 : 1);
+
+	// get pitch and roll multipliers, mainly used to align the
+	// viewpoint with the camera
+	fixed_t pitchMul = -FINESINE(viewingAngle >> ANGLETOFINESHIFT);
+	fixed_t rollMul = FINECOSINE(viewingAngle >> ANGLETOFINESHIFT);
+
+	// get visual positions
+	visz = visy = visx = 0;
+	visz = (INT16)(-(mobj->bakezoff / FRACUNIT));
+	visx = (INT16)(FixedMul((yoffs / FRACUNIT), rollMul));
+	visy = (INT16)(FixedMul((xoffs / FRACUNIT), pitchMul));
+
+	vxpiv = (INT16)(FixedMul((ypiv / FRACUNIT), rollMul));
+	vypiv = (INT16)(FixedMul((xpiv / FRACUNIT), pitchMul));
+
+	// rotate by rollangle
+	finx = (visx + visy);
+	finy = -visz;
+
+	rotcos = FINECOSINE(visrollang >> ANGLETOFINESHIFT);
+	rotsin = FINESINE(visrollang >> ANGLETOFINESHIFT);
+
+	xvec.x = FixedMul(finx, rotcos);
+	xvec.y = FixedMul(finx, -rotsin);
+
+	yvec.x = FixedMul(finy, rotsin);
+	yvec.y = FixedMul(finy, -rotcos);
+
+	rolloffs->x = (fixed_t)(FixedMul(mobj->rollingxoffset, rotcos) + FixedMul(mobj->rollingyoffset, rotsin));
+	rolloffs->y = (fixed_t)(FixedMul(mobj->rollingxoffset, -rotsin) - FixedMul(mobj->rollingyoffset, -rotcos));
+
+	// set finalized offsets
+	out->x = (fixed_t)(xvec.x + yvec.x + vxpiv + vypiv);
+	out->y = (fixed_t)(xvec.y - yvec.y) + (mobj->bakezpiv / FRACUNIT);
+
+	// flip based on vflip and hflip
+	// flip the view angle if we're horizontally flipped
+	if (hflip)
+	{
+		out->x *= -1;
+		rolloffs->x *= 1;
+	}
+
+	if (vflip)
+	{
+		out->y *= -1;
+		rolloffs->y *= 1;
+	}
+	return out;
+}
+
+#undef VISROTMUL
+
+>>>>>>> 6e99c9b5cd (Merge pull request '[FEAT] Affine sprite rendering' (#223) from softwarehell into next)
 patch_t *Patch_GetRotated(patch_t *patch, INT32 angle, boolean flip)
 {
 	rotsprite_t *rotsprite = patch->rotated;

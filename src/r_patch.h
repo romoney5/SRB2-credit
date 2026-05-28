@@ -45,6 +45,26 @@ patch_t *Patch_GetRotatedSprite(
 angle_t R_ModelRotationAngle(interpmobjstate_t *interp);
 angle_t R_SpriteRotationAngle(interpmobjstate_t *interp);
 INT32 R_GetRollAngle(angle_t rollangle);
+<<<<<<< HEAD
+=======
+boolean R_IsOverlayingSMonitorPlayer(mobj_t* mobj);
+angle_t R_GetPitchRollAngle(mobj_t *mobj, player_t *viewPlayer, interpmobjstate_t *interp);
+angle_t R_ModelRotationAngle(mobj_t *mobj, player_t *viewPlayer, boolean fliptilt);
+angle_t R_SpriteRotationAngle(mobj_t *mobj, player_t *viewPlayer, interpmobjstate_t *interp, boolean fliptilt);
+vector2_t* R_RotateSpriteOffsetsByPitchRoll(
+	mobj_t* mobj,
+	boolean vflip,
+	boolean hflip,
+	boolean affine,
+	interpmobjstate_t *interp, 
+	vector2_t* out,
+	vector2_t* rolloffs);
+angle_t R_ConvToRollAngle(angle_t ang);
+#endif
+
+#ifdef __cplusplus
+} // extern "C"
+>>>>>>> 6e99c9b5cd (Merge pull request '[FEAT] Affine sprite rendering' (#223) from softwarehell into next)
 #endif
 
 #endif // __R_PATCH__

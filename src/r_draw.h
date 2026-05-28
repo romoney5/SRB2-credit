@@ -170,6 +170,16 @@ void R_DrawTranslatedTranslucentColumn_8(void);
 void R_DrawFogColumn_8(void);
 void R_DrawColumnShadowed_8(void);
 
+void R_DrawAffineColumn(void);
+void R_DrawTranslatedAffineColumn(void);
+void R_DrawTranslucentAffineColumn(void);
+void R_DrawTranslatedTranslucentAffineColumn(void);
+
+void R_DrawAffineColumn_Brightmap(void);
+void R_DrawTranslatedAffineColumn_Brightmap(void);
+void R_DrawTranslucentAffineColumn_Brightmap(void);
+void R_DrawTranslatedTranslucentAffineColumn_Brightmap(void);
+
 void R_DrawSpan_8(void);
 void R_DrawTranslucentSpan_8(void);
 void R_DrawTiltedSpan_8(void);

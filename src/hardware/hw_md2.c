@@ -1771,6 +1771,8 @@ boolean HWR_DrawModel(gl_vissprite_t *spr)
 
 		{
 			fixed_t anglef = AngleFixed(R_ModelRotationAngle(&interp));
+			// romoney5: in blankart, was:
+			// fixed_t anglef = AngleFixed(R_SpriteRotationAngle(spr->mobj, NULL, &interp, false));
 
 			p.rollangle = 0.0f;
 

@@ -256,6 +256,13 @@ typedef struct
 	fixed_t y;
 } vector2_t;
 
+// Floating-point version, used sparingly, primarily in rendering
+struct f_vector2_t
+{
+	float x;
+	float y;
+};
+
 vector2_t *FV2_Load(vector2_t *vec, fixed_t x, fixed_t y);
 vector2_t *FV2_UnLoad(vector2_t *vec, fixed_t *x, fixed_t *y);
 vector2_t *FV2_Copy(vector2_t *a_o, const vector2_t *a_i);

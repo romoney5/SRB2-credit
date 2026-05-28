@@ -87,6 +87,28 @@ typedef struct gl_vissprite_s
 	fixed_t zdelta; // ditto
 	fixed_t ox, oy, oz, dx, dy; // ugh (fnf)
 
+	// Affine nonsense
+	struct {
+		// Vertex points for the affine sprite to be drawn to.
+		//
+		//  4--3
+		//  | /|
+		//  |/ |
+		//  1--2
+		f_vector2_t p1, p2, p3, p4;
+
+		// The "root", or center, of the affine sprite
+		polyvertex_t root;
+
+		// Bounding point (leftmost and highest point), to resolve clipping
+		polyvertex_t bounding_point;
+
+		// Sine/cosine multiplier, used for billboarding.
+		float patchsin, patchcos;
+
+		affine_t transform; // The actual affine transformation.
+	} affine;
+
 	//Hurdler: 25/04/2000: now support colormap in hardware mode
 	UINT8 *colormap;
 	INT32 dispoffset; // copy of mobj->dispoffset, affects ordering but not drawing
