@@ -951,6 +951,10 @@ static void AbortConnection(void)
 		else if (cv_returnfromconnect.value)
 			M_ConnectMenu(-1);
 	}
+	else
+	{
+		menuactive = true;
+	}
 
 	// Will be reset by caller. Signals refusal.
 	cl_mode = CL_ABORTED;

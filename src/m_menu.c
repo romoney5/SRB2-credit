@@ -3472,7 +3472,7 @@ boolean M_Responder(event_t *ev)
 		return false;
 	}
 
-	if (gks_luamenu)
+	if (gks_luamenu && currentMenu != &MessageDef)
 		return false;
 
 	routine = currentMenu->menuitems[itemOn].itemaction;
@@ -3691,7 +3691,7 @@ void M_Drawer(void)
 	if (currentMenu == &MessageDef)
 		menuactive = true;
 
-	if (menuactive && !gks_luamenu)
+	if (menuactive && (!gks_luamenu || currentMenu == &MessageDef))
 	{
 		// now that's more readable with a faded background (yeah like Quake...)
 		if (!wipe && (curfadevalue || (gamestate != GS_TITLESCREEN && gamestate != GS_TIMEATTACK)))
