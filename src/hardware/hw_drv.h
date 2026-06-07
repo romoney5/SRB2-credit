@@ -58,7 +58,7 @@ EXPORT void HWRAPI(DrawScreenTexture) (int tex, FSurfaceInfo *surf, FBITFIELD po
 EXPORT void HWRAPI(MakeScreenTexture) (int tex);
 EXPORT void HWRAPI(DrawScreenFinalTexture) (int tex, int width, int height);
 
-#define SCREENVERTS 10
+#define SCREENVERTS 32 // romoney5: increasing does not seem to take any performance
 EXPORT void HWRAPI(PostImgRedraw) (float points[SCREENVERTS][SCREENVERTS][2]);
 
 EXPORT boolean HWRAPI(InitShaders) (void);
