@@ -41,6 +41,7 @@
 
 #include "s_sound.h"
 #include "st_stuff.h"
+#include "tables.h"
 #include "w_wad.h"
 #include "z_zone.h"
 #include "r_splats.h"
@@ -3418,27 +3419,39 @@ static inline float P_SegLengthFloat(seg_t *seg)
 }
 #endif
 
+fixed_t P_LightFromAngle(angle_t angle)
+{
+	const UINT8 contrast = 16;
+
+	return ((FINESINE(angle >> ANGLETOFINESHIFT) / 2 - FRACUNIT / 2)
+		* (contrast * 2));
+}
+
 
 /** Updates the light offset
   *
   * \param li Seg to update the light offsets of
   */
- void P_UpdateSegLightOffset(seg_t *li)
- {
-	 const UINT8 contrast = 16;
-	 fixed_t extralight = 0;
+void P_UpdateSegLightOffset(seg_t *li)
+{
+	const UINT8 contrast = 32;
+	fixed_t extralight = 0;
+	angle_t angle = R_PointToAngle2(li->v1->x, li->v1->y,
+		li->v2->x, li->v2->y) + ANGLE_90;
  
-	 extralight = -((fixed_t)contrast*FRACUNIT) +
-		 FixedDiv(AngleFixed(R_PointToAngle2(0, 0,
-		 abs(li->v1->x - li->v2->x),
-		 abs(li->v1->y - li->v2->y))), 90*FRACUNIT) * ((fixed_t)contrast * 2);
+	// extralight = -((fixed_t)contrast*FRACUNIT) +
+	// 	FixedDiv(AngleFixed(R_PointToAngle2(0, 0,
+	// 	abs(li->v1->x - li->v2->x),
+	// 	abs(li->v1->y - li->v2->y))), 90*FRACUNIT) * ((fixed_t)contrast * 2);
+	extralight = P_LightFromAngle(angle);/*((FINESINE(angle >> ANGLETOFINESHIFT) / 2 - FRACUNIT / 2)
+		* (contrast * 2));*/
  
-	 // Between -2 and 2 for software, -16 and 16 for hardware
-	 li->lightOffset = FixedFloor((extralight / 8) + (FRACUNIT / 2)) / FRACUNIT;
- #ifdef HWRENDER
-	 li->hwLightOffset = FixedFloor(extralight + (FRACUNIT / 2)) / FRACUNIT;
- #endif
- }
+	// Between -2 and 2 for software, -16 and 16 for hardware
+	li->lightOffset = FixedFloor((extralight / 8) + (FRACUNIT / 2)) / FRACUNIT;
+#ifdef HWRENDER
+	li->hwLightOffset = FixedFloor(extralight + (FRACUNIT / 2)) / FRACUNIT;
+#endif
+}
 
 boolean P_ApplyLightOffset(UINT8 baselightlevel)
 {

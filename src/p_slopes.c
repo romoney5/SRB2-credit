@@ -11,10 +11,12 @@
 /// \brief ZDoom + Eternity Engine Slopes, ported and enhanced by Kalaron
 
 #include "doomdef.h"
+#include "m_fixed.h"
 #include "r_defs.h"
 #include "r_state.h"
 #include "m_bbox.h"
 #include "m_vector.h"
+#include "tables.h"
 #include "z_zone.h"
 #include "p_local.h"
 #include "p_spec.h"
@@ -34,7 +36,7 @@ static void P_UpdateMidtextureSlopesForSector(sector_t *sector);
 void P_UpdateSlopeLightOffset(pslope_t *slope)
 {
 	const boolean ceiling = (slope->normal.z < 0);
-	const UINT8 contrast = 16;
+	const UINT8 contrast = 32;
 
 	fixed_t contrastFixed = (contrast * FRACUNIT);
 	fixed_t zMul = FRACUNIT;
@@ -47,15 +49,15 @@ void P_UpdateSlopeLightOffset(pslope_t *slope)
 		return;
 	}
 
-	slopeDir = R_PointToAngle2(0, 0, abs(slope->normal.y), abs(slope->normal.x));
+	slopeDir = R_PointToAngle2(0, 0, -slope->normal.x, -slope->normal.y);
 	if (ceiling == true)
 	{
 		slopeDir ^= ANGLE_180;
 	}
 
-	zMul = min(FRACUNIT, abs(slope->zdelta)*3/2); // *3/2, to make 60 degree slopes match walls.
+	zMul = FixedDiv(AngleFixed(slope->zangle), 360*FRACUNIT); // *3/2, to make 60 degree slopes match walls.
 	contrastFixed = FixedMul(contrastFixed, zMul);
-	extralight = -contrastFixed + FixedMul(FixedDiv(AngleFixed(slopeDir), 90*FRACUNIT), (contrastFixed * 2));
+	extralight = FixedMul(P_LightFromAngle(slopeDir), zMul);//-contrastFixed + FixedMul(FixedDiv(AngleFixed(slopeDir), 360*FRACUNIT), (contrastFixed * 2));
 
 
 	// Between -2 and 2 for software, -16 and 16 for hardware
