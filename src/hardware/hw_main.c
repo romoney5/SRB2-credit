@@ -255,7 +255,7 @@ static FUINT HWR_CalcWallLight(FUINT lightnum, seg_t *line)
 		if (extralight != 0)
 		{
 			finallight += extralight;
-			finallight = min(max(finallight, 0) , 255);
+			finallight = min(max(finallight, 0), 255);
 		}
 	}
 
@@ -3305,7 +3305,7 @@ static void HWR_SplitSprite(gl_vissprite_t *spr)
 		if (h <= temp)
 		{
 			if (!lightset)
-				lightlevel = max(min(*list[i-1].lightlevel, 255), 0);
+				lightlevel = max(min(*list[i-1].lightlevel + (P_LightFromAngle(viewangle) * 2 / FRACUNIT), 255), 0);
 			if (!(spr->mobj->renderflags & RF_NOCOLORMAPS))
 				colormap = *list[i-1].extra_colormap;
 			break;
@@ -3324,7 +3324,7 @@ static void HWR_SplitSprite(gl_vissprite_t *spr)
 		if (!(list[i].flags & FOF_NOSHADE) && (list[i].flags & FOF_CUTSPRITES))
 		{
 			if (!lightset)
-				lightlevel = max(min(*list[i].lightlevel, 255), 0);
+				lightlevel = max(min(*list[i].lightlevel + (P_LightFromAngle(viewangle) * 2 / FRACUNIT), 255), 0);
 			if (!(spr->mobj->renderflags & RF_NOCOLORMAPS))
 				colormap = *list[i].extra_colormap;
 		}
@@ -3712,7 +3712,7 @@ static void HWR_DrawSprite(gl_vissprite_t *spr)
 				colormap = *sector->lightlist[light].extra_colormap;
 		}
 		else if (!lightset)
-			lightlevel = max(min(sector->lightlevel, 255), 0);
+			lightlevel = max(min(sector->lightlevel + (P_LightFromAngle(viewangle) * 2 / FRACUNIT), 255), 0);
 
 		if (R_ThingIsSemiBright(spr->mobj))
 			lightlevel = 128 + (lightlevel>>1);
@@ -3875,7 +3875,7 @@ static inline void HWR_DrawPrecipitationSprite(gl_vissprite_t *spr)
 		else
 		{
 			if (!R_ThingIsFullBright(spr->mobj))
-				lightlevel = sector->lightlevel > 255 ? 255 : sector->lightlevel;
+				lightlevel = min(sector->lightlevel - (P_LightFromAngle(viewangle) / FRACUNIT), 255);
 
 			if (sector->extra_colormap)
 				colormap = sector->extra_colormap;
