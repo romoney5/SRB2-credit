@@ -2828,7 +2828,7 @@ static void HWR_DrawDropShadow(mobj_t *thing, gl_vissprite_t *spr, fixed_t scale
 	alpha = 255 - alpha;
 
 	gpatch = (cv_shadow.value == 2) ? spr->gpatch : (patch_t *)W_CachePatchName("DSHADOW", PU_SPRITE);
-	if (!(gpatch && ((GLPatch_t *)gpatch->hardware)->mipmap->format)) return;
+	if (!(gpatch && gpatch->hardware && ((GLPatch_t *)gpatch->hardware)->mipmap->format)) return;
 	HWR_GetPatch(gpatch);
 
 	scalemul = FixedMul(FRACUNIT - floordiff/640, scale);
@@ -2853,6 +2853,12 @@ static void HWR_DrawDropShadow(mobj_t *thing, gl_vissprite_t *spr, fixed_t scale
 	shadowVerts[1].z = shadowVerts[2].z = fy - offset;
 	shadowVerts[0].z = shadowVerts[3].z = fy + offset;
 
+	angle_t shadowangle = ANGLE_90 - viewangle;
+	fixed_t shadowsin = FINESINE(shadowangle>>ANGLETOFINESHIFT);
+	fixed_t shadowcos = FINECOSINE(shadowangle>>ANGLETOFINESHIFT);
+	float gl_shadowsin = FixedToFloat(shadowsin);
+	float gl_shadowcos = FixedToFloat(shadowcos);
+
 	if (cv_shadow.value == 2)
 	{
 		shadowVerts[0].x = shadowVerts[3].x = spr->x1;
@@ -2871,6 +2877,7 @@ static void HWR_DrawDropShadow(mobj_t *thing, gl_vissprite_t *spr, fixed_t scale
 			}
 
 			// Now transform the TOP vertices along the floor in the direction of the camera
+
 			shadowVerts[3].x = spr->x1 + (gpatch->height + fscale + offset) * gl_viewcos;
 			shadowVerts[2].x = spr->x2 + (gpatch->height + fscale + offset) * gl_viewcos;
 			shadowVerts[3].z = spr->z1 + (gpatch->height + fscale + offset) * gl_viewsin;
@@ -2887,10 +2894,10 @@ static void HWR_DrawDropShadow(mobj_t *thing, gl_vissprite_t *spr, fixed_t scale
 			}
 
 			// Now transform the TOP vertices along the floor in the direction of the camera
-			shadowVerts[3].x = spr->x1 + (gpatch->height + offset) * gl_viewcos;
-			shadowVerts[2].x = spr->x2 + (gpatch->height + offset) * gl_viewcos;
-			shadowVerts[3].z = spr->z1 + (gpatch->height + offset) * gl_viewsin;
-			shadowVerts[2].z = spr->z2 + (gpatch->height + offset) * gl_viewsin;
+			shadowVerts[3].x = spr->x1 + (gpatch->height + offset) * gl_shadowcos;
+			shadowVerts[2].x = spr->x2 + (gpatch->height + offset) * gl_shadowcos;
+			shadowVerts[3].z = spr->z1 + (gpatch->height + offset) * gl_shadowsin;
+			shadowVerts[2].z = spr->z2 + (gpatch->height + offset) * gl_shadowsin;
 		}
 	}
 
@@ -2898,8 +2905,8 @@ static void HWR_DrawDropShadow(mobj_t *thing, gl_vissprite_t *spr, fixed_t scale
 	{
 		float oldx = shadowVerts[i].x;
 		float oldy = shadowVerts[i].z;
-		shadowVerts[i].x = fx + ((oldx - fx) * gl_viewcos) - ((oldy - fy) * gl_viewsin);
-		shadowVerts[i].z = fy + ((oldx - fx) * gl_viewsin) + ((oldy - fy) * gl_viewcos);
+		shadowVerts[i].x = fx + ((oldx - fx) * gl_shadowcos) - ((oldy - fy) * gl_shadowsin);
+		shadowVerts[i].z = fy + ((oldx - fx) * gl_shadowsin) + ((oldy - fy) * gl_shadowcos);
 	}
 
 	if (groundslope)
