@@ -81,7 +81,6 @@ extern consvar_t cv_mute;
 extern consvar_t cv_killingdead;
 extern consvar_t cv_pause;
 
-extern consvar_t cv_restrictmoveskinchange;
 extern consvar_t cv_restrictskinchange, cv_allowteamchange, cv_respawntime;
 
 extern consvar_t cv_teleporters, cv_superring, cv_supersneakers, cv_invincibility;
@@ -128,7 +127,7 @@ extern boolean timedemo_quit;
 extern consvar_t cv_freedemocamera;
 
 extern consvar_t cv_returnfromconnect;
-extern consvar_t cv_showserverinfo;
+extern consvar_t cv_showserverinfo, cv_showaddoninfo;
 
 typedef enum
 {

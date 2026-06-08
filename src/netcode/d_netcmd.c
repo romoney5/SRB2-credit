@@ -230,7 +230,6 @@ static consvar_t cv_fishcake = CVAR_INIT ("fishcake", "Off", CV_CALL|CV_NOSHOWHE
 #endif
 static consvar_t cv_dummyconsvar = CVAR_INIT ("dummyconsvar", "Off", CV_CALL|CV_NOSHOWHELP, CV_OnOff, DummyConsvar_OnChange);
 
-consvar_t cv_restrictmoveskinchange = CVAR_INIT ("restrictmoveskinchange", "Yes", CV_SAVE|CV_CHEAT|CV_ALLOWLUA, CV_YesNo, NULL);
 consvar_t cv_restrictskinchange = CVAR_INIT ("restrictskinchange", "Yes", CV_SAVE|CV_NETVAR|CV_CHEAT|CV_ALLOWLUA, CV_YesNo, NULL);
 consvar_t cv_allowteamchange = CVAR_INIT ("allowteamchange", "Yes", CV_SAVE|CV_NETVAR|CV_ALLOWLUA, CV_YesNo, NULL);
 
@@ -416,6 +415,7 @@ consvar_t cv_glallowshaders = CVAR_INIT ("gr_allowcustomshaders", "On", CV_NETVA
 
 consvar_t cv_returnfromconnect = CVAR_INIT ("returnfromconnect", "On", CV_SAVE|CV_CLIENT, CV_OnOff, NULL);
 consvar_t cv_showserverinfo = CVAR_INIT ("showserverinfo", "On", CV_SAVE|CV_CLIENT, CV_OnOff, NULL);
+consvar_t cv_showaddoninfo = CVAR_INIT ("showaddoninfo", "On", CV_SAVE|CV_CLIENT, CV_OnOff, NULL);
 
 static CV_PossibleValue_t cvarinfo_const_t[] = {{0, "Show All"}, {1, "Hide Origin"}, {2, "Hide Flags"}, {3, "Only Show Values"}, {0, NULL}};
 consvar_t cv_cvarinformation = CVAR_INIT ("cvarinfo", "Show All", CV_CLIENT|CV_SAVE, cvarinfo_const_t, NULL);
@@ -569,6 +569,7 @@ void D_RegisterServerCommands(void)
 	// server info
 	CV_RegisterVar(&cv_returnfromconnect);
     CV_RegisterVar(&cv_showserverinfo);
+    CV_RegisterVar(&cv_showaddoninfo);
 
 	// p_mobj.c
 	CV_RegisterVar(&cv_itemrespawntime);
@@ -632,7 +633,6 @@ void D_RegisterServerCommands(void)
 	RegisterNetXCmd(XD_RANDOMSEED, Got_RandomSeed);
 
 	CV_RegisterVar(&cv_allowexitlevel);
-	CV_RegisterVar(&cv_restrictmoveskinchange);
 	CV_RegisterVar(&cv_restrictskinchange);
 	CV_RegisterVar(&cv_allowteamchange);
 	CV_RegisterVar(&cv_respawntime);
@@ -878,6 +878,7 @@ void D_RegisterClientCommands(void)
 	CV_RegisterVar(&cv_deadzone2);
 	CV_RegisterVar(&cv_digitaldeadzone);
 	CV_RegisterVar(&cv_digitaldeadzone2);
+	CV_RegisterVar(&cv_gamepadifunfocused);
 
 	// filesrch.c
 	//CV_RegisterVar(&cv_addons_option); // These two are now defined
@@ -1547,12 +1548,8 @@ static void Got_NameAndColor(UINT8 **cp, INT32 playernum)
 	INT32 forcedskin = R_GetForcedSkin(playernum);
 	if (forcedskin != -1 && (netgame || multiplayer)) // Server wants everyone to use the same player (or the level is forcing one.)
 		SetPlayerSkinByNum(playernum, forcedskin);
-	else if (CanChangeSkin(playernum))
-	{
-		if (cv_restrictmoveskinchange.value && P_PlayerMoving(playernum))
-			return;
+	else
 		SetPlayerSkinByNum(playernum, skin);
-	}
 }
 
 void SendWeaponPref(void)
@@ -2274,8 +2271,8 @@ static void Command_Suicide(void)
 		return;
 	}
 
-	// Add file on your client directly if you aren't in a netgame.
-	if (!(netgame || multiplayer) || server)
+	// Retry is quicker.  Probably should force people to use it.
+	if (!(netgame || multiplayer))
 	{
 		CONS_Printf(M_GetText("You can't use this in Single Player! Use \"retry\" instead.\n"));
 		return;
@@ -4183,9 +4180,9 @@ static void Command_ListWADS_f(void)
 static void Command_Version_f(void)
 {
 #ifdef DEVELOP
-	CONS_Printf("Sonic Robo Blast 2 %s %s %s (%s %s) ", compbranch, comprevision, compnote, compdate, comptime);
+	CONS_Printf("Sonic Robo Blast 2 Banpyura %s %s %s (%s %s) ", compbranch, comprevision, compnote, compdate, comptime);
 #else
-	CONS_Printf("Sonic Robo Blast 2 %s (%s %s %s %s) ", VERSIONSTRING, compdate, comptime, comprevision, compbranch);
+	CONS_Printf("Sonic Robo Blast 2 Banpyura %s (%s %s %s %s) ", VERSIONSTRING, compdate, comptime, comprevision, compbranch);
 #endif
 
 	// Base library

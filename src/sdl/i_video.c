@@ -49,6 +49,7 @@
 #include "SDL_image.h"
 #elif defined (__unix__) || (!defined(__APPLE__) && defined (UNIXCOMMON)) // Windows & Mac don't need this, as SDL will do it for us.
 #define LOAD_XPM //I want XPM!
+#define EXTENDED_XPM_COLORS // romoney5: yeah, i've got space
 #include "IMG_xpm.c" //Alam: I don't want to add SDL_Image.dll/so
 #define HAVE_IMAGE //I have SDL_Image, sortof
 #endif
@@ -139,6 +140,10 @@ static SDL_bool      havefocus = SDL_TRUE;
 static UINT32 refresh_rate;
 
 static boolean video_init = false;
+
+// cursor position
+static INT32 mouse_x = 0;
+static INT32 mouse_y = 0;
 
 static SDL_bool Impl_CreateWindow(SDL_bool fullscreen);
 
@@ -862,6 +867,9 @@ static void Impl_HandleMouseMotionEvent(SDL_MouseMotionEvent evt)
 
 	if (USE_MOUSEINPUT)
 	{
+		mouse_x = evt.x;
+		mouse_y = evt.y;
+
 		if ((SDL_GetMouseFocus() != window && SDL_GetKeyboardFocus() != window) || (!ShouldGrabMouse() && !firstmove))
 		{
 			SDLdoUngrabMouse();
@@ -1649,7 +1657,10 @@ static SDL_bool Impl_CreateWindow(SDL_bool fullscreen)
 #endif
 
 	// Create a window
-	window = SDL_CreateWindow("SRB2-edit "VERSIONSTRING, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, realwidth, realheight, flags);
+	window = SDL_CreateWindow("SRB2 Banpyura "VERSIONSTRING, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+			realwidth, realheight, flags);
+
+
 	if (window == NULL)
 	{
 		VIDEO_INIT_ERROR("Couldn't create window: %s");
@@ -1807,6 +1818,9 @@ void I_StartupGraphics(void)
 	// Window icon
 #ifdef USE_WINDOW_ICON
 	icoSurface = IMG_ReadXPMFromArray(SDL_icon_xpm);
+
+	if (icoSurface == NULL)
+		CONS_Printf(M_GetText("Couldn't load XPM icon: %s\n"), SDL_GetError());
 #endif
 
 	// Fury: we do window initialization after GL setup to allow
@@ -1951,7 +1965,10 @@ void I_ShutdownGraphics(void)
 
 void I_GetCursorPosition(INT32 *x, INT32 *y)
 {
-	SDL_GetMouseState(x, y);
+	// using SDL_GetMouseState can report the wrong position in fullscreen mode,
+	// use events instead
+	*x = mouse_x;
+	*y = mouse_y;
 }
 
 UINT32 I_GetRefreshRate(void)
