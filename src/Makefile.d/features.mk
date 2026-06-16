@@ -35,6 +35,12 @@ endif
 opts+=-DHAVE_PNG
 sources+=apng.c
 
+ifndef NOLIBAV
+OPTS+=-DHAVE_LIBAV
+LIBS+=$(LIBAV_LDFLAGS)
+CFLAGS+=$(LIBAV_CFLAGS)
+endif
+
 ifndef NOCURL
 CURLCONFIG?=curl-config
 $(eval $(call Configure,CURL,$(CURLCONFIG)))

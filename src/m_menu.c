@@ -59,6 +59,7 @@
 #include "netcode/client_connection.h"
 #include "m_misc.h"
 #include "m_anigif.h"
+#include "m_videoencoder.h"
 #include "byteptr.h"
 #include "st_stuff.h"
 #include "i_sound.h"
@@ -1600,6 +1601,12 @@ static menuitem_t OP_ScreenshotOptionsMenu[] =
 	{IT_STRING|IT_CVAR, NULL, "Compression Level", &cv_zlib_levela,               105},
 	{IT_STRING|IT_CVAR, NULL, "Strategy",          &cv_zlib_strategya,            110},
 	{IT_STRING|IT_CVAR, NULL, "Window Size",       &cv_zlib_window_bitsa,         115},
+
+	{IT_STRING|IT_CVAR, NULL, "Bit rate",          &cv_videoencoder_bitrate,       95},
+	{IT_STRING|IT_CVAR, NULL, "Record audio",      &cv_videoencoder_audio,        100},
+	{IT_STRING|IT_CVAR, NULL, "Audio bit rate",    &cv_videoencoder_audiorate,    105},
+	{IT_STRING|IT_CVAR, NULL, "Downscaling",       &cv_videoencoder_downscale,    110},
+	{IT_STRING|IT_CVAR, NULL, "GOP size",          &cv_videoencoder_gopsize,      115},
 };
 
 enum
@@ -1613,6 +1620,8 @@ enum
 	op_screenshot_gif_end = 15,
 	op_screenshot_apng_start = 16,
 	op_screenshot_apng_end = 20,
+	op_screenshot_video_start = 21,
+	op_screenshot_video_end = 25,
 };
 
 static menuitem_t OP_EraseDataMenu[] =
@@ -2514,7 +2523,7 @@ void Screenshot_option_Onchange(void)
 void Moviemode_mode_Onchange(void)
 {
 	INT32 i, cstart, cend;
-	for (i = op_screenshot_gif_start; i <= op_screenshot_apng_end; ++i)
+	for (i = op_screenshot_gif_start; i <= op_screenshot_video_end; ++i)
 		OP_ScreenshotOptionsMenu[i].status = IT_DISABLED;
 
 	switch (cv_moviemode.value)
@@ -2526,6 +2535,17 @@ void Moviemode_mode_Onchange(void)
 		case MM_APNG:
 			cstart = op_screenshot_apng_start;
 			cend = op_screenshot_apng_end;
+			break;
+		case MM_MP4:
+		case MM_WEBM:
+		case MM_AVI:
+		case MM_MKV:
+		case MM_OGV:
+			cstart = op_screenshot_video_start;
+			cend = op_screenshot_video_end;
+			break;
+		case MM_LIBAV_GIF:
+			cstart = cend = op_screenshot_gif_start;
 			break;
 		default:
 			return;

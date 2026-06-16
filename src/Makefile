@@ -48,6 +48,7 @@
 #                    Already enabled by default for 32-bit
 #                    Windows.
 # NOCURL=1 - Disable libcurl--HTTP capability.
+# NOLIBAV=1 - Disable libav video recording.
 # NOGME=1 - Disable game music emu, retro VGM support.
 # NOOPENMPT=1 - Disable module (tracker) music support.
 # NOMIXER=1 - Disable SDL Mixer (audio playback).

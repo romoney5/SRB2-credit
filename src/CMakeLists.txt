@@ -35,6 +35,7 @@ add_executable(SRB2SDL2 MACOSX_BUNDLE WIN32
 	m_misc.c
 	m_perfstats.c
 	m_random.c
+	m_videoencoder.c
 	m_tokenizer.c
 	m_queue.c
 	m_vector.c
@@ -204,6 +205,11 @@ if("${SRB2_CONFIG_HWRENDER}")
 			message(WARNING "You have specified static opengl but opengl was not found. Not setting HWRENDER.")
 		endif()
 	endif()
+endif()
+
+if("${SRB2_CONFIG_HAVE_LIBAV}")
+	target_compile_definitions(SRB2SDL2 PRIVATE -DHAVE_LIBAV)
+	target_link_libraries(SRB2SDL2 PRIVATE avcodec avformat avutil swresample swscale)
 endif()
 
 # Targets

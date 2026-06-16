@@ -49,6 +49,7 @@
 #include "../lua_hook.h"
 #include "../m_cond.h"
 #include "../m_anigif.h"
+#include "../m_videoencoder.h"
 #include "../md5.h"
 #include "../m_perfstats.h"
 #include "../u_list.h"
@@ -743,6 +744,12 @@ void D_RegisterClientCommands(void)
 	CV_RegisterVar(&cv_gif_localcolortable);
 	CV_RegisterVar(&cv_gif_maxsize);
 	CV_RegisterVar(&cv_gif_rolling);
+	// Video variables	
+	CV_RegisterVar(&cv_videoencoder_bitrate);
+	CV_RegisterVar(&cv_videoencoder_gopsize);
+	CV_RegisterVar(&cv_videoencoder_downscale);
+	CV_RegisterVar(&cv_videoencoder_audiorate);
+	CV_RegisterVar(&cv_videoencoder_audio);
 
 	// register these so it is saved to config
 	CV_RegisterVar(&cv_playername);

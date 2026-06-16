@@ -40,6 +40,8 @@
 #include "../w_wad.h"
 #include "../z_zone.h"
 #include "../byteptr.h"
+#include "../m_misc.h"
+#include "../m_videoencoder.h"
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4214 4244)
@@ -216,6 +218,18 @@ consvar_t cv_midisoundfontpath = CVAR_INIT ("midisoundfont", "sf2/8bitsf.SF2", C
 consvar_t cv_miditimiditypath = CVAR_INIT ("midisoundbank", "./timidity", CV_SAVE, NULL, NULL);
 #endif
 
+#ifdef HAVE_LIBAV
+// Lactozilla: The native MIDI output is not affected by the postmix processor
+// (at least not on Windows) because the synth output isn't coming from SRB2.
+static void mix_audioencoder(int channel, void *stream, int len, void *udata)
+{
+	(void)channel;
+	(void)udata;
+	if (M_IsRecordingVideo() && VideoEncoder_IsRecordingAudio())
+		VideoEncoder_RecordAudio((INT16 *)stream, len);
+}
+#endif
+
 static void var_cleanup(void)
 {
 	song_length = loop_point = 0.0f;
@@ -330,6 +344,10 @@ void I_StartupSound(void)
 	sound_started = true;
 	songpaused = false;
 	Mix_AllocateChannels(256);
+
+#ifdef HAVE_LIBAV
+	Mix_RegisterEffect(MIX_CHANNEL_POST, mix_audioencoder, NULL, NULL);
+#endif
 }
 
 void I_ShutdownSound(void)
