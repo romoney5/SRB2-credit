@@ -51,7 +51,7 @@ endif()
 
 target_link_libraries(SRB2SDL2
 	PRIVATE
-	$<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
+	SDL2::SDL2main
 )
 
 if("${CMAKE_SYSTEM_NAME}" MATCHES Linux)
