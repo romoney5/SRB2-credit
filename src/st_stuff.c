@@ -2957,7 +2957,7 @@ void ST_MovieInfoDrawer(void)
 
 	INT32 movietype_color = ((gif_frames / (TICRATE / 2)) % 2) ? V_REDMAP : 0;
 
-	const char *movietype = (moviemode == MM_APNG ? "APNG" : "GIF");
+	const char *movietype = "GIF";
 
 	V_DrawThinString(x, y,
 		movietype_color|V_USERHUDTRANS|V_SNAPTOLEFT|V_SNAPTOBOTTOM,

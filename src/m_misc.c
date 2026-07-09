@@ -1030,12 +1030,6 @@ float M_SavedSize(void)
 	{	
 		case MM_GIF:
 			return GIF_GetSizeMB();
-		case MM_APNG:
-#ifdef USE_APNG
-		return ftell(apng_FILE);
-#else
-		return 0;
-#endif
 		default:
 			return 0;
 	}
