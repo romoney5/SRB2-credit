@@ -2092,8 +2092,8 @@ boolean S_RecallMusic(UINT16 status, boolean fromfirst)
 
 static lumpnum_t S_GetMusicLumpNum(const char *mname)
 {
-	// romoney5: W_GetNumForLongName for banpyura next
-	return W_GetNumForName(va("O_%s", mname));
+	// romoney5: W_GetNumForLongName (and O_) for banpyura next
+	return W_GetNumForName(va("o_%s", mname));
 }
 
 static boolean S_LoadMusic(const char *mname)

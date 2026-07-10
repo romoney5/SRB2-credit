@@ -1226,7 +1226,7 @@ static void IdentifyVersion(void)
 	D_AddFile(&startupwadfiles, va(pandf,srb2waddir, "patch.pk3"));
 #endif
 
-#if !defined (HAVE_SDL) || defined (HAVE_MIXER)
+#if !defined (HAVE_SDL) || defined (HAVE_MIXER) || true
 	{
 #define MUSICTEST(str) \
 		{\
