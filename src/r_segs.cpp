@@ -327,7 +327,7 @@ void R_RenderMaskedSegRange(drawseg_t *ds, INT32 x1, INT32 x2)
 		if (dc_numlights > dc_maxlights)
 		{
 			dc_maxlights = dc_numlights;
-			dc_lightlist = Z_Realloc(dc_lightlist, sizeof (*dc_lightlist) * dc_maxlights, PU_STATIC, NULL);
+			dc_lightlist = static_cast<r_lightlist_s *>(Z_Realloc(dc_lightlist, sizeof (*dc_lightlist) * dc_maxlights, PU_STATIC, NULL));
 		}
 
 		for (i = 0; i < dc_numlights; i++)
@@ -349,7 +349,7 @@ void R_RenderMaskedSegRange(drawseg_t *ds, INT32 x1, INT32 x2)
 			rlight->startheight = rlight->height; // keep starting value here to reset for each repeat
 			rlight->lightlevel = *light->lightlevel;
 			rlight->extra_colormap = *light->extra_colormap;
-			rlight->flags = light->flags;
+			rlight->flags = static_cast<ffloortype_e>(light->flags);
 
 			if ((colfunc != colfuncs[COLDRAWFUNC_FUZZY])
 				|| (rlight->flags & FOF_FOG)

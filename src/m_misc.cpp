@@ -954,6 +954,7 @@ void M_SaveFrame(void)
 #if NUMSCREENS > 2
 	// paranoia: should be unnecessary without singletics
 	static tic_t oldtic = 0;
+	float old_size;
 
 	if (oldtic == I_GetTime() && !singletics)
 		return;
@@ -968,7 +969,7 @@ void M_SaveFrame(void)
 		case MM_GIF:
 			movieframesrecorded++;
 
-			float old_size = GIF_GetSizeMB();
+			old_size = GIF_GetSizeMB();
 			GIF_frame();
 
 			// size cap

@@ -895,7 +895,7 @@ void I_OutputMsg(const char *fmt, ...)
 	if (len == 0)
 		return;
 
-	txt = malloc(len+1);
+	txt = static_cast<char *>(malloc(len+1));
 	va_start(argptr,fmt);
 	vsprintf(txt, fmt, argptr);
 	va_end(argptr);

@@ -1193,7 +1193,7 @@ static void IdentifyVersion(void)
 		srb2waddir = I_GetWadDir();
 #endif
 	// Commercial.
-	srb2wad = malloc(strlen(srb2waddir)+1+8+1);
+	srb2wad = static_cast<char *>(malloc(strlen(srb2waddir)+1+8+1));
 	if (srb2wad == NULL)
 		I_Error("No more free memory to look in %s", srb2waddir);
 	else

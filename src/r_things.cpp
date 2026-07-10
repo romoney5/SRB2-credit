@@ -1298,7 +1298,7 @@ static void R_SplitSprite(vissprite_t *sprite)
 		newsprite->cut = static_cast<spritecut_e>(newsprite->cut | SC_TOP);
 		if (!(sector->lightlist[i].caster->fofflags & FOF_NOSHADE))
 		{
-			lightnum = max(*sector->lightlist[i].lightlevel, cv_secbright.value) >> LIGHTSEGSHIFT;
+			lightnum = std::max((INT32)(*sector->lightlist[i].lightlevel), cv_secbright.value) >> LIGHTSEGSHIFT;
 
 			if (lightnum < 0)
 				spritelights = scalelight[0];
@@ -2314,7 +2314,7 @@ static void R_ProjectSprite(mobj_t *thing)
 	{
 		light = P_GetSectorLightNumAt(thing->subsector->sector, interp.x, interp.y, splat ? gz : gzt);
 
-		INT32 lightnum = max(*thing->subsector->sector->lightlist[light].lightlevel, cv_secbright.value) >> LIGHTSEGSHIFT;
+		INT32 lightnum = std::max((INT32)(*thing->subsector->sector->lightlist[light].lightlevel), cv_secbright.value) >> LIGHTSEGSHIFT;
 		if (lightnum < 0)
 			spritelights = scalelight[0];
 		else if (lightnum >= LIGHTLEVELS)
@@ -2701,7 +2701,7 @@ void R_AddSprites(sector_t *sec, INT32 lightlevel)
 	{
 		if (sec->heightsec == -1) lightlevel = sec->lightlevel;
 
-		lightnum = max(lightlevel, cv_secbright.value) >> LIGHTSEGSHIFT;
+		lightnum = std::max(lightlevel, cv_secbright.value) >> LIGHTSEGSHIFT;
 
 		if (lightnum < 0)
 			spritelights = scalelight[0];
