@@ -190,6 +190,11 @@ if("${CMAKE_SYSTEM_NAME}" MATCHES "Haiku")
 	target_link_libraries(SRB2SDL2 PRIVATE network)
 endif()
 
+# romoney5: define NOMINMAX on windows so that std::min/max don't conflict
+if("${CMAKE_SYSTEM_NAME}" MATCHES "Windows")
+	target_compile_definitions(SRB2SDL2 PRIVATE -DNOMINMAX)
+endif()
+
 if("${CMAKE_SYSTEM_NAME}" MATCHES "Darwin")
 	target_compile_definitions(SRB2SDL2 PRIVATE -DMACOSX)
 endif()

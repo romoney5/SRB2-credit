@@ -15,6 +15,7 @@ target_sources(SRB2SDL2 PRIVATE
 
 if("${CMAKE_SYSTEM_NAME}" MATCHES Windows)
 	target_sources(SRB2SDL2 PRIVATE
+		SDL_main/SDL_windows_main.c
 		../win32/win_dbg.c
 		../win32/Srb2win.rc)
 endif()
