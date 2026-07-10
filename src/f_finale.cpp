@@ -11,6 +11,8 @@
 /// \file  f_finale.c
 /// \brief Title screen, intro, game evaluation, and credits.
 
+#include <algorithm>
+
 #include "doomdef.h"
 #include "doomstat.h"
 #include "d_main.h"
