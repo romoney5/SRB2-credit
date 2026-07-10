@@ -7688,12 +7688,14 @@ static void P_RunSpecialStageWipe(void)
 #endif
 
 	F_WipeEndScreen();
-	F_RunWipe(wipedefs[wipe_speclevel_towhite], false);
+	F_RunWipe(wipedefs[wipe_speclevel_towhite], false, false);
 
 	I_OsPolling();
 	I_FinishUpdate(); // page flip or blit buffer
-	if (moviemode)
-		M_SaveFrame();
+	if (moviemode && rendermode == render_opengl)
+		M_LegacySaveFrame();
+	else if (moviemode && rendermode != render_none)
+		I_CaptureVideoFrame();
 
 	nowtime = lastwipetic;
 
@@ -7707,8 +7709,10 @@ static void P_RunSpecialStageWipe(void)
 			I_UpdateTime(cv_timescale.value);
 		}
 		lastwipetic = nowtime;
-		if (moviemode) // make sure we save frames for the white hold too
-			M_SaveFrame();
+		if (moviemode && rendermode == render_opengl)
+			M_LegacySaveFrame();
+		else if (moviemode && rendermode != render_none)
+			I_CaptureVideoFrame();
 		NetKeepAlive(); // Prevent timeout
 	}
 }
@@ -7730,7 +7734,7 @@ static void P_RunLevelWipe(void)
 	if (wipetypepre != INT16_MAX)
 		F_RunWipe(
 		(wipetypepre >= 0 && F_WipeExists(wipetypepre)) ? wipetypepre : wipedefs[wipe_level_toblack],
-			false);
+			false, false);
 	wipetypepre = -1;
 }
 
