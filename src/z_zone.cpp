@@ -25,8 +25,7 @@
 ///        allocator was fragmenting badly. Finally, this version is a bit
 ///        simpler (about half the lines of code).
 
-#include <stddef.h>
-#include <stdalign.h>
+#include <cstddef>
 
 #include "doomdef.h"
 #include "doomstat.h"
