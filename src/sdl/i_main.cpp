@@ -26,6 +26,7 @@
 #include <exception>
 #include <stdexcept>
 #include <string>
+#include <typeinfo>
 
 #if defined (__GNUC__) || defined (__unix__)
 #include <unistd.h>

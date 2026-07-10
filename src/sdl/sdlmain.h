@@ -19,14 +19,14 @@
 #ifndef __sdlmain__
 #define __sdlmain__
 
-extern SDL_bool consolevent;
-extern SDL_bool framebuffer;
-
 #include "../m_fixed.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+extern SDL_bool consolevent;
+extern SDL_bool framebuffer;
 
 // SDL2 stub macro
 #ifdef _MSC_VER
