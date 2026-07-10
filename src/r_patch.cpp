@@ -118,8 +118,6 @@ void Patch_MakeColumns(softwarepatch_t *source, size_t num_columns, INT16 width,
 	}
 }
 
-static boolean g_patch_was_freed_this_frame = false;
-
 //
 // Frees a patch from memory.
 //
@@ -161,24 +159,12 @@ static void Patch_FreeData(patch_t *patch)
 		Z_Free(patch->columns);
 	if (patch->posts)
 		Z_Free(patch->posts);
-
-	g_patch_was_freed_this_frame = true;
 }
 
 void Patch_Free(patch_t *patch)
 {
 	Patch_FreeData(patch);
 	Z_Free(patch);
-}
-
-boolean Patch_WasFreedThisFrame(void)
-{
-	return g_patch_was_freed_this_frame;
-}
-
-void Patch_ResetFreedThisFrame(void)
-{
-	g_patch_was_freed_this_frame = false;
 }
 
 //

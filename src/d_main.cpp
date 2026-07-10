@@ -381,7 +381,7 @@ static void D_Display(void)
 				else if (F_TryColormapFade(31))
 					wipetypepost = -1; // Don't run the fade below this one
 				F_WipeEndScreen();
-				F_RunWipe(wipetypepre, gamestate != GS_TIMEATTACK && gamestate != GS_TITLESCREEN, false);
+				F_RunWipe(wipetypepre, gamestate != GS_TIMEATTACK && gamestate != GS_TITLESCREEN);
 			}
 
 			F_WipeStartScreen();
@@ -537,11 +537,6 @@ static void D_Display(void)
 				R_RestoreLevelInterpolators();
 			}
 
-			if (rendermode == render_soft)
-			{
-				VID_DisplaySoftwareScreen();
-			}
-
 			if (lastdraw)
 			{
 				if (rendermode == render_soft)
@@ -641,7 +636,7 @@ static void D_Display(void)
 				wipestyleflags = static_cast<wipestyleflags_t>(wipestyleflags & ~WSF_FADEOUT);
 			}
 
-			F_RunWipe(wipetypepost, gamestate != GS_TIMEATTACK && gamestate != GS_TITLESCREEN, true);
+			F_RunWipe(wipetypepost, gamestate != GS_TIMEATTACK && gamestate != GS_TITLESCREEN);
 		}
 
 		// reset counters so timedemo doesn't count the wipe duration
@@ -927,16 +922,11 @@ static void D_RunFrame(void)
 			D_Display();
 		}
 
-#ifdef HWRENDER
 		// Only take screenshots after drawing.
-		if (moviemode && rendermode == render_opengl)
-			M_LegacySaveFrame();
-		if (rendermode == render_opengl && takescreenshot)
-			M_DoLegacyGLScreenShot();
-#endif
-
-		if ((moviemode || takescreenshot) && rendermode == render_soft)
-			I_CaptureVideoFrame();
+		if (moviemode)
+			M_SaveFrame();
+		if (takescreenshot)
+			M_DoScreenShot();
 
 		// consoleplayer -> displayplayers (hear sounds from viewpoint)
 		S_UpdateSounds(); // move positional sounds
@@ -1231,10 +1221,6 @@ static void IdentifyVersion(void)
 	// Add the characters
 	D_AddFile(&startupwadfiles, va(pandf,srb2waddir, "characters.pk3"));
 
-	D_AddFile(&startupwadfiles, va(pandf, srb2waddir, "shaders.pk3"));
-
-	// romoney5: { "shaders.pk3", "shaders/", ASSET_HASH_SHADERS_PK3, false }, in 2.3
-
 #ifdef USE_PATCH_DTA
 	// Add our crappy patches to fix our bugs
 	D_AddFile(&startupwadfiles, va(pandf,srb2waddir, "patch.pk3"));
@@ -1512,7 +1498,6 @@ void D_SRB2Main(void)
 
 	CONS_Printf("I_StartupGraphics()...\n");
 	I_StartupGraphics();
-	I_StartDisplayUpdate();
 
 #ifdef HWRENDER
 	// Lactozilla: Add every hardware mode CVAR and CCMD.
