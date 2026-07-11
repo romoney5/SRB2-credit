@@ -13,12 +13,11 @@ find_path(libgme_INCLUDE_DIR
 )
 
 find_library(libgme_LIBRARY
-	NAMES gme
+	NAMES gme libgme.0.6.5.dylib
 	PATHS
 		${libgme_PKGCONF_LIBRARY_DIRS}
 		"/usr/lib"
 		"/usr/local/lib"
-		"/usr/local/include"
 )
 
 include(FindPackageHandleStandardArgs)
