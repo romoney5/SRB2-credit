@@ -28,7 +28,7 @@ jobs:
           sudo apt install -y gcc-mingw-w64-$PKGSUFFIX binutils-mingw-w64-$PKGSUFFIX ninja-build
 
       - name: Configure CMake
-        run: echo a
+        run: echo ${VCPKG_ROOT}
 
       - name: Build SRB2
         run: |
