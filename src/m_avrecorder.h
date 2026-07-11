@@ -10,7 +10,7 @@
 #ifndef M_AVRECORDER_H
 #define M_AVRECORDER_H
 
-#include "typedef.h" // consvar_t
+#include "command.h" // consvar_t
 
 #ifdef __cplusplus
 extern "C" {

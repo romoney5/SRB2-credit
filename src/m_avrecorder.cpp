@@ -108,21 +108,17 @@ static AVRecorder::Config configure()
 
 	if (sound_started && cv_movie_sound.value)
 	{
-		cfg.audio = {
-			.sample_rate = 44100,
-		};
+		cfg.audio = AVRecorder::Config::Audio { 44100 };
 	}
 
-	cfg.video = {
-		.frame_rate = cv_movie_fps.value,
-	};
-
+	cfg.video = AVRecorder::Config::Video { };
 	AVRecorder::Config::Video& v = *cfg.video;
+	v.frame_rate = cv_movie_fps.value;
 
 	auto basex = [&v](int scale)
 	{
-		v.width = vid.width / vid.dupx * scale;
-		v.height = vid.height / vid.dupy * scale;
+		v.width = vid.width / vid.dup * scale;
+		v.height = vid.height / vid.dup * scale;
 	};
 
 	switch (cv_movie_resolution.value)
