@@ -53,6 +53,6 @@ const Options VP8Encoder::options_("vp8", {
 	})},
 	{"sharpness", Options::values<int>("7", {0, 7})},
 	{"token_parts", Options::values<int>("0", {0, 3})},
-	{"threads", Options::values<int>("1", {1})},
+	{"threads", Options::values<int>("4", {1})},
 });
 // clang-format on
