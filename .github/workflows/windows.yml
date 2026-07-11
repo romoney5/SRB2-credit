@@ -27,7 +27,7 @@ jobs:
           [ "${{ matrix.arch.name }}" = "x86" ] && PKGSUFFIX="i686" || PKGSUFFIX="x86-64"
           sudo apt install -y gcc-mingw-w64-$PKGSUFFIX binutils-mingw-w64-$PKGSUFFIX
 
-      - name: Build SRB2 Legacy
+      - name: Build SRB2
         run: |
           [ "${{ matrix.arch.name }}" = "x86" ] && IS64BIT="" || IS64BIT="64"
           make -C src/ --keep-going  -j$(nproc) MINGW$IS64BIT=1

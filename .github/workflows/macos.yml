@@ -27,7 +27,7 @@ jobs:
     - name: Configure CMake
       run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 
-    - name: Build SRB2 Legacy
+    - name: Build SRB2
       run: ninja -C build
 
     - name: Upload build artifact
