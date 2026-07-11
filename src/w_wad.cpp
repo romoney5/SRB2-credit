@@ -2961,6 +2961,9 @@ int W_VerifyNMUSlumps(const char *filename, boolean exit_on_error)
 		{"SHADERS", 7}, // OpenGL shader definitions
 		{"SH_", 3}, // GLSL shader
 
+		{"RHI_GLSL", 8}, // romoney5
+		{"VK_", 3}, // romoney5
+
 		{NULL, 0},
 	};
 
