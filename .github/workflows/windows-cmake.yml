@@ -33,7 +33,7 @@ jobs:
       - name: Build SRB2
         run: |
           [ "${{ matrix.arch.name }}" = "x86" ] && IS64BIT="" || IS64BIT="64"
-          cmake -B build.cmake -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake
+          cmake -B build.cmake -G "Unix Makefiles"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v6.0.0
