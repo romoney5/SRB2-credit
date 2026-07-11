@@ -30,6 +30,10 @@ boolean M_AVRecorder_IsExpired(void);
 
 const char *M_AVRecorder_GetCurrentFormat(void);
 
+float M_AVRecorder_GetSize(void);
+
+INT32 M_AVRecorder_GetFrames(void);
+
 void M_AVRecorder_PrintCurrentConfiguration(void);
 
 void M_AVRecorder_DrawFrameRate(void);
@@ -40,7 +44,6 @@ extern consvar_t
 	cv_movie_fps,
 	cv_movie_resolution,
 	cv_movie_showfps,
-	cv_movie_size,
 	cv_movie_sound;
 
 #ifdef __cplusplus

@@ -1153,11 +1153,21 @@ void M_StopMovie(void)
 
 INT32 M_RecordedFrames(void)
 {
-	return movieframesrecorded;
+	switch (moviemode)
+	{
+	case MM_GIF:
+		return movieframesrecorded;
+	case MM_AVRECORDER:
+		return M_AVRecorder_GetFrames();
+	default:
+		return 0;
+	}
 }
 
 float M_SavedSize(void)
 {
+	const float kMb = 1024.f * 1024.f;
+
 	if (!moviemode)
 		return 0;
 	
@@ -1165,6 +1175,8 @@ float M_SavedSize(void)
 	{	
 		case MM_GIF:
 			return GIF_GetSizeMB();
+		case MM_AVRECORDER:
+			return M_AVRecorder_GetSize() / kMb;
 		default:
 			return 0;
 	}

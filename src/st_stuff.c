@@ -2939,6 +2939,22 @@ void ST_Drawer(void)
 	}
 }
 
+
+// get the displayed string for the current movie mode
+
+static const char *MovieType(moviemode_t mode)
+{
+	switch (mode)
+	{
+	case MM_GIF:
+		return "GIF";
+	case MM_AVRECORDER:
+		return "WebM";
+	default:
+		return "???";
+	}
+}
+
 // draw movie frame amount and size
 void ST_MovieInfoDrawer(void)
 {
@@ -2957,7 +2973,7 @@ void ST_MovieInfoDrawer(void)
 
 	INT32 movietype_color = ((gif_frames / (TICRATE / 2)) % 2) ? V_REDMAP : 0;
 
-	const char *movietype = "GIF";
+	const char *movietype = MovieType(moviemode);
 
 	V_DrawThinString(x, y,
 		movietype_color|V_USERHUDTRANS|V_SNAPTOLEFT|V_SNAPTOBOTTOM,
@@ -2974,7 +2990,7 @@ void ST_MovieInfoDrawer(void)
 
 			(withincap ? "\x82" : "\x86"), // color if near the limit
 			
-			G_TicsToSeconds(gif_frames), // seconds
+			gif_frames / TICRATE, // seconds
 			G_TicsToCentiseconds(gif_frames), // centiseconds
 			gif_size // size in megabytes
 		)

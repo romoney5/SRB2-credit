@@ -133,7 +133,7 @@ static void temp_legacy_finishupdate_draws()
 		SCR_DisplayLocalPing();
 
 #ifdef SRB2_CONFIG_ENABLE_WEBM_MOVIES
-	M_AVRecorder_DrawFrameRate();
+	//M_AVRecorder_DrawFrameRate();
 #endif
 }
 

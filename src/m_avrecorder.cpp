@@ -28,6 +28,7 @@
 #include "screen.h"	  // vid global
 #include "st_stuff.h" // st_palette
 #include "v_video.h"  // pLocalPalette
+#include "m_anigif.h" // cv_gif_maxsize
 
 using namespace srb2::media;
 
@@ -75,7 +76,6 @@ consvar_t cv_movie_showfps = CVAR_INIT("movie_showfps", "Yes", CV_SAVE, CV_YesNo
 consvar_t cv_movie_sound = CVAR_INIT("movie_sound", "On", CV_SAVE, CV_OnOff, NULL);
 
 consvar_t cv_movie_duration = CVAR_INIT("movie_duration", "Unlimited", CV_SAVE | CV_FLOAT, movie_limit_cons_t, NULL);
-consvar_t cv_movie_size = CVAR_INIT("movie_size", "8.0", CV_SAVE | CV_FLOAT, movie_limit_cons_t, NULL);
 
 std::shared_ptr<AVRecorder> g_av_recorder;
 
@@ -86,7 +86,6 @@ void M_AVRecorder_AddCommands(void)
 	CV_RegisterVar(&cv_movie_fps);
 	CV_RegisterVar(&cv_movie_resolution);
 	CV_RegisterVar(&cv_movie_showfps);
-	CV_RegisterVar(&cv_movie_size);
 	CV_RegisterVar(&cv_movie_sound);
 
 	srb2::media::Options::register_all();
@@ -101,9 +100,9 @@ static AVRecorder::Config configure()
 		cfg.max_duration = std::chrono::duration<float>(FixedToFloat(cv_movie_duration.value));
 	}
 
-	if (cv_movie_size.value > 0)
+	if (cv_gif_maxsize.value > 0)
 	{
-		cfg.max_size = FixedToFloat(cv_movie_size.value) * 1024 * 1024;
+		cfg.max_size = FixedToFloat(cv_gif_maxsize.value * FRACUNIT) * 1024 * 1024;
 	}
 
 	if (sound_started && cv_movie_sound.value)
@@ -214,6 +213,26 @@ boolean M_AVRecorder_IsExpired(void)
 	SRB2_ASSERT(g_av_recorder != nullptr);
 
 	return g_av_recorder->invalid();
+}
+
+float M_AVRecorder_GetSize(void)
+{
+	if (!g_av_recorder)
+	{
+		return 0.f;
+	}
+
+	return g_av_recorder->size();
+}
+
+INT32 M_AVRecorder_GetFrames(void)
+{
+	if (!g_av_recorder)
+	{
+		return 0;
+	}
+
+	return g_av_recorder->frames();
 }
 
 void M_AVRecorder_DrawFrameRate(void)

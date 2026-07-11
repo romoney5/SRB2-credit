@@ -93,6 +93,12 @@ public:
 	// Proper name of the container format.
 	const char* format_name() const;
 
+	// romoney5: filesize
+	float size() const;
+
+	// romoney5: frame count
+	INT32 frames() const;
+
 	// True if this instance has terminated. Continuing to use
 	// this interface is useless and the object should be
 	// destructed immediately.

@@ -189,6 +189,16 @@ const char* AVRecorder::format_name() const
 	return impl_->container_->name();
 }
 
+float AVRecorder::size() const
+{
+	return impl_->container_->size();
+}
+
+INT32 AVRecorder::frames() const
+{
+	return impl_->container_->duration().count() * TICRATE;
+}
+
 void AVRecorder::push_audio_samples(audio_buffer_t buffer)
 {
 	const auto _ = impl_->queue_guard();
