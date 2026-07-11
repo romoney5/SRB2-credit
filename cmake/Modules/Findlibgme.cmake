@@ -18,6 +18,7 @@ find_library(libgme_LIBRARY
 		${libgme_PKGCONF_LIBRARY_DIRS}
 		"/usr/lib"
 		"/usr/local/lib"
+		"/usr/local/include"
 )
 
 include(FindPackageHandleStandardArgs)
