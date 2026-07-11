@@ -28,7 +28,7 @@ jobs:
       run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 
     - name: Donde esta mi amigo libgme
-      run: find /usr/local "gme"
+      run: find /usr/local -iname "gme"
 
     - name: Build SRB2
       run: ninja -C build
