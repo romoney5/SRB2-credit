@@ -27,6 +27,9 @@ jobs:
     - name: Configure CMake
       run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 
+    - name: find nemo
+      run: find /usr -iname "*gme*"
+
     - name: Build SRB2
       run: ninja -C build
 
