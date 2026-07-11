@@ -2,9 +2,7 @@ name: Ubuntu
 
 on:
   push:
-    branches: [ "next", "master", "ci" ]
   pull_request:
-    branches: [ "next", "master" ]
 
 env:
   CC: gcc
@@ -45,14 +43,13 @@ jobs:
     - name: Upload build artifact
       uses: actions/upload-artifact@v6.0.0
       with:
-        name: srb2legacy-linux-${{ matrix.arch.name }}-${{ github.sha }}
+        name: srb2banpyura-linux-${{ matrix.arch.name }}-${{ github.sha }}
         path: |
           bin/
-          src/comptime.h
 
     - name: Upload Appimage artifact
       uses: actions/upload-artifact@v6.0.0
       with:
-        name: srb2legacy-appimage-${{ matrix.arch.name }}-${{ github.sha }}
+        name: srb2banpyura-appimage-${{ matrix.arch.name }}-${{ github.sha }}
         path: |
           Sonic_Robo_Blast_2_Legacy_(2.1)-${{ matrix.arch.name }}.AppImage

@@ -2,9 +2,7 @@ name: macOS
 
 on:
   push:
-    branches: [ "next", "master", "ci" ]
   pull_request:
-    branches: [ "next", "master" ]
 
 jobs:
   build:
@@ -35,5 +33,5 @@ jobs:
     - name: Upload build artifact
       uses: actions/upload-artifact@v6.0.0
       with:
-        name: srb2legacy-macOS-${{ matrix.arch.name }}-${{ github.sha }}
+        name: srb2banpyura-macOS-${{ matrix.arch.name }}-${{ github.sha }}
         path: build/bin
