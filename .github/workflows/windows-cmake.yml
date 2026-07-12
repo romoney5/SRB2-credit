@@ -27,11 +27,21 @@ jobs:
           sudo apt update
           [ "${{ matrix.arch.name }}" = "x86" ] && PKGSUFFIX="i686" || PKGSUFFIX="x86-64"
           sudo apt install -y g++-mingw-w64-$PKGSUFFIX-posix binutils-mingw-w64-$PKGSUFFIX ninja-build
+          
+          export VCPKG_DEFAULT_BINARY_CACHE="${{ github.workspace }}/build/vcpkg-binary-cache"
 
       - name: Configure vcpkg
         uses: lukka/run-vcpkg@v11.6
         with:
           vcpkgDirectory: "${{ github.workspace }}/vcpkgslop"
+
+      - name: Configure vcpkg cache
+        uses: actions/cache@v6.1.0
+        with:
+          path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+          key: ${{ runner.os }}-${{ matrix.arch.name }}-vcpkg-${{ hashFiles('**/vcpkg.json') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.arch.name }}-vcpkg-
 
       - name: Configure CMake
         run: |
@@ -41,7 +51,6 @@ jobs:
           export CC="$PREFIX-gcc"
           export CXX="$PREFIX-g++"
           export LD="$PREFIX-ld"
-          export VCPKG_DEFAULT_BINARY_CACHE="${{ github.workspace }}/build/vcpkg-binary-cache"
           
           mkdir -p "$VCPKG_DEFAULT_BINARY_CACHE"
           
