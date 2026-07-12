@@ -29,12 +29,20 @@ jobs:
           sudo apt install -y g++-mingw-w64-$PKGSUFFIX-posix binutils-mingw-w64-$PKGSUFFIX ninja-build
           sudo update-alternatives --config i686-w64-mingw32-g++
 
-      - name: Configure vcpkg cache
+      - name: Configure vcpkg
         uses: lukka/run-vcpkg@v11.6
         with:
-          vcpkgJsonGlob: "**/vcpkg.json"
+          runVcpkgInstall: true
         env:
-          VCPKG_BINARY_SOURCES: "clear;gha;readwrite"
+          VCPKG_BINARY_SOURCES: default,rw
+
+      - name: Configure vcpkg cache
+        uses: actions/cache@v6.1.0
+        with:
+          path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+          key: ${{ runner.os }}-${{ matrix.arch.name }}-vcpkg-binary-cache-${{ hashFiles('vcpkg*.json') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.arch.name }}-vcpkg-binary-cache-
 
       - name: Configure CMake
         run: |
