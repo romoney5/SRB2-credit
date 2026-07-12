@@ -31,12 +31,11 @@ jobs:
         uses: lukka/run-vcpkg@v11.6
         with:
           vcpkgJsonGlob: "**/vcpkg.json"
-        env:
-          VCPKG_BINARY_SOURCES: "clear;gha;readwrite"
 
       - name: Configure CMake
         run: |
-          cmake -B build.cmake -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=${{ matrix.arch.name }}-mingw-static
+          [ "${{ matrix.arch.name }}" = "x86" ] && ARCH="x86" || ARCH="x64"
+          cmake -B build.cmake -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=ninja-$ARCH_mingw_static_vcpkg-release
 
       - name: Build SRB2
         run: |
