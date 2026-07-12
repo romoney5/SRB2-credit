@@ -35,8 +35,11 @@ jobs:
 
       - name: Configure CMake
         run: |
-          [ "${{ matrix.arch.name }}" = "x86" ] && ARCH="x86" || ARCH="x64"
-          cmake -B build.cmake -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=$ARCH-mingw-static -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/toolchains/mingw.cmake 
+          [ "${{ matrix.arch.name }}" = "x86" ] && ARCH="86" || ARCH="64"
+          cmake -B build.cmake -G "Unix Makefiles" \
+            -DCMAKE_TOOLCHAIN_FILE="${VCPKG_ROOT}/scripts/buildsystems/toolchain_profiles/mingw${ARCH}.cmake" \
+            -DVCPKG_TARGET_TRIPLET=x${ARCH}-mingw-static \
+            -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/toolchains/mingw.cmake 
 
       - name: Build SRB2
         run: |
