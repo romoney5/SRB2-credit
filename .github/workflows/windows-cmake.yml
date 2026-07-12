@@ -37,6 +37,14 @@ jobs:
         run: |
           [ "${{ matrix.arch.name }}" = "x86" ] && ARCH="x86" || ARCH="x64"
           [ "${{ matrix.arch.name }}" = "x86" ] && ARCHTWO="32" || ARCHTWO="64"
+          
+          export CC="$PREFIX-gcc"
+          export CXX="$PREFIX-g++"
+          export LD="$PREFIX-ld"
+          export VCPKG_DEFAULT_BINARY_CACHE="${{ github.workspace }}/build/vcpkg-binary-cache"
+          
+          mkdir -p "$VCPKG_DEFAULT_BINARY_CACHE"
+          
           cmake -B build.cmake -G "Unix Makefiles" \
             -DCMAKE_TOOLCHAIN_FILE="${VCPKG_ROOT}/scripts/buildsystems/toolchain_profiles/mingw${ARCHTWO}.cmake" \
             -DVCPKG_TARGET_TRIPLET=${ARCH}-mingw-static \
