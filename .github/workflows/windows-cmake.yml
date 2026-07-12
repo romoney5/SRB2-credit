@@ -35,13 +35,8 @@ jobs:
 
       - name: Configure CMake
         run: |
-          if [ "${{ matrix.arch.name }}" = "x86" ]; then
-            ARCH="x86"
-            PREFIX="i686-w64-mingw32"
-          else
-            ARCH="x64"
-            PREFIX="x86_64-w64-mingw32"
-          fi
+          [ "${{ matrix.arch.name }}" = "x86" ] && ARCH="x86" || ARCH="x64"
+          PREFIX="${{ matrix.arch.prefix }}"
           
           export CC="$PREFIX-gcc"
           export CXX="$PREFIX-g++"
