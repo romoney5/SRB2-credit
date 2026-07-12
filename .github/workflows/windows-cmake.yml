@@ -27,14 +27,13 @@ jobs:
           sudo apt update
           [ "${{ matrix.arch.name }}" = "x86" ] && PKGSUFFIX="i686" || PKGSUFFIX="x86-64"
           sudo apt install -y g++-mingw-w64-$PKGSUFFIX-posix binutils-mingw-w64-$PKGSUFFIX ninja-build
-          sudo update-alternatives --config i686-w64-mingw32-g++
 
       - name: Configure vcpkg
         uses: lukka/run-vcpkg@v11.6
         with:
           runVcpkgInstall: true
         env:
-          VCPKG_BINARY_SOURCES: default,rw
+          VCPKG_BINARY_SOURCES: default,readwrite
 
       - name: Configure vcpkg cache
         uses: actions/cache@v6.1.0
