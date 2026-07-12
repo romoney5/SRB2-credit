@@ -27,12 +27,16 @@ jobs:
           [ "${{ matrix.arch.name }}" = "x86" ] && PKGSUFFIX="i686" || PKGSUFFIX="x86-64"
           sudo apt install -y gcc-mingw-w64-$PKGSUFFIX binutils-mingw-w64-$PKGSUFFIX ninja-build build-essential
 
-      - name: Configure vcpkg
+      - name: Configure vcpkg cache
         uses: lukka/run-vcpkg@v11.6
         with:
           vcpkgJsonGlob: "**/vcpkg.json"
         env:
           VCPKG_BINARY_SOURCES: "clear;gha;readwrite"
+
+      - name: Configure vcpkg
+        run: |
+          ./vcpkg/vcpkg install
 
       - name: Configure CMake
         run: |
