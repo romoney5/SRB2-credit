@@ -28,10 +28,13 @@ jobs:
           [ "${{ matrix.arch.name }}" = "x86" ] && PKGSUFFIX="i686" || PKGSUFFIX="x86-64"
           sudo apt install -y g++-mingw-w64-$PKGSUFFIX-posix binutils-mingw-w64-$PKGSUFFIX ninja-build
 
+      - name: Configure vcpkg
+        uses: lukka/run-vcpkg@v11.6
+
       - name: Configure CMake
         run: |
           [ "${{ matrix.arch.name }}" = "x86" ] && ARCH="x86" || ARCH="x64"
-          cmake -B build.cmake -G "Unix Makefiles"
+          cmake -B build.cmake -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=$ARCH-mingw-static -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/toolchains/mingw.cmake 
 
       - name: Build SRB2
         run: |
