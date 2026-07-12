@@ -70,4 +70,4 @@ jobs:
         with:
           name: srb2banpyura-windows-cmake-${{ matrix.arch.name }}-${{ github.sha }}
           path: |
-            build.cmake/
+            build.cmake/bin/
