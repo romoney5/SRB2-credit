@@ -18,6 +18,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PREFIX: ${{ matrix.arch.prefix }}
+      CC: ${{ matrix.arch.prefix }}-gcc
+      CXX: ${{ matrix.arch.prefix }}-g++
+      LD: ${{ matrix.arch.prefix }}-ld
     steps:
       - uses: actions/checkout@v6.0.1
 
@@ -38,7 +41,7 @@ jobs:
       - name: Configure CMake
         run: |
           [ "${{ matrix.arch.name }}" = "x86" ] && ARCH="x86" || ARCH="x64"
-          cmake -B build.cmake -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=$ARCH-mingw-static -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/toolchains/mingw.cmake -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/toolchains/mingw.cmake
+          cmake -B build.cmake -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=$ARCH-mingw-static -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/toolchains/mingw.cmake 
 
       - name: Build SRB2
         run: |
