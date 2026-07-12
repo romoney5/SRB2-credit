@@ -40,7 +40,7 @@ jobs:
           cmake -B build.cmake -G "Unix Makefiles" \
             -DCMAKE_TOOLCHAIN_FILE="${VCPKG_ROOT}/scripts/buildsystems/toolchain_profiles/mingw${ARCHTWO}.cmake" \
             -DVCPKG_TARGET_TRIPLET=${ARCH}-mingw-static \
-            -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/toolchains/mingw.cmake 
+            -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake 
 
       - name: Build SRB2
         run: |
