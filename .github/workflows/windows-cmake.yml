@@ -27,13 +27,22 @@ jobs:
           [ "${{ matrix.arch.name }}" = "x86" ] && PKGSUFFIX="i686" || PKGSUFFIX="x86-64"
           sudo apt install -y gcc-mingw-w64-$PKGSUFFIX binutils-mingw-w64-$PKGSUFFIX ninja-build
 
+      - name: run-vcpkg
+        # You may pin to the exact commit or the version.
+        # uses: lukka/run-vcpkg@b1a0dd252f06b9e25b3c022a9a03bd7a427fb6a2
+        uses: lukka/run-vcpkg@v11.6
+        with:
+          vcpkgJsonGlob: "**/vcpkg.json"
+        env:
+          VCPKG_BINARY_SOURCES: "clear;gha;readwrite"
+
       - name: Configure CMake
         run: echo ${VCPKG_ROOT}
 
       - name: Build SRB2
         run: |
           [ "${{ matrix.arch.name }}" = "x86" ] && IS64BIT="" || IS64BIT="64"
-          cmake -B build.cmake -G "Unix Makefiles" -DVCPKG_TARGET_TRIPLET=x64-mingw-static --preset ninja-x86_mingw_static_vcpkg-release
+          cmake -B build.cmake -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v6.0.0
