@@ -55,7 +55,7 @@ jobs:
           mkdir -p "$VCPKG_DEFAULT_BINARY_CACHE"
           
           cmake -B build.cmake -G "Unix Makefiles" \
-            -DSRB2_CONFIG_ERRORMODE=ON \
+            -DSRB2_CONFIG_USE_GME=ON \
             -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkgslop/scripts/buildsystems/vcpkg.cmake" \
             -DVCPKG_TARGET_TRIPLET="$ARCH-mingw-static" \
             -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkgslop/scripts/toolchains/mingw.cmake"
