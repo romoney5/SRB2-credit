@@ -34,10 +34,6 @@ jobs:
         env:
           VCPKG_BINARY_SOURCES: "clear;gha;readwrite"
 
-      - name: t
-        run: |
-          ninja -v
-
       - name: Configure CMake
         run: |
           [ "${{ matrix.arch.name }}" = "x86" ] && ARCH="x86" || ARCH="x64"
