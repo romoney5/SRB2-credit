@@ -18,9 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PREFIX: ${{ matrix.arch.prefix }}
-      CC: ${{ matrix.arch.prefix }}-gcc
-      CXX: ${{ matrix.arch.prefix }}-g++
-      LD: ${{ matrix.arch.prefix }}-ld
+      VCPKG_TARGET_TRIPLET: x86-mingw-static
+
     steps:
       - uses: actions/checkout@v6.0.1
 
