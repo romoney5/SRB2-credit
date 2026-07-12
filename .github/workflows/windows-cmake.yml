@@ -30,6 +30,8 @@ jobs:
 
       - name: Configure vcpkg
         uses: lukka/run-vcpkg@v11.6
+        with:
+          vcpkgDirectory: "${{ github.workspace }}/vcpkgslop"
 
       - name: Configure CMake
         run: |
