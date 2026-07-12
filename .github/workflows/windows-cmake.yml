@@ -17,7 +17,6 @@ jobs:
 
     runs-on: ubuntu-latest
     env:
-      PREFIX: ${{ matrix.arch.prefix }}
       VCPKG_TARGET_TRIPLET: x86-mingw-static
 
     steps:
