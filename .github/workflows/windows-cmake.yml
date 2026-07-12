@@ -25,7 +25,7 @@ jobs:
         run: |
           sudo apt update
           [ "${{ matrix.arch.name }}" = "x86" ] && PKGSUFFIX="i686" || PKGSUFFIX="x86-64"
-          sudo apt install -y gcc-mingw-w64-$PKGSUFFIX binutils-mingw-w64-$PKGSUFFIX ninja-build build-essential
+          sudo apt install -y gcc-mingw-w64 binutils-mingw-w64 g++-mingw-w64 ninja-build
 
       - name: Configure vcpkg cache
         uses: lukka/run-vcpkg@v11.6
@@ -33,10 +33,6 @@ jobs:
           vcpkgJsonGlob: "**/vcpkg.json"
         env:
           VCPKG_BINARY_SOURCES: "clear;gha;readwrite"
-
-      - name: Configure vcpkg
-        run: |
-          ./vcpkg/vcpkg install
 
       - name: Configure CMake
         run: |
