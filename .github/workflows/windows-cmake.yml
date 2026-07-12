@@ -27,8 +27,6 @@ jobs:
           sudo apt update
           [ "${{ matrix.arch.name }}" = "x86" ] && PKGSUFFIX="i686" || PKGSUFFIX="x86-64"
           sudo apt install -y g++-mingw-w64-$PKGSUFFIX-posix binutils-mingw-w64-$PKGSUFFIX ninja-build
-          
-          export VCPKG_DEFAULT_BINARY_CACHE="${{ github.workspace }}/build/vcpkg-binary-cache"
 
       - name: Configure vcpkg
         uses: lukka/run-vcpkg@v11.6
@@ -52,6 +50,8 @@ jobs:
           export CXX="$PREFIX-g++"
           export LD="$PREFIX-ld"
           
+          export VCPKG_BINARY_SOURCES="clear;files,$VCPKG_DEFAULT_BINARY_CACHE,readwrite"
+          export VCPKG_DEFAULT_BINARY_CACHE="${{ github.workspace }}/build/vcpkg-binary-cache"
           mkdir -p "$VCPKG_DEFAULT_BINARY_CACHE"
           
           cmake -B build.cmake -G "Unix Makefiles" \
