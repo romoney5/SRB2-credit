@@ -2900,6 +2900,14 @@ static void HWR_DrawDropShadow(mobj_t *thing, gl_vissprite_t *spr, fixed_t scale
 			shadowVerts[2].z = spr->z2 + (gpatch->height + offset) * gl_shadowsin;
 		}
 	}
+	else
+	{
+		shadowangle = ANGLE_90;
+		shadowsin = FINESINE(shadowangle >> ANGLETOFINESHIFT);
+		shadowcos = FINECOSINE(shadowangle >> ANGLETOFINESHIFT);
+		gl_shadowsin = FixedToFloat(shadowsin);
+		gl_shadowcos = FixedToFloat(shadowcos);
+	}
 
 	for (i = 0; i < 4; i++)
 	{
@@ -2907,6 +2915,14 @@ static void HWR_DrawDropShadow(mobj_t *thing, gl_vissprite_t *spr, fixed_t scale
 		float oldy = shadowVerts[i].z;
 		shadowVerts[i].x = fx + ((oldx - fx) * gl_shadowcos) - ((oldy - fy) * gl_shadowsin);
 		shadowVerts[i].z = fy + ((oldx - fx) * gl_shadowsin) + ((oldy - fy) * gl_shadowcos);
+	}
+
+	for (i = 2; i < 4; i++)
+	{
+		float oldx = shadowVerts[i].x;
+		float oldy = shadowVerts[i].z;
+		shadowVerts[i].x += shadowcos / 6144.f * (float)cv_glfakecontraststrength.value / 32.f;
+		shadowVerts[i].z += shadowsin / 6144.f * (float)cv_glfakecontraststrength.value / 32.f;
 	}
 
 	if (groundslope)
