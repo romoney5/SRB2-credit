@@ -5776,6 +5776,7 @@ consvar_t cv_glspritebillboarding = CVAR_INIT ("gr_spritebillboarding", "Off", C
 consvar_t cv_glskydome = CVAR_INIT ("gr_skydome", "On", CV_SAVE, CV_OnOff, NULL);
 consvar_t cv_glfakecontrast = CVAR_INIT ("gr_fakecontrast", "Smooth", CV_SAVE, glfakecontrast_cons_t, NULL);
 consvar_t cv_glslopecontrast = CVAR_INIT ("gr_slopecontrast", "Off", CV_SAVE, CV_OnOff, NULL);
+consvar_t cv_glfakecontraststrength = CVAR_INIT("gr_fakecontraststrength", "32", CV_SAVE, 0, NULL);
 
 consvar_t cv_glfiltermode = CVAR_INIT ("gr_filtermode", "Nearest", CV_SAVE|CV_CALL, glfiltermode_cons_t, CV_glfiltermode_OnChange);
 consvar_t cv_glanisotropicmode = CVAR_INIT ("gr_anisotropicmode", "1", CV_SAVE|CV_CALL, glanisotropicmode_cons_t, CV_glanisotropic_OnChange);
@@ -5869,6 +5870,7 @@ void HWR_AddCommands(void)
 	CV_RegisterVar(&cv_glspritebillboarding);
 	CV_RegisterVar(&cv_glfakecontrast);
 	CV_RegisterVar(&cv_glslopecontrast);
+	CV_RegisterVar(&cv_glfakecontraststrength);
 	CV_RegisterVar(&cv_glshearing);
 	CV_RegisterVar(&cv_glshaders);
 

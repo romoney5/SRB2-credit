@@ -3421,10 +3421,10 @@ static inline float P_SegLengthFloat(seg_t *seg)
 
 fixed_t P_LightFromAngle(angle_t angle)
 {
-	const UINT8 contrast = 16;
+	UINT8 contrast = cv_glfakecontraststrength.value;
 
-	return ((FINESINE(angle >> ANGLETOFINESHIFT) / 2 - FRACUNIT / 2)
-		* (contrast * 2));
+	return ((FINESINE(angle >> ANGLETOFINESHIFT) / 2 - FRACUNIT / 4)
+		* (contrast));
 }
 
 

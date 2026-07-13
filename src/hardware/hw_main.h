@@ -97,6 +97,7 @@ extern consvar_t cv_glspritebillboarding;
 extern consvar_t cv_glskydome;
 extern consvar_t cv_glfakecontrast;
 extern consvar_t cv_glslopecontrast;
+extern consvar_t cv_glfakecontraststrength;
 extern consvar_t cv_glbatching;
 extern consvar_t cv_glpaletterendering;
 extern consvar_t cv_glpalettedepth;
