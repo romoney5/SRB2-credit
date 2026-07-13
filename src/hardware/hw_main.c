@@ -755,13 +755,13 @@ static void HWR_SplitWall(sector_t *sector, FOutVector *wallVerts, INT32 texnum,
 			{
 				lightnum = HWR_SideLightLevel(gl_sidedef, pfloor->master->frontsector->lightlevel);
 				colormap = pfloor->master->frontsector->extra_colormap;
-				lightnum = colormap ? lightnum : HWR_CalcWallLight(lightnum, gl_curline);
+				lightnum = HWR_CalcWallLight(lightnum, gl_curline);
 			}
 			else
 			{
 				lightnum = HWR_SideLightLevel(gl_sidedef, *list[i].lightlevel);
 				colormap = *list[i].extra_colormap;
-				lightnum = colormap ? lightnum : HWR_CalcWallLight(lightnum, gl_curline);
+				lightnum = HWR_CalcWallLight(lightnum, gl_curline);
 			}
 		}
 
@@ -1183,7 +1183,7 @@ static void HWR_ProcessSeg(void)
 
 	FUINT lightnum = HWR_SideLightLevel(gl_sidedef, gl_frontsector->lightlevel);
 	extracolormap_t *colormap = gl_frontsector->extra_colormap;
-	lightnum = colormap ? lightnum : HWR_CalcWallLight(lightnum, gl_curline);
+	lightnum = HWR_CalcWallLight(lightnum, gl_curline);
 
 	FSurfaceInfo Surf;
 	Surf.PolyColor.s.alpha = 255;
@@ -1644,7 +1644,7 @@ static void HWR_ProcessSeg(void)
 
 					lightnum = HWR_SideLightLevel(gl_sidedef, rover->master->frontsector->lightlevel);
 					colormap = rover->master->frontsector->extra_colormap;
-					lightnum = colormap ? lightnum : HWR_CalcWallLight(lightnum, gl_curline);
+					lightnum = HWR_CalcWallLight(lightnum, gl_curline);
 
 					Surf.PolyColor.s.alpha = HWR_FogBlockAlpha(HWR_SideLightLevel(gl_sidedef, rover->master->frontsector->lightlevel), rover->master->frontsector->extra_colormap);
 
@@ -1801,7 +1801,7 @@ static void HWR_ProcessSeg(void)
 
 					lightnum = HWR_SideLightLevel(gl_sidedef, rover->master->frontsector->lightlevel);
 					colormap = rover->master->frontsector->extra_colormap;
-					lightnum = colormap ? lightnum : HWR_CalcWallLight(lightnum, gl_curline);
+					lightnum = HWR_CalcWallLight(lightnum, gl_curline);
 
 					Surf.PolyColor.s.alpha = HWR_FogBlockAlpha(rover->master->frontsector->lightlevel, rover->master->frontsector->extra_colormap);
 
