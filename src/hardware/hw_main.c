@@ -142,7 +142,7 @@ void HWR_Lighting(FSurfaceInfo *Surface, INT32 light_level, extracolormap_t *col
 	fade_color.rgba = (colormap != NULL) ? (UINT32)colormap->fadergba : 0xFF000000;
 
 	// Clamp the light level, since it can sometimes go out of the 0-255 range from animations
-	light_level = min(max(light_level, cv_secbright.value), 255);
+	light_level = max(light_level, cv_secbright.value);
 
 	// Crappy backup coloring if you can't do shaders
 	if (!HWR_UseShader())
@@ -466,7 +466,7 @@ static void HWR_RenderPlane(subsector_t *subsector, extrasubsector_t *xsub, bool
 	if (slope)
 		lightlevel = HWR_CalcSlopeLight(lightlevel, slope);
 
-	HWR_Lighting(&Surf, lightlevel, planecolormap);
+	HWR_Lighting(&Surf, lightlevel + cv_glfakecontraststrength.value / 2, planecolormap);
 
 	if (PolyFlags & (PF_Translucent|PF_Fog|PF_Additive|PF_Subtractive|PF_ReverseSubtract|PF_Multiplicative|PF_Environment))
 	{
