@@ -562,6 +562,9 @@
     <ClInclude Include="..\u_list.h" />
     <ClInclude Include="..\mserv.h" />
     <ClInclude Include="..\http-mserv.h" />
+    <ClInclude Include="..\m_videoencoder.h">
+      <Filter>M_Misc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\tmap.nas">
@@ -1118,6 +1121,9 @@
     </ClCompile>
     <ClCompile Include="i_threads.c">
       <Filter>SDLApp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\m_videoencoder.c">
+      <Filter>M_Misc</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
