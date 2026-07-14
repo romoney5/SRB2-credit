@@ -1248,7 +1248,7 @@ static void IdentifyVersion(void)
 			if (ms == 1) \
 				D_AddFile(&startupwadfiles, musicpath); \
 			else if (ms == 0) \
-				I_Error("File "str" has been modified with non-music/sound lumps"); \
+				I_Error("File " str " has been modified with non-music/sound lumps"); \
 		}
 
 		MUSICTEST("music.pk3")
