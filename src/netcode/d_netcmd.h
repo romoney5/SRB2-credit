@@ -125,6 +125,8 @@ extern boolean timedemo_quit;
 
 extern consvar_t cv_freedemocamera;
 
+extern boolean legacycompat;
+
 typedef enum
 {
 	XD_NAMEANDCOLOR = 1,

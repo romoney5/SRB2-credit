@@ -235,6 +235,39 @@ typedef struct
 	UINT8 fileneeded[MAXFILENEEDED]; // is filled with writexxx (byteptr.h)
 } ATTRPACK serverinfo_pak;
 
+// romoney5: 2.1 version
+typedef struct
+{
+	UINT8 version;
+	UINT8 subversion;
+	UINT8 numberofplayer;
+	UINT8 maxplayer;
+	UINT8 gametype;
+	UINT8 modifiedgame;
+	UINT8 cheatsenabled;
+	UINT8 flags;
+	UINT8 fileneedednum;
+	SINT8 adminplayer;
+	tic_t time;
+	tic_t leveltime;
+	char servername[MAXSERVERNAME];
+	char mapname[8];
+	char maptitle[33];
+	unsigned char mapmd5[16];
+	UINT8 actnum;
+	UINT8 iszone;
+	UINT8 fileneeded[MAXFILENEEDED]; // is filled with writexxx (byteptr.h)
+
+	UINT8 padding[1324 - 1028]; // i promise i know what i'm doing..
+} ATTRPACK legacy_serverinfo_pak;
+
+// c hax
+typedef union
+{
+	serverinfo_pak serverinfo;
+	legacy_serverinfo_pak legacy_serverinfo;
+} converter_serverinfo;
+
 typedef struct
 {
 	char reason[255];

@@ -422,6 +422,8 @@ boolean splitscreen = false;
 boolean circuitmap = false;
 INT32 adminplayers[MAXPLAYERS];
 
+boolean legacycompat = true;
+
 /// \warning Keep this up-to-date if you add/remove/rename net text commands
 const char *netxcmdnames[MAXNETXCMD - 1] =
 {

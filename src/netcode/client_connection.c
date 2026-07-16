@@ -1885,6 +1885,86 @@ void CL_ConnectToServer(void)
   * \note What happens if the packet comes from a client or something like that?
   *
   */
+static serverinfo_pak *ConvertServerInfo(converter_serverinfo info)
+{
+	/*
+	UINT8 version;
+	UINT8 subversion;
+	UINT8 numberofplayer;
+	UINT8 maxplayer;
+	UINT8 gametype;
+	UINT8 modifiedgame;
+	UINT8 cheatsenabled;
+	UINT8 flags;
+	UINT8 fileneedednum;
+	SINT8 adminplayer;
+	tic_t time;
+	tic_t leveltime;
+	char servername[MAXSERVERNAME];
+	char mapname[8];
+	char maptitle[33];
+	unsigned char mapmd5[16];
+	UINT8 actnum;
+	UINT8 iszone;
+	UINT8 fileneeded[MAXFILENEEDED]; // is filled with writexxx (byteptr.h)
+	*/
+	// to
+	/*
+	UINT8 _255;
+	UINT8 packetversion;
+	char  application[MAXAPPLICATION];
+	UINT8 version;
+	UINT8 subversion;
+	UINT8 numberofplayer;
+	UINT8 maxplayer;
+	UINT8 refusereason; // 0: joinable, REFUSE enum
+	char gametypename[24];
+	UINT8 modifiedgame;
+	UINT8 cheatsenabled;
+	UINT8 flags;
+	UINT8 fileneedednum;
+	tic_t time;
+	tic_t leveltime;
+	char servername[MAXSERVERNAME];
+	char mapname[8];
+	char maptitle[33];
+	unsigned char mapmd5[16];
+	UINT8 actnum;
+	UINT8 iszone;
+	char httpsource[MAX_MIRROR_LENGTH];
+	UINT8 fileneeded[MAXFILENEEDED]; // is filled with writexxx (byteptr.h)
+	*/
+
+	legacy_serverinfo_pak legacy = info.legacy_serverinfo;
+	serverinfo_pak *out = Z_Malloc(sizeof(serverinfo_pak), PU_STATIC, NULL);
+
+	out->_255 = 255;
+	out->packetversion = PACKETVERSION;
+	strncpy(out->application, SRB2APPLICATION, MAXAPPLICATION);
+	out->version = VERSION;
+	out->subversion = SUBVERSION;
+	out->numberofplayer = legacy.numberofplayer;
+	out->maxplayer = legacy.maxplayer;
+	out->refusereason = 0;
+	strncpy(out->gametypename, "???", 24);
+	out->modifiedgame = legacy.modifiedgame;
+	out->cheatsenabled = legacy.cheatsenabled;
+	out->flags = legacy.flags;
+	out->fileneedednum = legacy.fileneedednum;
+	out->time = legacy.time;
+	out->leveltime = legacy.leveltime;
+	strncpy(out->servername, legacy.servername, MAXSERVERNAME);
+	strncpy(out->mapname, legacy.mapname, 8);
+	strncpy(out->maptitle, legacy.maptitle, 33);
+	memcpy(out->mapmd5, legacy.mapmd5, 16); // unsigned char, though?
+	out->actnum = legacy.actnum;
+	out->iszone = legacy.iszone;
+	out->httpsource[0] = '\0';
+	memcpy(out->fileneeded, legacy.fileneeded, MAXFILENEEDED); // UINT8, though?
+
+	return out;
+}
+
 void PT_ServerInfo(SINT8 node)
 {
 	// compute ping in ms
@@ -1897,6 +1977,20 @@ void PT_ServerInfo(SINT8 node)
 		[sizeof netbuffer->u.serverinfo.application - 1] = '\0';
 	netbuffer->u.serverinfo.gametypename
 		[sizeof netbuffer->u.serverinfo.gametypename - 1] = '\0';
+
+	if (legacycompat) // romoney5 TODO
+	{
+		converter_serverinfo info;
+		info.serverinfo = netbuffer->u.serverinfo;
+
+		if (info.legacy_serverinfo.version == 201) // now we're talking
+		{
+			serverinfo_pak *out = ConvertServerInfo(info);
+			memcpy(&netbuffer->u.serverinfo, out, sizeof(serverinfo_pak));
+
+			Z_Free(out);
+		}
+	}
 
 	SL_InsertServer(&netbuffer->u.serverinfo, node);
 }
