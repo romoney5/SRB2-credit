@@ -189,9 +189,9 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <DisableSpecificWarnings>4244;4267;4146;4003</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4244;4267;4146;4003;4996</DisableSpecificWarnings>
       <PreprocessorDefinitions>HAVE_CURL;HAVE_THREADS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\libs\curl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\libs\curl\include;..\..\libs\ffmpeg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>false</TreatWarningAsError>
     </ClCompile>
     <CustomBuild>
@@ -204,8 +204,10 @@
       <Outputs />
     </CustomBuild>
     <Link>
-      <AdditionalDependencies>libcurl.dll.a;libz32.a;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\libs\zlib\win32;..\..\libs\curl\lib32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libcurl.dll.a;libz32.a;avcodec.lib;avdevice.lib;avfilter.lib;avformat.lib;avutil.lib;swresample.lib;swscale.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\libs\zlib\win32;..\..\libs\curl\lib32;..\..\libs\libavcodec\lib32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <OptimizeReferences>true</OptimizeReferences>
+      <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -318,6 +320,8 @@
     <ClInclude Include="..\hardware\hw_md2load.h" />
     <ClInclude Include="..\hardware\hw_md3load.h" />
     <ClInclude Include="..\hardware\hw_model.h" />
+    <ClInclude Include="..\movie_decode.h" />
+    <ClInclude Include="..\movie_decode_libav.h" />
     <ClInclude Include="..\u_list.h" />
     <ClInclude Include="..\hu_stuff.h" />
     <ClInclude Include="..\info.h" />
@@ -499,7 +503,10 @@
     <ClCompile Include="..\hardware\hw_shaders.c" />
     <ClCompile Include="..\hardware\r_opengl\r_opengl.c" />
     <ClCompile Include="..\lua_colorlib.c" />
+    <ClCompile Include="..\lua_movielib.c" />
     <ClCompile Include="..\lua_randomlib.c" />
+    <ClCompile Include="..\movie_decode_dummy.c" />
+    <ClCompile Include="..\movie_decode_libav.c" />
     <ClCompile Include="..\r_bbox.c" />
     <ClCompile Include="..\u_list.c" />
     <ClCompile Include="..\hu_stuff.c" />
