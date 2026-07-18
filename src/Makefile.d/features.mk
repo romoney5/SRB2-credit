@@ -44,6 +44,28 @@ HAVE_MINIUPNPC=1
 opts+=-DHAVE_MINIUPNPC
 endif
 
+ifdef HAVE_LIBAV
+AVCODEC_PKGCONFIG?=libavcodec
+$(eval $(call Use_pkg_config,AVCODEC))
+
+AVFORMAT_PKGCONFIG?=libavformat
+$(eval $(call Use_pkg_config,AVFORMAT))
+
+AVUTIL_PKGCONFIG?=libavutil
+$(eval $(call Use_pkg_config,AVUTIL))
+
+SWRESAMPLE_PKGCONFIG?=libswresample
+$(eval $(call Use_pkg_config,SWRESAMPLE))
+
+SWSCALE_PKGCONFIG?=libswscale
+$(eval $(call Use_pkg_config,SWSCALE))
+
+opts+=-DHAVE_LIBAV
+sources+=movie_decode_libav.c lua_movielib.c
+else
+sources+=movie_decode_dummy.c
+endif
+
 # (Valgrind is a memory debugger.)
 ifdef VALGRIND
 VALGRIND_PKGCONFIG?=valgrind

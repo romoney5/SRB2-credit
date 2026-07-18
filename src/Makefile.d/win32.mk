@@ -104,3 +104,26 @@ lib:=../libs/miniupnpc
 MINIUPNPC_opts:=-I$(lib)/include -DMINIUPNP_STATICLIB
 MINIUPNPC_libs:=-L$(lib)/mingw$(32) -lminiupnpc -lws2_32 -liphlpapi
 $(eval $(call _set,MINIUPNPC))
+
+lib:=../libs/ffmpeg
+#$(eval $(call _set,FFMPEG))
+
+AVCODEC_opts:=-I$(lib)/include
+AVCODEC_libs:=-L$(lib)/lib$(32) -lavcodec-60
+$(eval $(call _set,AVCODEC))
+
+AVFORMAT_opts:=-I$(lib)/include
+AVFORMAT_libs:=-L$(lib)/lib$(32) -lavformat-60
+$(eval $(call _set,AVFORMAT))
+
+AVUTIL_opts:=-I$(lib)/include
+AVUTIL_libs:=-L$(lib)/lib$(32) -lavutil-58
+$(eval $(call _set,AVUTIL))
+
+SWRESAMPLE_opts:=-I$(lib)/include
+SWRESAMPLE_libs:=-L$(lib)/lib$(32) -lswresample-4
+$(eval $(call _set,SWRESAMPLE))
+
+SWSCALE_opts:=-I$(lib)/include
+SWSCALE_libs:=-L$(lib)/lib$(32) -lswscale-7
+$(eval $(call _set,SWSCALE))

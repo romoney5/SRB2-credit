@@ -435,7 +435,7 @@ static poly_t *CutOutSubsecPoly(seg_t *lseg, INT32 count, poly_t *poly)
 		p1 = {0, 0, 0}, p2 = {0, 0, 0};
 	float fracs = 0.0f;
 
-	fdivline_t cutseg; // x, y, dx, dy as start of node_t struct
+	fdivline_t cutseg; // x, y, dx, dy as start of bspnode_t struct
 
 	poly_t *temppoly;
 

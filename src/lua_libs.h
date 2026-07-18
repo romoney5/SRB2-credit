@@ -131,3 +131,6 @@ int LUA_InterceptLib(lua_State *L);
 int LUA_MatrixLib(lua_State *L);
 int LUA_QuaternionLib(lua_State *L);
 int LUA_VectorLib(lua_State *L);
+#ifdef HAVE_LIBAV
+int LUA_MovieLib(lua_State *L);
+#endif

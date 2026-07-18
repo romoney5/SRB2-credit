@@ -82,6 +82,7 @@
 #include "../lua_script.h"
 #include "../lua_libs.h"
 #include "../lua_hook.h"
+#include "../movie_decode.h"
 #include "sdlmain.h"
 #include "../netcode/tic_command.h" // simulated_lag
 #ifdef HWRENDER
@@ -1580,6 +1581,9 @@ boolean VID_CheckRenderer(void)
 
 		if (!contextcreated)
 			Impl_CreateContext();
+
+		if (activemovie)
+			MovieDecode_SetImageFormat(activemovie, (rendermode == render_soft));
 
 		setrenderneeded = 0;
 	}

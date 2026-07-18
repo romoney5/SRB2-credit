@@ -27,6 +27,8 @@
 #include "p_setup.h" // levelflats
 #include "byteptr.h"
 #include "dehacked.h"
+#include "movie_decode.h"
+#include "d_main.h"
 
 #ifdef HWRENDER
 #include "hardware/hw_glob.h" // HWR_LoadMapTextures
@@ -55,6 +57,8 @@ INT32 *texturewidth;
 fixed_t *textureheight; // needed for texture pegging
 
 INT32 *texturetranslation;
+
+INT32 movietexturenum = -1;
 
 // Painfully simple texture id cacheing to make maps load faster. :3
 static struct {
@@ -636,7 +640,74 @@ INT32 R_GetTextureNum(INT32 texnum)
 void R_CheckTextureCache(INT32 tex)
 {
 	if (!texturecache[tex])
+	{
+		if (tex == movietexturenum)
+		{
+			textures[tex]->width = 64;
+			textures[tex]->height = 64;
+			texturewidth[tex] = 64;
+			textureheight[tex] = 64;
+		}
+
 		R_GenerateTexture(tex);
+	}
+
+	if (tex == movietexturenum)
+		R_CheckMovieTextureCache(activemovie, tex);
+}
+
+void R_CheckMovieTextureCache(movie_t *movie, INT32 texnum)
+{
+	if (!movie)
+		return;
+
+	UINT8 *image = MovieDecode_GetImage(movie);
+	if (!image)
+		return;
+
+	if (texturecache[texnum])
+		Z_Free(texturecache[texnum]);
+
+	INT32 width, height;
+	MovieDecode_GetDimensions(movie, &width, &height);
+
+	texture_t *texture = textures[texnum];
+
+	texture->width = width;
+	texture->height = height;
+	texture->type = TEXTURETYPE_TEXTURE;
+	texture->transparency = true;
+	texture->patchcount = 1;
+	texture->flip = 0;
+
+	texturewidth[texnum] = width;
+	textureheight[texnum] = height << FRACBITS;
+
+	softwarepatch_t *swpatch = Z_Malloc(sizeof(softwarepatch_t) + MovieDecode_GetPatchBytes(movie), PU_STATIC, NULL);
+	swpatch->width = width;
+	swpatch->height = height;
+	swpatch->leftoffset = 0;
+	swpatch->topoffset = 0;
+	memcpy(swpatch->columnofs, image, MovieDecode_GetPatchBytes(movie));
+
+	size_t total_posts = 0;
+	size_t total_pixels = 0;
+	Patch_CalcDataSizes(swpatch, &total_pixels, &total_posts);
+
+	size_t blocksize = (sizeof(column_t) * texture->width) + (sizeof(post_t) * total_posts) + (sizeof(UINT8) * total_pixels);
+
+	UINT8 *block = Z_Calloc(blocksize, PU_STATIC, &texturecache[texnum]);
+
+	column_t *columns = (column_t *)(block + (sizeof(UINT8) * total_pixels));
+	post_t *posts = (post_t *)(block + (sizeof(UINT8) * total_pixels) + (sizeof(column_t) * texture->width));
+
+	texturecolumns[texnum] = columns;
+
+	Patch_MakeColumns(swpatch, texture->width, texture->width, block, columns, posts, 0);
+
+	Z_Free(swpatch);
+
+	Z_ChangeTag(block, PU_CACHE);
 }
 
 column_t *R_GetColumn(fixed_t tex, INT32 col)
@@ -1053,6 +1124,8 @@ static INT32 R_DefineTextures(INT32 i, UINT16 w)
 static void R_FinishLoadingTextures(INT32 add)
 {
 	numtextures += add;
+
+	movietexturenum = R_CheckTextureNumForName("MOVIE", TEXTURETYPE_TEXTURE);
 
 #ifdef HWRENDER
 	if (rendermode == render_opengl)
