@@ -204,7 +204,7 @@
       <Outputs />
     </CustomBuild>
     <Link>
-      <AdditionalDependencies>libcurl.dll.a;libz32.a;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libcurl.dll.a;libz32.a;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\..\libs\zlib\win32;..\..\libs\curl\lib32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -318,6 +318,13 @@
     <ClInclude Include="..\hardware\hw_md2load.h" />
     <ClInclude Include="..\hardware\hw_md3load.h" />
     <ClInclude Include="..\hardware\hw_model.h" />
+    <ClInclude Include="..\i_midimusic.h" />
+    <ClInclude Include="..\memio.h" />
+    <ClInclude Include="..\midifallback.h" />
+    <ClInclude Include="..\midifile.h" />
+    <ClInclude Include="..\midiout.h" />
+    <ClInclude Include="..\m_array.h" />
+    <ClInclude Include="..\m_io.h" />
     <ClInclude Include="..\u_list.h" />
     <ClInclude Include="..\hu_stuff.h" />
     <ClInclude Include="..\info.h" />
@@ -498,7 +505,13 @@
     <ClCompile Include="..\hardware\hw_model.c" />
     <ClCompile Include="..\hardware\hw_shaders.c" />
     <ClCompile Include="..\hardware\r_opengl\r_opengl.c" />
+    <ClCompile Include="..\i_midimusic.c" />
     <ClCompile Include="..\lua_colorlib.c" />
+    <ClCompile Include="..\memio.c" />
+    <ClCompile Include="..\midifallback.c" />
+    <ClCompile Include="..\midifile.c" />
+    <ClCompile Include="..\midiout.c" />
+    <ClCompile Include="..\m_io.c" />
     <ClCompile Include="..\r_bbox.c" />
     <ClCompile Include="..\u_list.c" />
     <ClCompile Include="..\hu_stuff.c" />
