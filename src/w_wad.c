@@ -2452,7 +2452,7 @@ void *W_CachePatchNumPwad(UINT16 wad, UINT16 lump, INT32 tag)
 	return (void *)patch;
 }
 
-void *W_CachePatchNum(lumpnum_t lumpnum, INT32 tag)
+__declspec(dllexport) void *W_CachePatchNum(lumpnum_t lumpnum, INT32 tag)
 {
 	return W_CachePatchNumPwad(WADFILENUM(lumpnum),LUMPNUM(lumpnum),tag);
 }

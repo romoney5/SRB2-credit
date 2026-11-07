@@ -28,8 +28,11 @@ typedef enum
 	/// OpenGL
 	render_opengl = 2,
 
+	/// LOVE2D rendering
+	render_love2d = 3,
+
 	/// Dedicated
-	render_none = 3  // for dedicated server
+	render_none = 4,  // for dedicated server
 } rendermode_t;
 
 /**	\brief current render mode
@@ -68,6 +71,16 @@ INT32 VID_NumModes(void);
 	\return	vidmode closest to w : h
 */
 INT32 VID_GetModeForSize(INT32 w, INT32 h);
+
+/**	\brief	The VID_SetResolution function
+
+	Sets window resolution
+
+
+	\param	width	target window width
+	\param	height	target window height
+*/
+__declspec(dllexport) void VID_SetResolution(INT32 width, INT32 height);
 
 
 /**	\brief	The VID_SetMode function

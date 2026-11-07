@@ -103,15 +103,15 @@ unsigned char mapmd5[16];
 //
 
 boolean udmf;
-size_t numvertexes, numsegs, numsectors, numsubsectors, numnodes, numlines, numsides, nummapthings;
+__declspec(dllexport) size_t numvertexes, numsegs, numsectors, numsubsectors, numnodes, numlines, numsides, nummapthings;
 vertex_t *vertexes;
-seg_t *segs;
-sector_t *sectors;
+__declspec(dllexport) seg_t *segs;
+__declspec(dllexport) sector_t *sectors;
 subsector_t *subsectors;
 node_t *nodes;
 line_t *lines;
 side_t *sides;
-mapthing_t *mapthings;
+__declspec(dllexport) mapthing_t *mapthings;
 sector_t *spawnsectors;
 line_t *spawnlines;
 side_t *spawnsides;

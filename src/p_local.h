@@ -106,7 +106,7 @@ typedef struct camera_s
 	fixed_t momx, momy, momz;
 } camera_t;
 
-extern camera_t camera, camera2;
+__declspec(dllexport) extern camera_t camera, camera2;
 extern consvar_t cv_cam_dist, cv_cam_still, cv_cam_height;
 extern consvar_t cv_cam_speed, cv_cam_rotate, cv_cam_rotspeed, cv_cam_turnmultiplier, cv_cam_gamepadxsensitivity, cv_cam_gamepadysensitivity, cv_cam_orbit, cv_cam_adjust;
 

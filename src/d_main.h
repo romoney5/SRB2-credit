@@ -27,8 +27,9 @@ extern boolean usehome; //Alam: which path?
 extern const char *pandf; //Alam: how to path?
 extern char srb2path[256]; //Alam: SRB2's Home
 
+__declspec(dllexport) void D_RunFrame(void);
 // the infinite loop of D_SRB2Loop() called from win_main for windows version
-void D_SRB2Loop(void) FUNCNORETURN;
+__declspec(dllexport) void D_SRB2Loop(void) FUNCNORETURN;
 
 //
 // D_SRB2Main()
@@ -36,10 +37,10 @@ void D_SRB2Loop(void) FUNCNORETURN;
 // calls all startup code, parses command line options.
 // If not overrided by user input, calls D_AdvanceDemo.
 //
-void D_SRB2Main(void);
+__declspec(dllexport) void D_SRB2Main(void);
 
 // Called by IO functions when input is detected.
-void D_PostEvent(const event_t *ev);
+__declspec(dllexport) void D_PostEvent(const event_t *ev);
 void D_ProcessEvents(void);
 
 const char *D_Home(void);

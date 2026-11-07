@@ -54,30 +54,30 @@ extern size_t numspritelumps, max_spritelumps;
 //
 extern boolean udmf;
 
-extern size_t numsprites;
-extern spritedef_t *sprites;
+__declspec(dllexport) extern size_t numsprites;
+__declspec(dllexport) extern spritedef_t *sprites;
 
-extern size_t numvertexes;
+__declspec(dllexport) extern size_t numvertexes;
 extern vertex_t *vertexes;
 
-extern size_t numsegs;
-extern seg_t *segs;
+__declspec(dllexport) extern size_t numsegs;
+__declspec(dllexport) extern seg_t *segs;
 
-extern size_t numsectors;
-extern sector_t *sectors;
+__declspec(dllexport) extern size_t numsectors;
+__declspec(dllexport) extern sector_t *sectors;
 extern sector_t *spawnsectors;
 
-extern size_t numsubsectors;
+__declspec(dllexport) extern size_t numsubsectors;
 extern subsector_t *subsectors;
 
-extern size_t numnodes;
+__declspec(dllexport) extern size_t numnodes;
 extern node_t *nodes;
 
-extern size_t numlines;
+__declspec(dllexport) extern size_t numlines;
 extern line_t *lines;
 extern line_t *spawnlines;
 
-extern size_t numsides;
+__declspec(dllexport) extern size_t numsides;
 extern side_t *sides;
 extern side_t *spawnsides;
 

@@ -54,8 +54,8 @@ INT32 P_AddLevelFlat(const char *flatname, levelflat_t *levelflat);
 INT32 P_AddLevelFlatRuntime(const char *flatname);
 INT32 P_CheckLevelFlat(const char *flatname);
 
-extern size_t nummapthings;
-extern mapthing_t *mapthings;
+__declspec(dllexport) extern size_t nummapthings;
+__declspec(dllexport) extern mapthing_t *mapthings;
 
 void P_SetupLevelSky(INT32 skynum, boolean global);
 #ifdef SCANTHINGS

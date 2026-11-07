@@ -2467,7 +2467,7 @@ static void I_Fork(void)
 }
 #endif/*NEWSIGNALHANDLER*/
 
-INT32 I_StartupSystem(void)
+__declspec(dllexport) INT32 I_StartupSystem(void)
 {
 	SDL_version SDLcompiled;
 	SDL_version SDLlinked;
@@ -2498,7 +2498,7 @@ INT32 I_StartupSystem(void)
 //
 // I_Quit
 //
-void I_Quit(void)
+__declspec(dllexport) void I_Quit(void)
 {
 	static SDL_bool quiting = SDL_FALSE;
 
@@ -3352,7 +3352,7 @@ void I_SetTextInputMode(boolean active)
 		SDL_StopTextInput();
 }
 
-boolean I_GetTextInputMode(void)
+__declspec(dllexport) boolean I_GetTextInputMode(void)
 {
 	return SDL_IsTextInputActive();
 }

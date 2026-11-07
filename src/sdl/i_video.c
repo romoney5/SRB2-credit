@@ -91,6 +91,7 @@
 #include "hwsym_sdl.h"
 #include "ogl_sdl.h"
 #endif
+#include "../r_love2d.h"
 
 // maximum number of windowed modes (see windowedModes[][])
 #define MAXWINMODES (22)
@@ -103,6 +104,7 @@ static INT32 numVidModes = -1;
 */
 static char vidModeName[33][32]; // allow 33 different modes
 
+//rendermode_t rendermode = render_love2d;
 rendermode_t rendermode = render_soft;
 rendermode_t chosenrendermode = render_none; // set by command line arguments
 
@@ -447,6 +449,8 @@ void I_UpdateMouseGrab(void)
 
 void I_SetMouseGrab(boolean grab)
 {
+	LOVE_SetMouseGrab(grab);
+
 	if (grab)
 		SDLdoGrabMouse();
 	else
@@ -1319,6 +1323,9 @@ void I_FinishUpdate(void)
 
 	if (rendermode == render_soft && screens[0])
 	{
+		// TODO: this shouldn't be entirely disabled
+		LOVE_DrawSoftwareBuffer(screens[0], vid.width, vid.height);
+		/*
 		if (!bufSurface) //Double-Check
 		{
 			Impl_VideoSetupSDLBuffer();
@@ -1336,6 +1343,7 @@ void I_FinishUpdate(void)
 		SDL_RenderClear(renderer);
 		SDL_RenderCopy(renderer, texture, &src_rect, NULL);
 		SDL_RenderPresent(renderer);
+		*/
 	}
 #ifdef HWRENDER
 	else if (rendermode == render_opengl)
@@ -1351,6 +1359,10 @@ void I_FinishUpdate(void)
 		OglSdlFinishUpdate(cv_vidwait.value);
 	}
 #endif
+	else if (rendermode == render_love2d)
+	{
+		LOVE_OnRender();
+	}
 
 	exposevideo = SDL_FALSE;
 }
@@ -1629,21 +1641,14 @@ static UINT32 VID_GetRefreshRate(void)
 	return m.refresh_rate;
 }
 
-INT32 VID_SetMode(INT32 modeNum)
+__declspec(dllexport) void VID_SetResolution(INT32 width, INT32 height)
 {
-	SDLdoUngrabMouse();
-
 	vid.recalc = 1;
 	vid.bpp = 1;
 
-	if (modeNum < 0)
-		modeNum = 0;
-	if (modeNum >= MAXWINMODES)
-		modeNum = MAXWINMODES-1;
-
-	vid.width = windowedModes[modeNum][0];
-	vid.height = windowedModes[modeNum][1];
-	vid.modenum = modeNum;
+	vid.width = width;
+	vid.height = height;
+	vid.modenum = 0;
 
 	//Impl_SetWindowName("SRB2 "VERSIONSTRING);
 	src_rect.w = vid.width;
@@ -1652,6 +1657,20 @@ INT32 VID_SetMode(INT32 modeNum)
 	refresh_rate = VID_GetRefreshRate();
 
 	VID_CheckRenderer();
+}
+
+INT32 VID_SetMode(INT32 modeNum)
+{
+	SDLdoUngrabMouse();
+
+	if (modeNum < 0)
+		modeNum = 0;
+	if (modeNum >= MAXWINMODES)
+		modeNum = MAXWINMODES - 1;
+
+	VID_SetResolution(windowedModes[modeNum][0], windowedModes[modeNum][1]);
+	vid.modenum = modeNum;
+
 	return SDL_TRUE;
 }
 

@@ -432,18 +432,19 @@ static void F_DoColormapWipe(fademask_t *fademask, UINT8 *colormap)
   */
 void F_WipeStartScreen(void)
 {
-	if (rendermode == render_none)
-		return;
 #ifndef NOWIPE
 #ifdef HWRENDER
-	if(rendermode != render_soft)
+	if (rendermode == render_opengl)
 	{
 		HWR_StartScreenWipe();
 		return;
 	}
 #endif
-	wipe_scr_start = screens[3];
-	I_ReadScreen(wipe_scr_start);
+	if (rendermode == render_soft)
+	{
+		wipe_scr_start = screens[3];
+		I_ReadScreen(wipe_scr_start);
+	}
 #endif
 }
 
@@ -451,20 +452,20 @@ void F_WipeStartScreen(void)
   */
 void F_WipeEndScreen(void)
 {
-	if (rendermode == render_none)
-		return;
-
 #ifndef NOWIPE
 #ifdef HWRENDER
-	if(rendermode != render_soft)
+	if (rendermode == render_opengl)
 	{
 		HWR_EndScreenWipe();
 		return;
 	}
 #endif
-	wipe_scr_end = screens[4];
-	I_ReadScreen(wipe_scr_end);
-	V_DrawBlock(0, 0, 0, vid.width, vid.height, wipe_scr_start);
+	if (rendermode == render_soft)
+	{
+		wipe_scr_end = screens[4];
+		I_ReadScreen(wipe_scr_end);
+		V_DrawBlock(0, 0, 0, vid.width, vid.height, wipe_scr_start);
+	}
 #endif
 }
 
@@ -586,11 +587,17 @@ void F_RunWipe(UINT8 wipetype, boolean drawMenu)
 			}
 			else
 #endif
+			if (rendermode == render_soft)
 			{
 				UINT8 *colormap = fadecolormap;
 				if (wipestyleflags & WSF_TOWHITE)
 					colormap += (FADECOLORMAPROWS * 256);
 				F_DoColormapWipe(fmask, colormap);
+			}
+			else if (rendermode == render_love2d)
+			{
+				 // love2d renderer TODO
+				return;
 			}
 
 			// Draw the title card above the wipe
@@ -606,7 +613,15 @@ void F_RunWipe(UINT8 wipetype, boolean drawMenu)
 			}
 			else
 #endif
+			if (rendermode == render_soft)
+			{
 				F_DoWipe(fmask);
+			}
+			else if (rendermode == render_love2d)
+			{
+				// love2d renderer TODO
+				return;
+			}
 		}
 
 		I_OsPolling();

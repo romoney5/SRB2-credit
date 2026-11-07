@@ -234,7 +234,7 @@ void *W_CachePatchName(const char *name, INT32 tag);
 void *W_CachePatchLongName(const char *name, INT32 tag);
 
 void *W_CachePatchNumPwad(UINT16 wad, UINT16 lump, INT32 tag);
-void *W_CachePatchNum(lumpnum_t lumpnum, INT32 tag);
+__declspec(dllexport) void *W_CachePatchNum(lumpnum_t lumpnum, INT32 tag);
 void *W_GetCachedPatchNumPwad(UINT16 wad, UINT16 lump);
 
 boolean W_ReadPatchHeaderPwad(UINT16 wadnum, UINT16 lumpnum, INT16 *width, INT16 *height, INT16 *topoffset, INT16 *leftoffset);

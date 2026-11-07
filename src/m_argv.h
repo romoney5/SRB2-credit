@@ -17,9 +17,9 @@
 //
 // MISC
 //
-extern INT32 myargc;
-extern char **myargv;
-extern boolean myargmalloc;
+__declspec(dllexport) extern INT32 myargc;
+__declspec(dllexport) extern char **myargv;
+__declspec(dllexport) extern boolean myargmalloc;
 
 // Looks for an srb2:// (or similar) URL passed in as an argument and returns the IP to connect to if found.
 const char *M_GetUrlProtocolArg(void);

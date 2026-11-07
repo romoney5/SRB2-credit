@@ -20,15 +20,15 @@
 
 /**	\brief number of arg
 */
-INT32 myargc;
+__declspec(dllexport) INT32 myargc;
 
 /**	\brief string table
 */
-char **myargv;
+__declspec(dllexport) char **myargv;
 
 /** \brief did we alloc myargv ourselves?
 */
-boolean myargmalloc = false;
+__declspec(dllexport) boolean myargmalloc = false;
 
 /**	\brief founded the parm
 */

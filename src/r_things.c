@@ -75,7 +75,7 @@ spriteinfo_t spriteinfo[NUMSPRITES];
 //
 
 // variables used to look up and range check thing_t sprites patches
-spritedef_t *sprites;
+__declspec(dllexport) spritedef_t *sprites;
 size_t numsprites;
 
 static spriteframe_t sprtemp[MAXFRAMENUM];

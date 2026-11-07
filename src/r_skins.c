@@ -149,7 +149,7 @@ UINT16 P_GetSkinSprite2(skin_t *skin, UINT16 spr2, player_t *player)
 }
 
 // Gets the spritedef of a skin animation
-spritedef_t *P_GetSkinSpritedef(skin_t *skin, UINT16 spr2)
+__declspec(dllexport) spritedef_t *P_GetSkinSpritedef(skin_t *skin, UINT16 spr2)
 {
 	if (!skin)
 		return NULL;

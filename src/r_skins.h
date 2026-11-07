@@ -114,7 +114,7 @@ UINT16 P_GetStateSprite2(state_t *state);
 UINT16 P_GetSprite2StateFrame(state_t *state);
 UINT16 P_GetSkinSprite2(skin_t *skin, UINT16 spr2, player_t *player);
 UINT16 P_ApplySuperFlagToSprite2(UINT16 spr2, mobj_t *mobj);
-spritedef_t *P_GetSkinSpritedef(skin_t *skin, UINT16 spr2);
+__declspec(dllexport) spritedef_t *P_GetSkinSpritedef(skin_t *skin, UINT16 spr2);
 spriteinfo_t *P_GetSkinSpriteInfo(skin_t *skin, UINT16 spr2);
 boolean P_IsValidSprite2(skin_t *skin, UINT16 spr2);
 boolean P_IsStateSprite2Super(state_t *state);

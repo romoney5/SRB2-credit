@@ -612,12 +612,12 @@ void I_FreeSfx(sfxinfo_t *sfx)
 			// I believe this should ensure the sound is not playing when we free it
 			abufdata = chunk->abuf;
 		}
-		Mix_FreeChunk(sfx->data);
-		if (abufdata)
+		/*if (abufdata)
 		{
-			// I'm going to assume we used Z_Malloc to allocate this data.
-			Z_Free(abufdata);
-		}
+			// I'm going to assume we used malloc to allocate this data.
+			free(abufdata);
+		}*/
+		Mix_FreeChunk(sfx->data);
 	}
 	sfx->data = NULL;
 	sfx->lumpnum = LUMPERROR;

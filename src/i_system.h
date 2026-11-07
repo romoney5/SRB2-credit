@@ -103,7 +103,7 @@ ticcmd_t *I_BaseTiccmd2(void);
 
 /**	\brief Called by M_Responder when quit is selected, return exit code 0
 */
-void I_Quit(void) FUNCNORETURN;
+__declspec(dllexport) void I_Quit(void) FUNCNORETURN;
 
 typedef enum
 {
@@ -231,7 +231,7 @@ void I_RemoveExitFunc(void (*func)());
 
 /**	\brief Setup signal handler, plus stuff for trapping errors and cleanly exit.
 */
-INT32 I_StartupSystem(void);
+__declspec(dllexport) INT32 I_StartupSystem(void);
 
 /**	\brief Shutdown systems
 */
@@ -345,6 +345,6 @@ void I_SetTextInputMode(boolean active);
 
 /** \brief Retrieves current text input mode.
  */
-boolean I_GetTextInputMode(void);
+__declspec(dllexport) boolean I_GetTextInputMode(void);
 
 #endif

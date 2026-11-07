@@ -9806,7 +9806,7 @@ notrealplayer:
 // P_MoveCamera: make sure the camera is not outside the world and looks at the player avatar
 //
 
-camera_t camera, camera2; // Two cameras.. one for split!
+__declspec(dllexport) camera_t camera, camera2; // Two cameras.. one for split!
 
 static void CV_CamRotate_OnChange(void)
 {
@@ -10251,7 +10251,7 @@ boolean P_MoveChaseCamera(player_t *player, camera_t *thiscam, boolean resetcall
 	if (camorbit) //Sev here, I'm guessing this is where orbital cam lives
 	{
 #ifdef HWRENDER
-		if (rendermode == render_opengl && !cv_glshearing.value)
+		if (rendermode != render_soft && !cv_glshearing.value)
 			distxy = FixedMul(dist, FINECOSINE((focusaiming>>ANGLETOFINESHIFT) & FINEMASK));
 		else
 #endif

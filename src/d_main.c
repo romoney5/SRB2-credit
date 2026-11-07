@@ -99,6 +99,8 @@
 #include "lua_script.h"
 #include "lua_httplib.h"
 
+#include "r_love2d.h"
+
 // Version numbers for netplay :upside_down_face:
 int    VERSION;
 int SUBVERSION;
@@ -162,7 +164,7 @@ boolean dedicated = false;
 // D_PostEvent
 // Called by the I/O functions when input is detected
 //
-void D_PostEvent(const event_t *ev)
+__declspec(dllexport) void D_PostEvent(const event_t *ev)
 {
 	events[eventhead] = *ev;
 	eventhead = (eventhead+1) & (MAXEVENTS-1);
@@ -495,12 +497,14 @@ static void D_Display(void)
 					topleft = screens[0] + viewwindowy*vid.width + viewwindowx;
 					objectsdrawn = 0;
 	#ifdef HWRENDER
-					if (rendermode != render_soft)
+					if (rendermode == render_opengl)
 						HWR_RenderPlayerView(0, &players[displayplayer]);
 					else
 	#endif
-					if (rendermode != render_none)
+					if (rendermode == render_soft)
 						R_RenderPlayerView(&players[displayplayer]);
+					else if (rendermode == render_love2d)
+						LOVE_RenderPlayerView(&players[displayplayer]);
 				}
 
 				// render the second screen
@@ -513,7 +517,7 @@ static void D_Display(void)
 						HWR_RenderPlayerView(1, &players[secondarydisplayplayer]);
 					else
 #endif
-					if (rendermode != render_none)
+					if (rendermode == render_soft)
 					{
 						topleft = screens[0] + viewwindowy*vid.width + viewwindowx;
 
@@ -700,10 +704,9 @@ static void D_Display(void)
 
 tic_t rendergametic;
 
-static void D_RunFrame(void);
 static tic_t oldentertics = 0;
 
-void D_SRB2Loop(void)
+__declspec(dllexport) void D_SRB2Loop(void)
 {
 	if (dedicated)
 		server = true;
@@ -769,6 +772,9 @@ void D_SRB2Loop(void)
 #ifdef __EMSCRIPTEN__
 	emscripten_set_main_loop(D_RunFrame, 0, 1);
 #else
+	// romoney5: don't enter the loop on love2d
+	return;
+
 	for (;;)
 	{
 		D_RunFrame();
@@ -794,7 +800,7 @@ int EMSCRIPTEN_KEEPALIVE resume_loop(void)
 }
 #endif
 
-static void D_RunFrame(void)
+__declspec(dllexport) void D_RunFrame(void)
 {
 	static tic_t entertic = 0, realtics = 0, rendertimeout = INFTICS;
 	static double deltatics = 0.0;
@@ -1273,7 +1279,7 @@ static void Command_assert(void)
 //
 // D_SRB2Main
 //
-void D_SRB2Main(void)
+__declspec(dllexport) void D_SRB2Main(void)
 {
 	INT32 p;
 

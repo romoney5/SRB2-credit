@@ -34,6 +34,8 @@
 #include "hardware/hw_glob.h"
 #endif
 
+#include "r_love2d.h"
+
 // Each screen is [vid.width*vid.height];
 UINT8 *screens[5];
 // screens[0] = main display window
@@ -97,7 +99,7 @@ consvar_t cv_menucolor = CVAR_INIT("menucolor", "Yellow", CV_SAVE|CV_CLIENT, men
 
 // local copy of the palette for V_GetColor()
 RGBA_t *pLocalPalette = NULL;
-RGBA_t *pMasterPalette = NULL;
+__declspec(dllexport) RGBA_t *pMasterPalette = NULL;
 
 /*
 The following was an extremely helpful resource when developing my Colour Cube LUT.
@@ -539,6 +541,12 @@ void V_DrawStretchyFixedPatch(fixed_t x, fixed_t y, fixed_t pscale, fixed_t vsca
 	}
 #endif
 
+	if (rendermode == render_love2d)
+	{
+		LOVE_DrawStretchyFixedPatch(patch, x, y, pscale, vscale, scrn, colormap);
+		return;
+	}
+
 	patchdrawfunc = standardpdraw;
 
 	v_translevel = NULL;
@@ -817,6 +825,12 @@ void V_DrawCroppedPatch(fixed_t x, fixed_t y, fixed_t pscale, fixed_t vscale, IN
 		return;
 	}
 #endif
+
+	if (rendermode == render_love2d)
+	{
+		// LOVE_DrawStretchyFixedPatch(patch, x, y, pscale, vscale, scrn, colormap);
+		return;
+	}
 
 	patchdrawfunc = standardpdraw;
 
@@ -1172,6 +1186,12 @@ void V_DrawFill(INT32 x, INT32 y, INT32 w, INT32 h, INT32 c)
 		return;
 	}
 #endif
+
+	if (rendermode == render_love2d)
+	{
+		// LOVE_DrawStretchyFixedPatch(patch, x, y, pscale, vscale, scrn, colormap);
+		return;
+	}
 
 
 
@@ -2524,10 +2544,8 @@ void V_DoPostProcessor(INT32 view, postimg_t type, INT32 param)
 #else
 	INT32 height, yoffset;
 
-#ifdef HWRENDER
 	if (rendermode != render_soft)
 		return;
-#endif
 
 	if (view < 0 || view >= 2 || (view == 1 && !splitscreen))
 		return;

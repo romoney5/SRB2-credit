@@ -59,7 +59,7 @@ void (*spanfuncs_npo2[SPANDRAWFUNC_MAX])(void);
 // ------------------
 // global video state
 // ------------------
-viddef_t vid;
+__declspec(dllexport) viddef_t vid;
 INT32 setmodeneeded; //video mode change needed if > 0 (the mode number to set + 1)
 UINT8 setrenderneeded = 0;
 
@@ -77,10 +77,11 @@ CV_PossibleValue_t cv_renderer_t[] = {
 #ifdef HWRENDER
 	{2, "OpenGL"},
 #endif
+	{3, "LOVE2D"},
 	{0, NULL}
 };
 
-consvar_t cv_renderer = CVAR_INIT ("renderer", "Software", CV_SAVE|CV_CALL, cv_renderer_t, SCR_ChangeRenderer);
+consvar_t cv_renderer = CVAR_INIT ("renderer", /*"LOVE2D"*/"Software", CV_SAVE | CV_CALL, cv_renderer_t, SCR_ChangeRenderer);
 
 static void SCR_ChangeFullscreen(void);
 

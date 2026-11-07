@@ -63,7 +63,7 @@ const char *R_GetPalname(UINT16 num);
 const char *GetPalette(void);
 
 extern RGBA_t *pLocalPalette;
-extern RGBA_t *pMasterPalette;
+__declspec(dllexport) extern RGBA_t *pMasterPalette;
 
 void V_CubeApply(UINT8 *red, UINT8 *green, UINT8 *blue);
 
